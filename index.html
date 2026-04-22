@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Janine Chiang Kids｜精品童裝</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --cream: #FAF6F0; --cream-dark: #F2EBE0; --cream-mid: #EDE3D5;
+  --warm-brown: #8B6E52; --soft-brown: #A8866A; --dark-brown: #3D2B1F;
+  --blush: #E8C9B0; --blush-light: #F5E6D8;
+  --text-main: #2C1F14; --text-soft: #7A6050; --text-light: #B09880;
+  --white: #FFFDF9; --shadow: rgba(60,35,15,0.10);
+  --radius: 14px; --radius-sm: 8px; --red: #C0614A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var(--text-main); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+/* HEADER */
+.site-header { background: var(--white); border-bottom: 1px solid var(--cream-mid); position: sticky; top: 0; z-index: 100; padding: 0 16px; }
+.header-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 10px; }
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--dark-brown); letter-spacing: 0.04em; line-height: 1.2; }
+.logo span { display: block; font-size: 0.62rem; font-weight: 300; letter-spacing: 0.22em; color: var(--text-light); text-transform: uppercase; font-family: 'Noto Serif TC', serif; }
+.header-btns { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.line-btn { background: #06C755; color: #fff; font-size: 0.72rem; padding: 6px 12px; border-radius: 20px; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+.line-btn:hover { opacity: 0.85; }
+.admin-btn { background: none; border: 1.5px solid var(--blush); color: var(--soft-brown); font-size: 0.72rem; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; transition: all 0.2s; white-space: nowrap; }
+.admin-btn:hover { background: var(--blush-light); }
+.search-wrap { padding: 0 0 12px; position: relative; }
+.search-box { width: 100%; background: var(--cream-dark); border: none; border-radius: 22px; padding: 10px 18px 10px 40px; font-size: 0.9rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); outline: none; transition: box-shadow 0.2s; }
+.search-box::placeholder { color: var(--text-light); }
+.search-box:focus { box-shadow: 0 0 0 2px var(--blush); }
+.search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 1rem; pointer-events: none; }
+/* HERO */
+.hero { background: linear-gradient(135deg, var(--cream-dark) 0%, var(--blush-light) 60%, #F0E0CE 100%); padding: 36px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -30px; right: -30px; width: 160px; height: 160px; border-radius: 50%; background: var(--blush); opacity: 0.25; }
+.hero::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 120px; height: 120px; border-radius: 50%; background: var(--warm-brown); opacity: 0.08; }
+.hero-eyebrow { font-size: 0.68rem; letter-spacing: 0.2em; color: var(--soft-brown); margin-bottom: 14px; position: relative; text-transform: uppercase; font-weight: 300; }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; font-weight: 300; color: var(--dark-brown); letter-spacing: 0.04em; line-height: 1.55; margin-bottom: 6px; position: relative; }
+.hero-deco { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 14px 0; position: relative; }
+.hero-deco span { height: 1px; width: 50px; background: var(--blush); display: block; }
+.hero-manifesto { position: relative; max-width: 340px; margin: 0 auto; }
+.hero-manifesto p { font-size: 0.82rem; color: var(--text-soft); letter-spacing: 0.05em; line-height: 2; font-weight: 300; }
+.hero-divider { height: 1px; background: var(--cream-mid); margin: 14px auto; width: 60px; }
+/* BRAND TABS */
+.brand-tabs-wrap { background: var(--white); border-bottom: 1px solid var(--cream-mid); padding: 0 12px; overflow-x: auto; scrollbar-width: none; }
+.brand-tabs-wrap::-webkit-scrollbar { display: none; }
+.brand-tabs { display: flex; white-space: nowrap; min-width: max-content; }
+.brand-tab { padding: 11px 16px; font-size: 0.8rem; font-family: 'Noto Serif TC', serif; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.2s; letter-spacing: 0.05em; flex-shrink: 0; }
+.brand-tab.active { color: var(--warm-brown); border-bottom-color: var(--warm-brown); font-weight: 500; }
+/* PRODUCT GRID */
+.section-title { text-align: center; padding: 24px 20px 16px; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.15rem; color: var(--text-soft); letter-spacing: 0.12em; }
+.product-grid { padding: 0 12px 40px; columns: 2; column-gap: 10px; }
+.product-card { break-inside: avoid; background: var(--white); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; box-shadow: 0 2px 14px var(--shadow); transition: transform 0.22s, box-shadow 0.22s; cursor: pointer; animation: fadeUp 0.4s ease both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 22px rgba(60,35,15,0.14); }
+.product-img-wrap { position: relative; overflow: hidden; background: var(--cream-dark); }
+.product-img-wrap img { width: 100%; display: block; object-fit: cover; transition: transform 0.4s ease; }
+.product-card:hover .product-img-wrap img { transform: scale(1.04); }
+.product-info { padding: 12px 11px 14px; }
+.product-brand-tag { display: inline-block; font-size: 0.65rem; background: var(--blush-light); color: var(--soft-brown); border-radius: 10px; padding: 1px 7px; margin-bottom: 6px; letter-spacing: 0.04em; }
+/* 尺寸 + 金額一行（放大後仍保留同列排版） */
+.product-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.product-meta-row .product-size { font-size: 0.82rem; color: var(--text-soft); letter-spacing: 0.03em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.product-meta-row .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 600; color: var(--warm-brown); flex-shrink: 0; letter-spacing: 0.02em; }
+.order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 20px; padding: 8px 0; font-size: 0.72rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+.order-btn:hover { opacity: 0.88; transform: scale(0.98); }
+.empty-state { text-align: center; padding: 60px 30px; color: var(--text-light); column-span: all; }
+.empty-state .big-icon { font-size: 3rem; margin-bottom: 14px; }
+.empty-state p { font-size: 0.9rem; line-height: 1.8; }
+/* LIGHTBOX */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.88); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+.lightbox.active { display: flex; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.lightbox-inner { background: var(--white); border-radius: var(--radius); max-width: 420px; width: 100%; overflow: hidden; animation: scaleIn 0.25s ease; position: relative; }
+@keyframes scaleIn { from { transform: scale(0.94); opacity:0; } to { transform: scale(1); opacity:1; } }
+.lightbox-img { width: 100%; display: block; max-height: 52vh; object-fit: contain; background: var(--cream-dark); }
+.lightbox-body { padding: 16px 18px 20px; }
+.lightbox-brand { display: inline-block; font-size: 0.72rem; background: var(--blush-light); color: var(--soft-brown); border-radius: 10px; padding: 2px 10px; margin-bottom: 10px; }
+.lightbox-size { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px; line-height: 1.7; }
+.lightbox-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--warm-brown); margin-bottom: 14px; }
+.lightbox-order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.9rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.2s; }
+.lightbox-order-btn:hover { opacity: 0.85; }
+.lightbox-close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.92); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--dark-brown); z-index: 2; }
+/* RULES MODAL */
+.rules-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.82); z-index: 400; align-items: center; justify-content: center; padding: 20px; }
+.rules-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+.rules-box { background: var(--white); border-radius: 18px; max-width: 400px; width: 100%; padding: 28px 24px 24px; animation: scaleIn 0.25s ease; max-height: 88vh; overflow-y: auto; }
+.rules-icon { text-align: center; font-size: 2.2rem; margin-bottom: 8px; }
+.rules-title { text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: var(--dark-brown); margin-bottom: 20px; letter-spacing: 0.06em; }
+.rules-divider { height: 1px; background: var(--cream-mid); margin: 14px 0; }
+.rules-item { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+.rules-item-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.rules-item-text { font-size: 0.85rem; line-height: 1.85; color: var(--text-soft); }
+.rules-item-text strong { color: var(--text-main); font-weight: 500; }
+.rules-agree-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 24px; padding: 12px 8px; font-size: 0.76rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.03em; cursor: pointer; margin-top: 22px; transition: opacity 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rules-agree-btn:hover { opacity: 0.85; }
+.rules-cancel { display: block; text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-light); cursor: pointer; letter-spacing: 0.06em; padding: 4px; }
+/* ADMIN MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.7); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.admin-panel { background: var(--white); border-radius: 20px 20px 0 0; width: 100%; max-width: 960px; max-height: 93vh; overflow-y: auto; padding: 0 0 40px; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.admin-handle { width: 40px; height: 4px; background: var(--cream-mid); border-radius: 2px; margin: 14px auto 0; }
+.admin-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--cream-dark); display: flex; align-items: center; justify-content: space-between; }
+.admin-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--dark-brown); }
+.close-admin { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-light); }
+.pw-screen { padding: 30px 24px; text-align: center; }
+.pw-screen p { color: var(--text-soft); margin-bottom: 16px; font-size: 0.9rem; }
+.pw-input { width: 100%; border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 1rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); outline: none; margin-bottom: 14px; text-align: center; letter-spacing: 0.2em; transition: border-color 0.2s; }
+.pw-input:focus { border-color: var(--soft-brown); }
+.pw-btn { width: 100%; background: var(--warm-brown); color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.08em; transition: opacity 0.2s; }
+.pw-btn:hover { opacity: 0.85; }
+.pw-error { color: var(--red); font-size: 0.8rem; margin-top: 8px; }
+.admin-content { padding: 18px 20px; }
+.admin-tabs { display: flex; border-bottom: 1px solid var(--cream-mid); margin-bottom: 20px; }
+.admin-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 0.8rem; font-family: 'Noto Serif TC', serif; color: var(--text-light); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.04em; }
+.admin-tab.active { color: var(--warm-brown); border-bottom-color: var(--warm-brown); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+.admin-section { margin-bottom: 24px; }
+.admin-section-title { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
+.urls-textarea { width: 100%; height: 90px; border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 12px; font-size: 0.78rem; font-family: monospace; color: var(--text-main); background: var(--cream); resize: vertical; outline: none; transition: border-color 0.2s; }
+.urls-textarea:focus { border-color: var(--soft-brown); }
+/* Upload Zone（批量上傳照片） */
+.upload-zone { border: 2px dashed var(--blush); border-radius: var(--radius-sm); background: var(--cream); transition: background 0.2s, border-color 0.2s; }
+.upload-zone.dragover { background: var(--blush-light); border-color: var(--soft-brown); }
+.upload-zone-inner { padding: 28px 18px; text-align: center; cursor: pointer; }
+.upload-icon { font-size: 2.4rem; margin-bottom: 10px; }
+.upload-title { font-size: 0.95rem; color: var(--text-main); font-weight: 500; letter-spacing: 0.05em; margin-bottom: 6px; }
+.upload-hint { font-size: 0.72rem; color: var(--text-soft); line-height: 1.75; letter-spacing: 0.03em; }
+.upload-progress { margin-top: 12px; padding: 12px 14px; background: var(--cream); border-radius: var(--radius-sm); border: 1px solid var(--cream-mid); }
+.upload-progress-text { font-size: 0.78rem; color: var(--text-soft); margin-bottom: 8px; letter-spacing: 0.04em; line-height: 1.5; }
+.upload-progress-bar { background: var(--cream-mid); height: 6px; border-radius: 3px; overflow: hidden; }
+.upload-progress-fill { background: linear-gradient(90deg, var(--warm-brown), var(--soft-brown)); height: 100%; width: 0%; transition: width 0.25s ease; }
+.upload-tip { font-size: 0.7rem; color: var(--text-light); margin-top: 8px; line-height: 1.65; letter-spacing: 0.03em; }
+.parse-btn { margin-top: 8px; width: 100%; background: var(--cream-dark); color: var(--warm-brown); border: 1.5px solid var(--blush); border-radius: 20px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.06em; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.parse-btn:hover:not(:disabled) { background: var(--blush-light); }
+.parse-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.ai-dot-wrap { display: inline-flex; gap: 3px; align-items: center; }
+.ai-dot { width: 5px; height: 5px; background: var(--warm-brown); border-radius: 50%; animation: dotB 1s infinite; }
+.ai-dot:nth-child(2) { animation-delay: 0.15s; }
+.ai-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dotB { 0%,80%,100% { transform:scale(0.5);opacity:0.4; } 40% { transform:scale(1);opacity:1; } }
+/* BULK BAR */
+.bulk-bar { background: var(--blush-light); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; }
+.bulk-bar-title { font-size: 0.82rem; color: var(--text-main); margin-bottom: 4px; font-weight: 500; letter-spacing: 0.04em; display: flex; align-items: center; gap: 6px; }
+.bulk-bar-hint { font-size: 0.7rem; color: var(--text-soft); margin-bottom: 10px; line-height: 1.6; }
+.bulk-bar-row { display: flex; gap: 8px; }
+.bulk-bar-row .field-input { flex: 1; background: var(--white); }
+.bulk-apply-btn { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 20px; padding: 0 18px; font-size: 0.8rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.06em; white-space: nowrap; transition: opacity 0.2s; }
+.bulk-apply-btn:hover { opacity: 0.88; }
+.bulk-apply-btn.full { width: 100%; padding: 11px 18px; margin-top: 10px; }
+.bulk-size-wrap { background: var(--white); border-radius: var(--radius-sm); padding: 2px; }
+/* EDIT CARDS — 3 欄 Grid，圖片完整顯示不裁切 */
+.edit-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 768px) { .edit-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .edit-cards { grid-template-columns: 1fr; gap: 16px; } }
+.edit-card { background: var(--cream); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--cream-mid); display: flex; flex-direction: column; }
+.edit-card-img-wrap { position: relative; aspect-ratio: 1 / 1; background: var(--cream); overflow: hidden; }
+.edit-card-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.img-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--cream); }
+.img-spinner { width: 28px; height: 28px; border: 2.5px solid var(--blush); border-top-color: var(--warm-brown); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.img-loading-txt { font-size: 0.72rem; color: var(--text-light); letter-spacing: 0.06em; }
+.img-error-txt { text-align: center; font-size: 0.75rem; color: var(--text-light); line-height: 1.8; }
+.img-error-txt span { font-size: 0.68rem; color: var(--text-light); opacity: 0.7; }
+.edit-card-fields { padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.edit-field { display: flex; flex-direction: column; gap: 4px; }
+.edit-field label { font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.06em; display: flex; align-items: center; gap: 5px; }
+.field-input { border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.88rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); background: var(--white); outline: none; transition: border-color 0.2s; width: 100%; }
+.field-input:focus { border-color: var(--soft-brown); }
+/* Brand autocomplete */
+.brand-wrap { position: relative; }
+.brand-sugg { position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border: 1px solid var(--cream-mid); border-radius: var(--radius-sm); z-index: 20; max-height: 130px; overflow-y: auto; box-shadow: 0 4px 12px var(--shadow); display: none; }
+.brand-sugg.open { display: block; }
+.brand-sugg-item { padding: 8px 12px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); transition: background 0.15s; }
+.brand-sugg-item:hover { background: var(--cream-dark); }
+/* Size picker */
+.size-picker { background: var(--white); border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 10px 12px; }
+.size-group { margin-bottom: 10px; }
+.size-group:last-of-type { margin-bottom: 0; }
+.size-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px; }
+.size-group-label { font-size: 0.7rem; color: var(--text-soft); letter-spacing: 0.08em; font-weight: 500; }
+.select-all-chip { font-size: 0.65rem; padding: 3px 10px; border-radius: 10px; border: 1.5px solid var(--blush); color: var(--soft-brown); cursor: pointer; transition: all 0.15s; background: var(--white); letter-spacing: 0.04em; user-select: none; white-space: nowrap; }
+.select-all-chip:hover { background: var(--blush-light); }
+.select-all-chip.on { background: var(--soft-brown); color: var(--white); border-color: var(--soft-brown); }
+.size-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.size-chip { padding: 4px 9px; border-radius: 12px; border: 1.5px solid var(--cream-mid); font-size: 0.72rem; color: var(--text-soft); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--cream); }
+.size-chip.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
+.size-preview { font-size: 0.72rem; color: var(--soft-brown); margin-top: 8px; min-height: 16px; padding-top: 8px; border-top: 1px dashed var(--cream-mid); }
+.remove-btn { background: none; border: none; color: var(--red); font-size: 0.75rem; cursor: pointer; text-align: right; font-family: 'Noto Serif TC', serif; }
+.save-all-btn { width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 24px; padding: 14px; font-size: 1rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.1em; transition: opacity 0.2s, transform 0.15s; margin-top: 14px; }
+.save-all-btn:hover { opacity: 0.88; transform: scale(0.99); }
+/* Backup bar */
+.backup-bar { background: var(--cream); border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 18px; }
+.backup-bar-title { font-size: 0.78rem; font-weight: 500; color: var(--text-main); margin-bottom: 10px; letter-spacing: 0.04em; }
+.backup-btns { display: flex; gap: 8px; margin-bottom: 10px; }
+.backup-btn { flex: 1; padding: 10px 0; border-radius: 20px; font-size: 0.8rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; text-align: center; transition: opacity 0.2s; border: none; }
+.export-btn { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
+.import-btn { background: var(--white); color: var(--warm-brown); border: 1.5px solid var(--blush) !important; display: flex; align-items: center; justify-content: center; }
+.backup-btn:hover { opacity: 0.85; }
+.backup-hint { font-size: 0.7rem; color: var(--text-light); line-height: 1.7; letter-spacing: 0.03em; }
+/* Manage */
+.ep { display: flex; gap: 10px; background: var(--cream); border-radius: var(--radius-sm); padding: 10px; border: 1px solid var(--cream-mid); margin-bottom: 8px; align-items: center; }
+.ep img { width: 54px; height: 54px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: var(--cream-mid); }
+.ep-info { flex: 1; min-width: 0; }
+.ep-brand { font-size: 0.78rem; font-weight: 500; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
+.ep-meta { font-size: 0.72rem; color: var(--text-light); line-height: 1.5; }
+.edit-btn-sm { background: none; border: none; color: var(--soft-brown); font-size: 1rem; cursor: pointer; padding: 5px 7px; flex-shrink: 0; border-radius: 6px; transition: background 0.15s; }
+.edit-btn-sm:hover { background: var(--blush-light); }
+.del-btn { background: none; border: none; color: var(--red); font-size: 1.05rem; cursor: pointer; padding: 5px 7px; flex-shrink: 0; border-radius: 6px; transition: background 0.15s; }
+.del-btn:hover { background: rgba(192,97,74,0.1); }
+.no-results { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 0.88rem; }
+/* Edit-in-place product form */
+.ep-editing { background: var(--white); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; animation: fadeIn 0.2s ease; }
+.ep-editing-header { padding: 10px 12px; background: var(--blush-light); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--blush); }
+.ep-editing-header img { width: 42px; height: 42px; object-fit: cover; border-radius: 5px; }
+.ep-editing-title { font-size: 0.82rem; font-weight: 500; color: var(--text-main); }
+.ep-editing-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.ep-editing-actions { display: flex; gap: 8px; margin-top: 6px; }
+.ep-btn { flex: 1; padding: 10px 0; border-radius: 18px; font-size: 0.82rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; border: none; }
+.ep-save-btn { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
+.ep-cancel-btn { background: var(--cream); color: var(--text-soft); border: 1.5px solid var(--cream-mid); }
+/* BATCH MODE (管理頁 批量刪除 / 批量修改) */
+.batch-toggle-btn { width: 100%; background: var(--cream); color: var(--warm-brown); border: 1.5px solid var(--blush); border-radius: 20px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.06em; margin-bottom: 14px; transition: background 0.2s; }
+.batch-toggle-btn:hover { background: var(--blush-light); }
+.batch-action-bar { background: var(--blush-light); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.batch-action-bar label { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-main); cursor: pointer; font-weight: 500; user-select: none; }
+.batch-action-bar label input { width: 16px; height: 16px; accent-color: var(--warm-brown); cursor: pointer; }
+.batch-count { font-size: 0.78rem; color: var(--text-soft); flex: 1; min-width: 80px; }
+.batch-count strong { color: var(--warm-brown); font-size: 1rem; font-family: 'Cormorant Garamond', serif; }
+.batch-btn { padding: 7px 14px; border-radius: 18px; font-size: 0.76rem; border: none; cursor: pointer; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; transition: opacity 0.2s; white-space: nowrap; }
+.batch-btn:hover { opacity: 0.85; }
+.batch-btn-del { background: var(--red); color: var(--white); }
+.batch-btn-edit { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
+.batch-btn-cancel { background: var(--white); color: var(--text-soft); border: 1.5px solid var(--cream-mid); }
+.batch-modify-panel { background: var(--white); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px; animation: fadeIn 0.2s ease; }
+.batch-modify-title { font-size: 0.92rem; color: var(--text-main); margin-bottom: 12px; font-weight: 500; letter-spacing: 0.03em; }
+.batch-modify-field { background: var(--cream); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 10px; border: 1px solid var(--cream-mid); }
+.batch-modify-field-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.batch-modify-field-head input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--warm-brown); cursor: pointer; }
+.batch-modify-field-head label { font-size: 0.84rem; color: var(--text-main); font-weight: 500; cursor: pointer; user-select: none; }
+.batch-modify-actions { display: flex; gap: 8px; margin-top: 12px; }
+.ep-checkbox { width: 20px; height: 20px; accent-color: var(--warm-brown); cursor: pointer; flex-shrink: 0; pointer-events: none; }
+.ep.selected { background: var(--blush-light); border-color: var(--blush); }
+.ep.batch-row { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.ep.batch-row:hover { border-color: var(--blush); }
+/* 批量選擇 —— 品牌快選 */
+.batch-brand-chips-wrap { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 12px; }
+.batch-brand-chips-label { font-size: 0.72rem; color: var(--text-soft); margin-bottom: 8px; letter-spacing: 0.05em; }
+.batch-brand-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.batch-brand-chip { padding: 5px 12px; border-radius: 14px; border: 1.5px solid var(--cream-mid); font-size: 0.76rem; color: var(--text-soft); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--white); white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+.batch-brand-chip:hover { border-color: var(--blush); background: var(--blush-light); }
+.batch-brand-chip.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
+.batch-brand-chip-count { opacity: 0.75; font-size: 0.7rem; }
+/* Footer */
+.site-footer { background: var(--dark-brown); color: var(--blush); text-align: center; padding: 30px 20px; font-size: 0.78rem; letter-spacing: 0.1em; line-height: 2; }
+.site-footer .logo-f { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; color: var(--cream); letter-spacing: 0.1em; margin-bottom: 8px; }
+/* Toast */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark-brown); color: var(--cream); padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-top">
+    <div class="logo">Janine Chiang Kids<span>韓國童裝選品</span></div>
+    <div class="header-btns">
+      <a class="line-btn" href="https://lin.ee/rCNd7ai" target="_blank">💬 官方Line</a>
+      <button class="admin-btn" onclick="openAdmin()">🔑 後台</button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-box" type="text" placeholder="搜尋品牌、尺寸…" id="searchInput" oninput="applyFilters()">
+  </div>
+</header>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Janine Chiang Kids｜美學宣言</div>
+  <h1>讓美好的質地，<br>成為成長中溫暖的底色。</h1>
+  <div class="hero-deco"><span></span><i>✦</i><span></span></div>
+  <div class="hero-manifesto">
+    <p>我們相信，童裝不只是布料的裁切，<br>而是孩子觸摸世界的第一種方式，<br>也是父母記錄時光的一種溫柔。</p>
+    <div class="hero-divider"></div>
+    <p>每一件衣服都承載著流動的愛。<br>我們推崇「美好的延續」，<br>讓那些裝滿回憶的衣裳，透過分享與循環，<br>在不同的孩子身上，編織出新的故事。</p>
+  </div>
+</section>
+<!-- BRAND TABS -->
+<div class="brand-tabs-wrap" id="brandTabsWrap" style="display:none;">
+  <div class="brand-tabs" id="brandTabs"></div>
+</div>
+<!-- PRODUCTS -->
+<div class="section-title" id="sectionTitle">— 全部商品 —</div>
+<div class="product-grid" id="productGrid"></div>
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="logo-f">Janine Chiang Kids</div>
+  <div>韓國童裝選品｜用心挑選每一件</div>
+  <div style="margin-top:8px;opacity:0.5;">© 2025 Janine Chiang Kids. All rights reserved.</div>
+</footer>
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="lbOutside(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="closeLb()">✕</button>
+    <img class="lightbox-img" id="lbImg" src="" alt="">
+    <div class="lightbox-body">
+      <div class="lightbox-brand" id="lbBrand"></div>
+      <div class="lightbox-size" id="lbSize"></div>
+      <div class="lightbox-price" id="lbPrice"></div>
+      <button class="lightbox-order-btn" onclick="initiateOrder(currentLbId)">💬 點我私訊下單</button>
+    </div>
+  </div>
+</div>
+<!-- RULES MODAL -->
+<div class="rules-overlay" id="rulesOverlay">
+  <div class="rules-box">
+    <div class="rules-icon">📋</div>
+    <div class="rules-title">賣場購買須知</div>
+    <div class="rules-item">
+      <div class="rules-item-icon">💳</div>
+      <div class="rules-item-text"><strong>首次購買需先匯款：</strong>第一次下單請先行匯款，往後再次下單即可享受<strong>先訂貨、後付款</strong>的優惠方式。</div>
+    </div>
+    <div class="rules-divider"></div>
+    <div class="rules-item">
+      <div class="rules-item-icon">💰</div>
+      <div class="rules-item-text"><strong>斷貨處理：</strong>如匯款後遇到斷貨，斷貨款式金額將列為「<strong>儲值金</strong>」，供下次下單扣抵；若 <strong>30 天內未再下單</strong>，可申請退款。</div>
+    </div>
+    <div class="rules-divider"></div>
+    <div class="rules-item">
+      <div class="rules-item-icon">⏳</div>
+      <div class="rules-item-text"><strong>預購制度：</strong>本賣場全部商品皆為<strong>預購商品</strong>，下單不代表一定有貨，<strong>恕不接受急單</strong>！</div>
+    </div>
+    <div class="rules-divider"></div>
+    <div class="rules-item">
+      <div class="rules-item-icon">🚫</div>
+      <div class="rules-item-text"><strong>棄單責任聲明：</strong>私訊確認下單後即視為正式訂購。若發生<strong>無故棄單、拒收</strong>或未在指定時間完成付款，本賣場保留追討運費及相關損失之權利，並可能影響日後購買資格。</div>
+    </div>
+    <div class="rules-divider"></div>
+    <div class="rules-item">
+      <div class="rules-item-icon">📐</div>
+      <div class="rules-item-text"><strong>尺寸確認：</strong>下單前請務必確認孩子的身高體重，預購商品<strong>恕不接受尺寸錯誤退換</strong>，如有疑問請先私訊詢問。</div>
+    </div>
+    <button class="rules-agree-btn" onclick="confirmOrder()">✓ 我已閱讀並同意，前往官方LINE私訊下單</button>
+    <div class="rules-cancel" onclick="closeRules()">取消</div>
+  </div>
+</div>
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal" onclick="adminOutside(event)">
+  <div class="admin-panel">
+    <div class="admin-handle"></div>
+    <!-- Password -->
+    <div id="pwScreen" class="pw-screen">
+      <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--dark-brown);margin-bottom:6px;">商家後台</p>
+      <p>請輸入管理員密碼</p>
+      <input class="pw-input" type="password" id="pwInput" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()">
+      <button class="pw-btn" onclick="checkPw()">進入後台</button>
+      <div class="pw-error" id="pwError"></div>
+    </div>
+    <!-- Content -->
+    <div id="adminContent" style="display:none;">
+      <div class="admin-header">
+        <h2>✦ 商家後台</h2>
+        <button class="close-admin" onclick="closeAdmin()">✕</button>
+      </div>
+      <div class="admin-content">
+        <div class="admin-tabs">
+          <div class="admin-tab active" onclick="switchTab('upload')">📦 新增商品</div>
+          <div class="admin-tab" onclick="switchTab('manage')">📋 管理商品</div>
+        </div>
+        <!-- UPLOAD -->
+        <div class="tab-pane active" id="tab-upload">
+          <div class="admin-section">
+            <div class="admin-section-title">批量上傳商品照片</div>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*" multiple style="display:none;" onchange="handleFileSelect(event)">
+              <div class="upload-zone-inner" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📷</div>
+                <div class="upload-title">點擊此處 或 拖曳照片進來</div>
+                <div class="upload-hint">支援 JPG / PNG / WEBP，可一次選多張<br>系統會自動壓縮（寬度 1200px、約 80% 品質，單張 ≦ 200KB）<br>並上傳至 Supabase 雲端儲存</div>
+              </div>
+            </div>
+            <div class="upload-progress" id="uploadProgress" style="display:none;">
+              <div class="upload-progress-text" id="uploadProgressText">準備中…</div>
+              <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadProgressFill"></div></div>
+            </div>
+            <div class="upload-tip">✨ 上傳完成後會自動將 Public URL 填入下方商品小卡，繼續批量編輯即可。</div>
+          </div>
+          <div id="editSection" style="display:none;">
+            <div class="admin-section-title" style="margin-bottom:12px;">填寫商品資訊</div>
+            <!-- 批量品牌 -->
+            <div class="bulk-bar">
+              <div class="bulk-bar-title">🏷 批量套用品牌</div>
+              <div class="bulk-bar-hint">這次上傳都是同一個品牌？輸入後點「套用」會一次填入所有商品。</div>
+              <div class="bulk-bar-row">
+                <div class="brand-wrap" style="flex:1;">
+                  <input class="field-input" type="text" id="bulkBrandInput" placeholder="例：Mini Balabala"
+                    autocomplete="off"
+                    oninput="showBulkSugg(this.value)"
+                    onfocus="showBulkSugg(this.value)"
+                    onblur="setTimeout(hideBulkSugg,180)"
+                    onkeydown="if(event.key==='Enter')applyBulkBrand()">
+                  <div class="brand-sugg" id="bulkBs"></div>
+                </div>
+                <button class="bulk-apply-btn" onclick="applyBulkBrand()">✓ 套用</button>
+              </div>
+            </div>
+            <!-- 批量尺寸 -->
+            <div class="bulk-bar">
+              <div class="bulk-bar-title">📐 批量套用尺寸</div>
+              <div class="bulk-bar-hint">這批商品都適用同樣尺寸？在下方勾選後點「套用至所有商品」一次填入；個別商品仍可在下方自己的卡片中彈性微調。</div>
+              <div class="bulk-size-wrap" id="bulkSizeContainer"></div>
+              <button class="bulk-apply-btn full" onclick="applyBulkSizes()">✓ 套用至所有商品</button>
+            </div>
+            <div class="edit-cards" id="editCards"></div>
+            <button class="save-all-btn" onclick="saveAll()">🌟 一鍵發佈商品</button>
+          </div>
+        </div>
+        <!-- MANAGE -->
+        <div class="tab-pane" id="tab-manage">
+          <!-- 匯出／匯入區 -->
+          <div class="backup-bar">
+            <div class="backup-bar-title">📦 資料備份與還原</div>
+            <div class="backup-btns">
+              <button class="backup-btn export-btn" onclick="exportData()">⬇ 匯出資料</button>
+              <label class="backup-btn import-btn">
+                ⬆ 匯入資料
+                <input type="file" accept=".json" id="importFile" style="display:none;" onchange="importData(event)">
+              </label>
+            </div>
+            <div class="backup-hint">匯出後將檔案傳至電腦，再於電腦瀏覽器中匯入即可還原所有商品與品牌資料。</div>
+          </div>
+          <div class="admin-section-title" style="margin-bottom:12px;">現有商品（<span id="prodCount">0</span> 件）</div>
+          <div id="batchSection"></div>
+          <div id="existingProds"></div>
+          <div id="noProd" class="no-results" style="display:none;">尚未上架任何商品</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script>
+// ═══════════════════════════════
+//  CONFIG
+// ═══════════════════════════════
+const SK_PROD   = 'jck_products_v3';
+const SK_BRAND  = 'jck_brands_v3';
+const PASS      = '52771314';
+const LINE_URL  = 'https://lin.ee/rCNd7ai';
+// ── Supabase 串接資訊 ──────────────────────────────
+const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';
+const SUPABASE_KEY    = 'sb_publishable__-Ac_0k27vvy8r456Hq_0g_AiRWZPHD';
+const SUPABASE_BUCKET = 'products';
+// 壓縮參數
+const IMG_MAX_WIDTH   = 1200;          // 寬度最大 1200px
+const IMG_QUALITY     = 0.8;           // JPEG 品質約 80%
+const IMG_TARGET_SIZE = 200 * 1024;    // 目標 ≦ 200KB
+// 初始化 Supabase client（createClient 會在 <script> 載入後掛在 window.supabase 上）
+const sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+const SIZE_GROUPS = [
+  { label:'Baby',  sizes:['BXS','BS','BM','BL'] },
+  { label:'小童',  sizes:['XS','S','M','L','XL','XXL'] },
+  { label:'大童',  sizes:['JS','JM','JL'] },
+  { label:'大人',  sizes:['F'] },
+  { label:'身高(cm)', sizes:['90','95','100','105','110','115','120','125','130','140','150'] },
+];
+const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect fill%3D%22%23EDE3D5%22 width%3D%22200%22 height%3D%22200%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2255%25%22 text-anchor%3D%22middle%22 fill%3D%22%23B09880%22 font-size%3D%2230%22%3E%F0%9F%91%97%3C%2Ftext%3E%3C%2Fsvg%3E';
+// ═══════════════════════════════
+//  STATE
+// ═══════════════════════════════
+let products       = [];
+let brandHistory   = [];
+let editData       = [];
+let brandFilter    = 'all';
+let currentLbId    = null;
+let pendingOrderId = null;
+let editingProdId  = null;   // 正在編輯的商品 id（管理頁）
+let editingSizes   = [];     // 管理頁編輯中暫存的尺寸
+let bulkSizes      = [];     // 批量尺寸暫存（新增商品流程）
+// --- 管理頁 批量管理 ---
+let batchMode       = false;
+let batchSelected   = new Set();
+let batchEditing    = false;
+// 批量修改：卡片式個別編輯（對每件商品分別輸入品牌 / 價格 / 尺寸）
+let batchEditItems  = [];     // [{id, url, brand, price, sizes}]
+let batchBulkSizes  = [];     // 批量修改面板中「批量套用尺寸」暫存
+// ═══════════════════════════════
+//  STORAGE
+// ═══════════════════════════════
+function load() {
+  try { products     = JSON.parse(localStorage.getItem(SK_PROD))  || []; } catch { products = []; }
+  try { brandHistory = JSON.parse(localStorage.getItem(SK_BRAND)) || []; } catch { brandHistory = []; }
+}
+function save() {
+  localStorage.setItem(SK_PROD,  JSON.stringify(products));
+  localStorage.setItem(SK_BRAND, JSON.stringify(brandHistory));
+}
+function rememberBrand(b) {
+  if (!b || !b.trim()) return;
+  b = b.trim();
+  if (brandHistory.includes(b)) return;
+  brandHistory.unshift(b);
+  if (brandHistory.length > 40) brandHistory.pop();
+}
+// ═══════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg, dur=2600) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+function lock()   { document.body.style.overflow = 'hidden'; }
+function unlock() { document.body.style.overflow = ''; }
+// ═══════════════════════════════
+//  BRAND TABS
+// ═══════════════════════════════
+function uniqueBrands() {
+  return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];
+}
+function renderBrandTabs() {
+  const brands = uniqueBrands();
+  const wrap   = document.getElementById('brandTabsWrap');
+  const tabs   = document.getElementById('brandTabs');
+  if (!brands.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  tabs.innerHTML = ['全部', ...brands].map(b => {
+    const key = b === '全部' ? 'all' : b;
+    return `<div class="brand-tab ${brandFilter===key?'active':''}" onclick="setBrand('${esc(key)}')">${esc(b)}</div>`;
+  }).join('');
+}
+function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); }
+// ═══════════════════════════════
+//  FILTER + RENDER (前台)
+// ═══════════════════════════════
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = [...products];
+  if (brandFilter !== 'all') list = list.filter(p => (p.brand||'').trim() === brandFilter);
+  if (q) list = list.filter(p =>
+    (p.brand||'').toLowerCase().includes(q) ||
+    (p.sizes||[]).join(' ').toLowerCase().includes(q)
+  );
+  renderProducts(list);
+}
+function renderProducts(list) {
+  const grid  = document.getElementById('productGrid');
+  const title = document.getElementById('sectionTitle');
+  if (!list.length) {
+    title.textContent = '— 0 件商品 —';
+    const filt = brandFilter !== 'all' || document.getElementById('searchInput').value.trim();
+    grid.innerHTML = `<div class="empty-state"><div class="big-icon">${filt?'🔍':'👗'}</div><p>${filt?'找不到符合的商品<br>試試其他條件？':'後台還沒有上架商品喔～<br>點右上角後台按鈕新增商品'}</p></div>`;
+    return;
+  }
+  title.textContent = `— 共 ${list.length} 件商品 —`;
+  grid.innerHTML = list.map((p,i) => {
+    const sz = (p.sizes||[]).join(' / ');
+    return `
+    <div class="product-card" style="animation-delay:${i*0.04}s" onclick="openLb('${p.id}')">
+      <div class="product-img-wrap">
+        <img src="${p.url}" alt="${esc(p.brand||'商品')}" loading="lazy" onerror="this.onerror=null;this.src=FALLBACK_IMG">
+      </div>
+      <div class="product-info">
+        ${p.brand ? `<div class="product-brand-tag">${esc(p.brand)}</div>` : ''}
+        <div class="product-meta-row">
+          <span class="product-size">${sz ? '📐 '+esc(sz) : ''}</span>
+          <span class="product-price">${p.price ? 'NT$ '+esc(p.price) : ''}</span>
+        </div>
+        <button class="order-btn" onclick="event.stopPropagation();initiateOrder('${p.id}')">💬 點我私訊下單</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+// ═══════════════════════════════
+//  LIGHTBOX
+// ═══════════════════════════════
+function openLb(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  currentLbId = id;
+  document.getElementById('lbImg').src = p.url;
+  const brand = document.getElementById('lbBrand');
+  brand.textContent = p.brand || '';
+  brand.style.display = p.brand ? 'inline-block' : 'none';
+  document.getElementById('lbSize').textContent  = (p.sizes||[]).length ? '尺寸：' + p.sizes.join(' / ') : '';
+  document.getElementById('lbPrice').textContent = p.price ? 'NT$ ' + p.price : '';
+  document.getElementById('lightbox').classList.add('active');
+  lock();
+}
+function closeLb() {
+  document.getElementById('lightbox').classList.remove('active');
+  unlock();
+}
+function lbOutside(e) { if (e.target === document.getElementById('lightbox')) closeLb(); }
+// ═══════════════════════════════
+//  RULES MODAL
+// ═══════════════════════════════
+function initiateOrder(id) {
+  closeLb();
+  pendingOrderId = id;
+  document.getElementById('rulesOverlay').classList.add('active');
+  lock();
+}
+function closeRules() {
+  document.getElementById('rulesOverlay').classList.remove('active');
+  unlock();
+  pendingOrderId = null;
+}
+function confirmOrder() {
+  closeRules();
+  if (LINE_URL === '#') { showToast('LINE 連結尚未設定，請聯繫管理員'); return; }
+  // 連結至官方 LINE（與 header 的官方Line按鈕相同）
+  window.open(LINE_URL, '_blank');
+}
+// ═══════════════════════════════
+//  ADMIN
+// ═══════════════════════════════
+function openAdmin() {
+  document.getElementById('adminModal').classList.add('active');
+  document.getElementById('pwScreen').style.display   = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  lock();
+}
+function closeAdmin() {
+  document.getElementById('adminModal').classList.remove('active');
+  editingProdId = null;
+  unlock();
+}
+function adminOutside(e) { if (e.target === document.getElementById('adminModal')) closeAdmin(); }
+function checkPw() {
+  if (document.getElementById('pwInput').value === PASS) {
+    document.getElementById('pwScreen').style.display   = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    renderManage();
+  } else {
+    document.getElementById('pwError').textContent = '密碼錯誤，請再試一次';
+    document.getElementById('pwInput').value = '';
+  }
+}
+function switchTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='manage')));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'manage') { editingProdId = null; renderManage(); }
+  if (tab === 'upload') { batchMode = false; _resetBatchState(); }
+}
+// ═══════════════════════════════
+//  IMAGE COMPRESSION + SUPABASE UPLOAD
+// ═══════════════════════════════
+// 讀取檔案為 Image
+function _loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload  = () => { resolve({ img, url }); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('無法讀取圖片')); };
+    img.src = url;
+  });
+}
+// Canvas 轉 Blob（Promise 版）
+function _canvasToBlob(canvas, quality) {
+  return new Promise(res => canvas.toBlob(b => res(b), 'image/jpeg', quality));
+}
+// 前端壓縮：寬度最大 1200px、JPEG ~80%、並自動降質到 ≦200KB
+async function compressImage(file) {
+  const { img, url } = await _loadImage(file);
+  let w = img.naturalWidth  || img.width;
+  let h = img.naturalHeight || img.height;
+  if (w > IMG_MAX_WIDTH) {
+    h = Math.round(h * IMG_MAX_WIDTH / w);
+    w = IMG_MAX_WIDTH;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // 處理透明 PNG → JPEG 會變黑底，先鋪白底
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(url);
+  // 先用 0.8 壓一次；若超過 200KB 再逐級降到最低 0.4
+  let q = IMG_QUALITY;
+  let blob = await _canvasToBlob(canvas, q);
+  while (blob && blob.size > IMG_TARGET_SIZE && q > 0.4) {
+    q = +(q - 0.1).toFixed(2);
+    blob = await _canvasToBlob(canvas, q);
+  }
+  return { blob, width: w, height: h, quality: q };
+}
+// 產生不易撞名的檔名
+function _uniqueName() {
+  const d = new Date();
+  const stamp = d.getFullYear().toString()
+    + String(d.getMonth()+1).padStart(2,'0')
+    + String(d.getDate()).padStart(2,'0')
+    + '_' + d.getTime();
+  const rnd = Math.random().toString(36).slice(2, 8);
+  return `jck_${stamp}_${rnd}.jpg`;
+}
+// 單張上傳：壓縮 → 上傳 → 取 Public URL
+async function uploadOne(file) {
+  if (!sb) throw new Error('Supabase 尚未初始化，請確認 SUPABASE_URL 已填入');
+  const { blob } = await compressImage(file);
+  const filename = _uniqueName();
+  const { error } = await sb.storage
+    .from(SUPABASE_BUCKET)
+    .upload(filename, blob, {
+      contentType: 'image/jpeg',
+      cacheControl: '31536000',
+      upsert: false
+    });
+  if (error) throw error;
+  const { data: pub } = sb.storage.from(SUPABASE_BUCKET).getPublicUrl(filename);
+  return { url: pub.publicUrl, size: blob.size, filename };
+}
+// 從 input[type=file] 選檔後進入這裡
+async function handleFileSelect(ev) {
+  const files = Array.from(ev.target.files || []).filter(f => f.type.startsWith('image/'));
+  ev.target.value = '';  // 重置，讓同檔名可再次選擇
+  if (!files.length) { showToast('請選擇圖片檔案'); return; }
+  await uploadFiles(files);
+}
+// 批量上傳主流程（壓縮 → 上傳 → 寫入 editData → 渲染商品小卡）
+async function uploadFiles(files) {
+  if (!sb) {
+    showToast('⚠️ 請先在程式碼中填入你的 SUPABASE_URL');
+    return;
+  }
+  const progEl = document.getElementById('uploadProgress');
+  const txtEl  = document.getElementById('uploadProgressText');
+  const fillEl = document.getElementById('uploadProgressFill');
+  progEl.style.display = 'block';
+  fillEl.style.width = '0%';
+  const uploaded = [];
+  const failed   = [];
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    const kbOrig = Math.round(f.size / 1024);
+    txtEl.textContent = `壓縮並上傳中（${i+1}/${files.length}）：${f.name}（原 ${kbOrig}KB）`;
+    try {
+      const res = await uploadOne(f);
+      uploaded.push(res);
+      const kbNew = Math.round(res.size / 1024);
+      txtEl.textContent = `已完成（${i+1}/${files.length}）：${f.name}（壓縮後 ${kbNew}KB）`;
+    } catch (err) {
+      console.error('[upload error]', f.name, err);
+      failed.push({ name: f.name, msg: (err && err.message) || String(err) });
+    }
+    fillEl.style.width = `${((i+1)/files.length)*100}%`;
+  }
+  // 讓進度條最後一格停留半秒再收起
+  setTimeout(() => { progEl.style.display = 'none'; fillEl.style.width = '0%'; }, 600);
+  if (!uploaded.length) {
+    showToast(failed.length ? `上傳全部失敗：${failed[0].msg}` : '沒有成功上傳的圖片', 3600);
+    return;
+  }
+  // 追加到 editData（允許多批次累積；個別想移除可用小卡上的 ✕ 鈕）
+  const startIdx = editData.length;
+  uploaded.forEach((u, k) => {
+    editData.push({ url: u.url, price:'', brand:'', sizes:[], _id:'tmp'+(startIdx+k) });
+  });
+  // 若已先在「批量套用」區輸入了品牌／尺寸，對新加入的商品也自動套用
+  const bulkBrandVal = (document.getElementById('bulkBrandInput')?.value || '').trim();
+  if (bulkBrandVal) {
+    for (let k = startIdx; k < editData.length; k++) editData[k].brand = bulkBrandVal;
+  }
+  if (bulkSizes.length) {
+    for (let k = startIdx; k < editData.length; k++) editData[k].sizes = [...bulkSizes];
+  }
+  // 初次上傳時才重建「批量尺寸」選擇器
+  const bulkCont = document.getElementById('bulkSizeContainer');
+  if (bulkCont && !bulkCont.innerHTML.trim()) bulkCont.innerHTML = sizePicker('bulk', 0, bulkSizes);
+  renderEditCards();
+  const editSec = document.getElementById('editSection');
+  editSec.style.display = 'block';
+  editSec.scrollIntoView({ behavior:'smooth' });
+  if (failed.length) {
+    showToast(`✓ 成功 ${uploaded.length} 張；失敗 ${failed.length} 張（詳見 Console）`, 3600);
+  } else {
+    showToast(`✓ 已成功上傳 ${uploaded.length} 張照片`);
+  }
+}
+// 拖曳上傳
+function setupDragDrop() {
+  const zone = document.getElementById('uploadZone');
+  if (!zone) return;
+  ['dragenter','dragover'].forEach(ev => {
+    zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+  });
+  ['dragleave','drop'].forEach(ev => {
+    zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover'); });
+  });
+  zone.addEventListener('drop', async e => {
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));
+    if (!files.length) { showToast('請拖曳圖片檔案'); return; }
+    await uploadFiles(files);
+  });
+  // 避免頁面其他地方誤被拖曳行為觸發預覽
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop',     e => e.preventDefault());
+}
+// ═══════════════════════════════
+//  BULK BRAND
+// ═══════════════════════════════
+function applyBulkBrand() {
+  const val = document.getElementById('bulkBrandInput').value.trim();
+  if (!val) { showToast('請先輸入品牌名稱'); return; }
+  if (!editData.length) { showToast('尚無商品可套用'); return; }
+  editData.forEach(d => { d.brand = val; });
+  // 更新所有 brand 輸入框
+  editData.forEach((_, i) => {
+    const inp = document.getElementById('bi' + i);
+    if (inp) inp.value = val;
+  });
+  hideBulkSugg();
+  showToast(`✓ 已將 ${editData.length} 件商品的品牌設為「${val}」`);
+}
+function showBulkSugg(val) {
+  const el  = document.getElementById('bulkBs');
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBulkBrand('${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideBulkSugg() { document.getElementById('bulkBs')?.classList.remove('open'); }
+function pickBulkBrand(b) {
+  document.getElementById('bulkBrandInput').value = b;
+  hideBulkSugg();
+}
+// ═══════════════════════════════
+//  BULK SIZES
+// ═══════════════════════════════
+function applyBulkSizes() {
+  if (!bulkSizes.length) { showToast('請先勾選要套用的尺寸'); return; }
+  if (!editData.length)  { showToast('尚無商品可套用');   return; }
+  editData.forEach(d => { d.sizes = [...bulkSizes]; });
+  renderEditCards();
+  showToast(`✓ 已將 ${editData.length} 件商品的尺寸設為：${bulkSizes.join(' / ')}`);
+}
+// ═══════════════════════════════
+//  EDIT CARDS (新增商品)
+// ═══════════════════════════════
+function renderEditCards() {
+  document.getElementById('editCards').innerHTML = editData.map((d,i) => `
+    <div class="edit-card">
+      <div class="edit-card-img-wrap" id="imgwrap${i}">
+        <div class="img-loading" id="imgload${i}">
+          <div class="img-spinner"></div>
+          <div class="img-loading-txt">圖片載入中…</div>
+        </div>
+        <img class="edit-card-img" id="eimg${i}" src=""
+          style="display:none;"
+          onload="onImgLoad(${i})"
+          onerror="onImgError(${i})">
+      </div>
+      <div class="edit-card-fields">
+        <div class="edit-field">
+          <label>🏷 品牌</label>
+          <div class="brand-wrap">
+            <input class="field-input" type="text" id="bi${i}" placeholder="例：Mini Balabala"
+              autocomplete="off" value="${esc(d.brand)}"
+              oninput="editData[${i}].brand=this.value;showSugg(${i},this.value)"
+              onfocus="showSugg(${i},this.value)"
+              onblur="setTimeout(()=>hideSugg(${i}),180)">
+            <div class="brand-sugg" id="bs${i}"></div>
+          </div>
+        </div>
+        <div class="edit-field">
+          <label>💰 價格（數字）</label>
+          <input class="field-input" type="text" placeholder="例：580"
+            value="${esc(d.price)}" oninput="editData[${i}].price=this.value">
+        </div>
+        <div class="edit-field">
+          <label>📐 尺寸（可多選，可整組全選）</label>
+          ${sizePicker('new', i, d.sizes)}
+        </div>
+        <div style="text-align:right;">
+          <button class="remove-btn" onclick="removeCard(${i})">✕ 移除此商品</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  // 等 DOM 就緒後再設定 src
+  requestAnimationFrame(() => {
+    editData.forEach((d, i) => {
+      const img = document.getElementById('eimg' + i);
+      if (img) img.src = d.url;
+    });
+  });
+}
+function onImgLoad(i) {
+  const img  = document.getElementById('eimg' + i);
+  const load = document.getElementById('imgload' + i);
+  if (img)  { img.style.display = 'block'; }
+  if (load) { load.style.display = 'none'; }
+}
+function onImgError(i) {
+  const load = document.getElementById('imgload' + i);
+  if (load) {
+    load.innerHTML = '<div class="img-error-txt">⚠️ 圖片無法顯示<br><span>請確認網址是否為圖片直鏈</span></div>';
+  }
+}
+// ═══════════════════════════════
+//  SIZE PICKER（共用：新增 + 編輯 + 批量）
+//  mode='new'   → 作用於 editData[idx]
+//  mode='edit'  → 作用於 editingSizes（編輯商品）
+//  mode='bulk'  → 作用於 bulkSizes（批量套用）
+// ═══════════════════════════════
+function sizePicker(mode, idx, sel) {
+  sel = sel || [];
+  const previewId =
+    mode === 'new'       ? `sp${idx}` :
+    mode === 'bulk'      ? 'bulkSp' :
+    mode === 'batchEdit' ? `besp_${idx}` :
+    mode === 'batchBulk' ? 'batchBulkSp' :
+    `espv_${idx}`;
+  const groups = SIZE_GROUPS.map((g, gi) => {
+    const allOn = g.sizes.every(s => sel.includes(s));
+    return `
+    <div class="size-group">
+      <div class="size-group-header">
+        <div class="size-group-label">${g.label}</div>
+        <div class="select-all-chip ${allOn?'on':''}" onclick="toggleAllSizes('${mode}','${idx}',${gi},this)">${allOn?'✓ 已全選':'全選'}</div>
+      </div>
+      <div class="size-chips">
+        ${g.sizes.map(s => `<div class="size-chip ${sel.includes(s)?'on':''}" onclick="toggleSz('${mode}','${idx}','${s}',this)">${s}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="size-picker">${groups}<div class="size-preview" id="${previewId}">已選：${sel.length ? sel.join(' / ') : '尚未選取'}</div></div>`;
+}
+function _getSizes(mode, idx) {
+  if (mode === 'new')       return editData[idx].sizes;
+  if (mode === 'bulk')      return bulkSizes;
+  if (mode === 'batchEdit') return batchEditItems[idx].sizes;
+  if (mode === 'batchBulk') return batchBulkSizes;
+  return editingSizes;
+}
+function _setSizes(mode, idx, arr) {
+  if (mode === 'new')            editData[idx].sizes = arr;
+  else if (mode === 'bulk')      bulkSizes = arr;
+  else if (mode === 'batchEdit') batchEditItems[idx].sizes = arr;
+  else if (mode === 'batchBulk') batchBulkSizes = arr;
+  else                           editingSizes = arr;
+}
+function _previewId(mode, idx) {
+  if (mode === 'new')       return 'sp'+idx;
+  if (mode === 'bulk')      return 'bulkSp';
+  if (mode === 'batchEdit') return 'besp_'+idx;
+  if (mode === 'batchBulk') return 'batchBulkSp';
+  return 'espv_'+idx;
+}
+function _afterSizeChange(mode) {
+  // 保留 hook，日後如需在特定 mode 做額外副作用可擴充
+}
+function toggleSz(mode, idx, s, el) {
+  let sizes = _getSizes(mode, idx);
+  if (sizes.includes(s)) { sizes = sizes.filter(x => x !== s); el.classList.remove('on'); }
+  else                    { sizes.push(s); el.classList.add('on'); }
+  _setSizes(mode, idx, sizes);
+  _afterSizeChange(mode);
+  // 更新預覽
+  document.getElementById(_previewId(mode, idx)).textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
+  // 更新該組的「全選」按鈕狀態
+  const groupEl = el.closest('.size-group');
+  const selectAllBtn = groupEl.querySelector('.select-all-chip');
+  if (selectAllBtn) {
+    const groupSizes = Array.from(groupEl.querySelectorAll('.size-chip')).map(c => c.textContent);
+    const allOn = groupSizes.every(sz => sizes.includes(sz));
+    selectAllBtn.classList.toggle('on', allOn);
+    selectAllBtn.textContent = allOn ? '✓ 已全選' : '全選';
+  }
+}
+function toggleAllSizes(mode, idx, groupIdx, el) {
+  let sizes = _getSizes(mode, idx);
+  const g = SIZE_GROUPS[groupIdx];
+  const allOn = g.sizes.every(s => sizes.includes(s));
+  if (allOn) {
+    sizes = sizes.filter(s => !g.sizes.includes(s));
+  } else {
+    g.sizes.forEach(s => { if (!sizes.includes(s)) sizes.push(s); });
+  }
+  _setSizes(mode, idx, sizes);
+  _afterSizeChange(mode);
+  // 更新該組所有 chip
+  const groupEl = el.closest('.size-group');
+  groupEl.querySelectorAll('.size-chip').forEach(chip => {
+    const sz = chip.textContent;
+    chip.classList.toggle('on', sizes.includes(sz));
+  });
+  // 更新全選按鈕
+  const newAllOn = g.sizes.every(s => sizes.includes(s));
+  el.classList.toggle('on', newAllOn);
+  el.textContent = newAllOn ? '✓ 已全選' : '全選';
+  // 更新預覽
+  document.getElementById(_previewId(mode, idx)).textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
+}
+function removeCard(i) {
+  editData.splice(i, 1);
+  if (!editData.length) document.getElementById('editSection').style.display = 'none';
+  else renderEditCards();
+}
+// ═══════════════════════════════
+//  BRAND SUGGESTIONS
+// ═══════════════════════════════
+function showSugg(idx, val) {
+  const el  = document.getElementById('bs'+idx);
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBrand(${idx},'${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideSugg(idx) { document.getElementById('bs'+idx)?.classList.remove('open'); }
+function pickBrand(idx, b) {
+  editData[idx].brand = b;
+  const inp = document.getElementById('bi'+idx);
+  if (inp) inp.value = b;
+  hideSugg(idx);
+}
+// ═══════════════════════════════
+//  SAVE (發佈)
+// ═══════════════════════════════
+function saveAll() {
+  const newItems = editData.filter(d => d.url).map(d => ({
+    id: 'p' + Date.now() + Math.random().toString(36).slice(2,6),
+    url: d.url,
+    price: d.price || '',
+    brand: (d.brand||'').trim(),
+    sizes: d.sizes || [],
+    createdAt: Date.now()
+  }));
+  if (!newItems.length) { showToast('沒有可發佈的商品'); return; }
+  newItems.forEach(p => rememberBrand(p.brand));
+  products = [...newItems, ...products];
+  save();
+  // reset upload tab
+  editData = [];
+  bulkSizes = [];
+  document.getElementById('bulkBrandInput').value = '';
+  document.getElementById('editSection').style.display = 'none';
+  document.getElementById('editCards').innerHTML = '';
+  const bulkCont = document.getElementById('bulkSizeContainer');
+  if (bulkCont) bulkCont.innerHTML = '';
+  renderBrandTabs();
+  applyFilters();
+  showToast(`✓ 已成功上架 ${newItems.length} 件商品！`);
+  setTimeout(() => { switchTab('manage'); renderManage(); }, 800);
+}
+// ═══════════════════════════════
+//  匯出 / 匯入
+// ═══════════════════════════════
+function exportData() {
+  if (!products.length) { showToast('目前沒有商品可以匯出'); return; }
+  const payload = { products, brandHistory, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = `jck-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✓ 已匯出 ${products.length} 件商品資料`);
+}
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.products)) throw new Error('格式錯誤');
+      const incoming = data.products;
+      const existingIds = new Set(products.map(p => p.id));
+      const merged = [...products];
+      let added = 0;
+      incoming.forEach(p => {
+        if (!existingIds.has(p.id)) { merged.push(p); added++; }
+      });
+      products = merged;
+      if (data.brandHistory && Array.isArray(data.brandHistory)) {
+        data.brandHistory.forEach(b => rememberBrand(b));
+      }
+      save();
+      renderBrandTabs();
+      applyFilters();
+      renderManage();
+      showToast(`✓ 匯入完成！新增 ${added} 件，共 ${products.length} 件商品`);
+    } catch {
+      showToast('⚠️ 檔案格式錯誤，請選擇正確的備份檔');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+// ═══════════════════════════════
+//  MANAGE TAB (列表 + 編輯)
+// ═══════════════════════════════
+function renderManage() {
+  const batch = document.getElementById('batchSection');
+  const cont  = document.getElementById('existingProds');
+  const none  = document.getElementById('noProd');
+  document.getElementById('prodCount').textContent = products.length;
+  if (!products.length) {
+    if (batch) batch.innerHTML = '';
+    cont.innerHTML = '';
+    none.style.display = 'block';
+    batchMode = false;
+    batchEditing = false;
+    return;
+  }
+  none.style.display = 'none';
+  // 批量區塊：未開啟時顯示切換按鈕；開啟時顯示操作列 + 可選修改面板
+  if (batch) {
+    if (batchMode) {
+      batch.innerHTML = renderBatchActionBar() + (batchEditing ? renderBatchModifyPanel() : '');
+    } else {
+      batch.innerHTML = `<button class="batch-toggle-btn" onclick="toggleBatchMode()">🗂 批量管理（多選刪除 / 修改）</button>`;
+    }
+  }
+  // 商品列
+  cont.innerHTML = products.map(p => {
+    if (!batchMode && editingProdId === p.id) return renderEditingProd(p);
+    if (batchMode) {
+      const selected = batchSelected.has(p.id);
+      return `
+        <div class="ep batch-row ${selected?'selected':''}" onclick="toggleBatchSelect('${p.id}')">
+          <input type="checkbox" class="ep-checkbox" ${selected?'checked':''}>
+          <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+          <div class="ep-info">
+            <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}</div>
+            <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
+          </div>
+        </div>`;
+    }
+    return `
+      <div class="ep">
+        <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+        <div class="ep-info">
+          <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}</div>
+          <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
+        </div>
+        <button class="edit-btn-sm" onclick="startEditProd('${p.id}')" title="編輯">✏️</button>
+        <button class="del-btn" onclick="delProd('${p.id}')" title="刪除">🗑</button>
+      </div>`;
+  }).join('');
+}
+function renderBatchActionBar() {
+  const total = products.length;
+  const selected = batchSelected.size;
+  const allChecked = selected === total && total > 0;
+  // 品牌快選 Chips
+  const brands = uniqueBrands();
+  const brandChipsHTML = brands.length ? `
+    <div class="batch-brand-chips-wrap">
+      <div class="batch-brand-chips-label">🏷 依品牌快速選取（點擊切換）</div>
+      <div class="batch-brand-chips">
+        ${brands.map(b => {
+          const brandIds = products.filter(p => (p.brand||'').trim() === b).map(p => p.id);
+          const allSelected = brandIds.length > 0 && brandIds.every(id => batchSelected.has(id));
+          return `<div class="batch-brand-chip ${allSelected?'on':''}" onclick="toggleSelectBrand('${esc(b)}')">
+            ${allSelected?'✓ ':''}${esc(b)}<span class="batch-brand-chip-count">(${brandIds.length})</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : '';
+  return `
+    <div class="batch-action-bar">
+      <label>
+        <input type="checkbox" ${allChecked?'checked':''} onchange="toggleSelectAll()">
+        <span>全選</span>
+      </label>
+      <div class="batch-count">已選 <strong>${selected}</strong> / ${total} 件</div>
+      <button class="batch-btn batch-btn-edit" onclick="openBatchModify()">✏️ 批量修改</button>
+      <button class="batch-btn batch-btn-del" onclick="batchDelete()">🗑 批量刪除</button>
+      <button class="batch-btn batch-btn-cancel" onclick="toggleBatchMode()">✕ 取消</button>
+    </div>
+    ${brandChipsHTML}`;
+}
+function toggleSelectBrand(brand) {
+  const brandIds = products.filter(p => (p.brand||'').trim() === brand).map(p => p.id);
+  if (!brandIds.length) return;
+  const allSelected = brandIds.every(id => batchSelected.has(id));
+  if (allSelected) {
+    brandIds.forEach(id => batchSelected.delete(id));
+  } else {
+    brandIds.forEach(id => batchSelected.add(id));
+  }
+  renderManage();
+}
+function renderBatchModifyPanel() {
+  const count = batchEditItems.length;
+  const cardsHTML = batchEditItems.map((d, i) => `
+    <div class="edit-card">
+      <div class="edit-card-img-wrap">
+        <img class="edit-card-img" src="${d.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+      </div>
+      <div class="edit-card-fields">
+        <div class="edit-field">
+          <label>🏷 品牌</label>
+          <div class="brand-wrap">
+            <input class="field-input" type="text" id="bei_brand_${i}" placeholder="例：Mini Balabala"
+              autocomplete="off" value="${esc(d.brand)}"
+              oninput="batchEditItems[${i}].brand=this.value;showBatchEditSugg(${i},this.value)"
+              onfocus="showBatchEditSugg(${i},this.value)"
+              onblur="setTimeout(()=>hideBatchEditSugg(${i}),180)">
+            <div class="brand-sugg" id="bes_${i}"></div>
+          </div>
+        </div>
+        <div class="edit-field">
+          <label>💰 價格（數字）</label>
+          <input class="field-input" type="text" placeholder="例：580"
+            value="${esc(d.price)}" oninput="batchEditItems[${i}].price=this.value">
+        </div>
+        <div class="edit-field">
+          <label>📐 尺寸（可多選，可整組全選）</label>
+          ${sizePicker('batchEdit', i, d.sizes)}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  return `
+    <div class="batch-modify-panel">
+      <div class="batch-modify-title">✏️ 批量修改 ${count} 件商品（每件可個別調整）</div>
+      <!-- 批量套用品牌 -->
+      <div class="bulk-bar">
+        <div class="bulk-bar-title">🏷 批量套用品牌</div>
+        <div class="bulk-bar-hint">這批選中的商品都是同一個品牌？輸入後點「套用」會一次填入所有卡片；個別商品仍可在下方卡片微調。</div>
+        <div class="bulk-bar-row">
+          <div class="brand-wrap" style="flex:1;">
+            <input class="field-input" type="text" id="bmBulkBrand" placeholder="例：Mini Balabala"
+              autocomplete="off"
+              oninput="showBmBulkBrandSugg(this.value)"
+              onfocus="showBmBulkBrandSugg(this.value)"
+              onblur="setTimeout(hideBmBulkBrandSugg,180)"
+              onkeydown="if(event.key==='Enter')applyBmBulkBrand()">
+            <div class="brand-sugg" id="bmBulkBrandSugg"></div>
+          </div>
+          <button class="bulk-apply-btn" onclick="applyBmBulkBrand()">✓ 套用</button>
+        </div>
+      </div>
+      <!-- 批量套用尺寸 -->
+      <div class="bulk-bar">
+        <div class="bulk-bar-title">📐 批量套用尺寸</div>
+        <div class="bulk-bar-hint">勾選後點「套用至所有商品」一次填入所有卡片；個別商品仍可在下方卡片彈性微調。</div>
+        <div class="bulk-size-wrap" id="bmBulkSizeContainer">${sizePicker('batchBulk', 0, batchBulkSizes)}</div>
+        <button class="bulk-apply-btn full" onclick="applyBmBulkSizes()">✓ 套用至所有商品</button>
+      </div>
+      <!-- 每件商品個別編輯卡 -->
+      <div class="edit-cards">${cardsHTML}</div>
+      <div class="batch-modify-actions">
+        <button class="ep-btn ep-cancel-btn" onclick="cancelBatchModify()">取消</button>
+        <button class="ep-btn ep-save-btn" onclick="saveBatchEditAll()">✓ 儲存 ${count} 件商品變更</button>
+      </div>
+    </div>`;
+}
+function renderEditingProd(p) {
+  return `
+    <div class="ep-editing">
+      <div class="ep-editing-header">
+        <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+        <div class="ep-editing-title">編輯商品</div>
+      </div>
+      <div class="ep-editing-body">
+        <div class="edit-field">
+          <label>🏷 品牌</label>
+          <div class="brand-wrap">
+            <input class="field-input" type="text" id="ebi_${p.id}" value="${esc(p.brand||'')}" autocomplete="off"
+              oninput="showEditSugg('${p.id}',this.value)"
+              onfocus="showEditSugg('${p.id}',this.value)"
+              onblur="setTimeout(()=>hideEditSugg('${p.id}'),180)">
+            <div class="brand-sugg" id="ebs_${p.id}"></div>
+          </div>
+        </div>
+        <div class="edit-field">
+          <label>💰 價格（數字）</label>
+          <input class="field-input" type="text" id="epi_${p.id}" value="${esc(p.price||'')}">
+        </div>
+        <div class="edit-field">
+          <label>📐 尺寸（可多選，可整組全選）</label>
+          ${sizePicker('edit', p.id, editingSizes)}
+        </div>
+        <div class="ep-editing-actions">
+          <button class="ep-btn ep-cancel-btn" onclick="cancelEditProd()">取消</button>
+          <button class="ep-btn ep-save-btn" onclick="saveEditProd('${p.id}')">💾 儲存變更</button>
+        </div>
+      </div>
+    </div>`;
+}
+function startEditProd(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingProdId = id;
+  editingSizes  = [...(p.sizes||[])];
+  renderManage();
+  // 自動捲到編輯卡片
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.ep-editing');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+}
+function cancelEditProd() {
+  editingProdId = null;
+  editingSizes  = [];
+  renderManage();
+}
+function saveEditProd(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const brand = document.getElementById('ebi_'+id).value.trim();
+  const price = document.getElementById('epi_'+id).value.trim();
+  p.brand = brand;
+  p.price = price;
+  p.sizes = [...editingSizes];
+  rememberBrand(brand);
+  save();
+  editingProdId = null;
+  editingSizes  = [];
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast('✓ 商品已更新');
+}
+function showEditSugg(pid, val) {
+  const el  = document.getElementById('ebs_'+pid);
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickEditBrand('${pid}','${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideEditSugg(pid) { document.getElementById('ebs_'+pid)?.classList.remove('open'); }
+function pickEditBrand(pid, b) {
+  const inp = document.getElementById('ebi_'+pid);
+  if (inp) inp.value = b;
+  hideEditSugg(pid);
+}
+function delProd(id) {
+  if (!confirm('確定要刪除此商品？')) return;
+  products = products.filter(p => p.id !== id);
+  save();
+  if (editingProdId === id) { editingProdId = null; editingSizes = []; }
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast('已刪除商品');
+}
+// ═══════════════════════════════
+//  BATCH MODE（管理頁：批量刪除 / 批量修改）
+// ═══════════════════════════════
+function toggleBatchMode() {
+  batchMode = !batchMode;
+  if (batchMode) {
+    // 進入批量模式 → 取消任何個別編輯
+    editingProdId = null;
+    editingSizes  = [];
+  } else {
+    _resetBatchState();
+  }
+  renderManage();
+}
+function _resetBatchState() {
+  batchSelected.clear();
+  batchEditing    = false;
+  batchEditItems  = [];
+  batchBulkSizes  = [];
+}
+function toggleBatchSelect(id) {
+  if (batchSelected.has(id)) batchSelected.delete(id);
+  else batchSelected.add(id);
+  renderManage();
+}
+function toggleSelectAll() {
+  if (batchSelected.size === products.length && products.length > 0) {
+    batchSelected.clear();
+  } else {
+    products.forEach(p => batchSelected.add(p.id));
+  }
+  renderManage();
+}
+function batchDelete() {
+  if (!batchSelected.size) { showToast('請先勾選要刪除的商品'); return; }
+  if (!confirm(`確定要刪除已選的 ${batchSelected.size} 件商品嗎？\n此操作無法復原。`)) return;
+  const count = batchSelected.size;
+  products = products.filter(p => !batchSelected.has(p.id));
+  save();
+  batchMode = false;
+  _resetBatchState();
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast(`✓ 已刪除 ${count} 件商品`);
+}
+function openBatchModify() {
+  if (!batchSelected.size) { showToast('請先勾選要修改的商品'); return; }
+  // 從已選中的商品複製一份資料到 batchEditItems 供個別編輯
+  batchEditItems = products
+    .filter(p => batchSelected.has(p.id))
+    .map(p => ({
+      id:    p.id,
+      url:   p.url,
+      brand: p.brand || '',
+      price: p.price || '',
+      sizes: [...(p.sizes || [])]
+    }));
+  batchBulkSizes = [];
+  batchEditing   = true;
+  renderManage();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.batch-modify-panel');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+}
+function cancelBatchModify() {
+  batchEditing   = false;
+  batchEditItems = [];
+  batchBulkSizes = [];
+  renderManage();
+}
+function saveBatchEditAll() {
+  if (!batchEditItems.length) { showToast('沒有可儲存的商品'); return; }
+  const count = batchEditItems.length;
+  const byId  = new Map(batchEditItems.map(d => [d.id, d]));
+  products.forEach(p => {
+    if (!byId.has(p.id)) return;
+    const d = byId.get(p.id);
+    p.brand = (d.brand || '').trim();
+    p.price = (d.price || '').trim();
+    p.sizes = [...(d.sizes || [])];
+    if (p.brand) rememberBrand(p.brand);
+  });
+  save();
+  batchMode = false;
+  _resetBatchState();
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast(`✓ 已更新 ${count} 件商品`);
+}
+// 批量修改面板內 —— 批量套用品牌
+function applyBmBulkBrand() {
+  const val = (document.getElementById('bmBulkBrand')?.value || '').trim();
+  if (!val) { showToast('請先輸入品牌名稱'); return; }
+  if (!batchEditItems.length) { showToast('尚無商品可套用'); return; }
+  batchEditItems.forEach(d => { d.brand = val; });
+  batchEditItems.forEach((_, i) => {
+    const inp = document.getElementById('bei_brand_' + i);
+    if (inp) inp.value = val;
+  });
+  hideBmBulkBrandSugg();
+  showToast(`✓ 已將 ${batchEditItems.length} 件商品的品牌設為「${val}」`);
+}
+function showBmBulkBrandSugg(val) {
+  const el = document.getElementById('bmBulkBrandSugg');
+  if (!el) return;
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBmBulkBrand('${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideBmBulkBrandSugg() { document.getElementById('bmBulkBrandSugg')?.classList.remove('open'); }
+function pickBmBulkBrand(b) {
+  const inp = document.getElementById('bmBulkBrand');
+  if (inp) inp.value = b;
+  hideBmBulkBrandSugg();
+}
+// 批量修改面板內 —— 批量套用尺寸
+function applyBmBulkSizes() {
+  if (!batchBulkSizes.length) { showToast('請先勾選要套用的尺寸'); return; }
+  if (!batchEditItems.length) { showToast('尚無商品可套用'); return; }
+  batchEditItems.forEach(d => { d.sizes = [...batchBulkSizes]; });
+  // 重新渲染批量修改面板以反映新選尺寸
+  renderManage();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.batch-modify-panel');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  showToast(`✓ 已將 ${batchEditItems.length} 件商品的尺寸設為：${batchBulkSizes.join(' / ')}`);
+}
+// 批量修改面板內 —— 個別卡片品牌建議
+function showBatchEditSugg(idx, val) {
+  const el = document.getElementById('bes_' + idx);
+  if (!el) return;
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBatchEditBrand(${idx},'${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideBatchEditSugg(idx) { document.getElementById('bes_' + idx)?.classList.remove('open'); }
+function pickBatchEditBrand(idx, b) {
+  if (!batchEditItems[idx]) return;
+  batchEditItems[idx].brand = b;
+  const inp = document.getElementById('bei_brand_' + idx);
+  if (inp) inp.value = b;
+  hideBatchEditSugg(idx);
+}
+// ═══════════════════════════════
+//  INIT
+// ═══════════════════════════════
+load();
+renderBrandTabs();
+applyFilters();
+setupDragDrop();
+</script>
+</body>
+</html>
