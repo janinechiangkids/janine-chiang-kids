@@ -457,6 +457,7 @@ const LINE_URL  = 'https://lin.ee/rCNd7ai';
 const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';
 const SUPABASE_KEY    = 'sb_publishable__-Ac_0k27vvy8r456Hq_0g_AiRWZPHD';
 const SUPABASE_BUCKET = 'products';
+const SUPABASE_TABLE  = 'products';   // 資料表名稱（和圖片 storage bucket 同名但用途不同）
 // 壓縮參數
 const IMG_MAX_WIDTH   = 1200;          // 寬度最大 1200px
 const IMG_QUALITY     = 0.8;           // JPEG 品質約 80%
@@ -493,22 +494,60 @@ let batchEditing    = false;
 let batchEditItems  = [];     // [{id, url, brand, price, sizes}]
 let batchBulkSizes  = [];     // 批量修改面板中「批量套用尺寸」暫存
 // ═══════════════════════════════
-//  STORAGE
+//  STORAGE —— 全面改用 Supabase database table
 // ═══════════════════════════════
-function load() {
-  try { products     = JSON.parse(localStorage.getItem(SK_PROD))  || []; } catch { products = []; }
-  try { brandHistory = JSON.parse(localStorage.getItem(SK_BRAND)) || []; } catch { brandHistory = []; }
+let _productsLoading = true;  // 初始就是 true，等 loadProducts() 結束後才 false
+// 從 Supabase 讀取所有商品
+async function loadProducts() {
+  if (!sb) {
+    console.error('[loadProducts] Supabase 尚未初始化');
+    _productsLoading = false;
+    products = [];
+    return;
+  }
+  const { data, error } = await sb
+    .from(SUPABASE_TABLE)
+    .select('*')
+    .order('created_at', { ascending: false });
+  _productsLoading = false;
+  if (error) {
+    console.error('[loadProducts error]', error);
+    showToast('⚠️ 讀取商品失敗：' + (error.message || error), 4000);
+    products = [];
+    return;
+  }
+  products = (data || []).map(row => ({
+    id:        row.id,
+    url:       row.url,
+    brand:     row.brand || '',
+    price:     row.price || '',
+    sizes:     Array.isArray(row.sizes) ? row.sizes : [],
+    createdAt: Number(row.created_at) || 0
+  }));
+  rebuildBrandHistory();
 }
-function save() {
-  localStorage.setItem(SK_PROD,  JSON.stringify(products));
-  localStorage.setItem(SK_BRAND, JSON.stringify(brandHistory));
+// brandHistory 從 products 即時衍生（自動保持同步、無需 localStorage）
+function rebuildBrandHistory() {
+  brandHistory = [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];
 }
+// 記住一個新輸入的品牌（未儲存前的暫時快取，提供 autocomplete）
 function rememberBrand(b) {
   if (!b || !b.trim()) return;
   b = b.trim();
   if (brandHistory.includes(b)) return;
   brandHistory.unshift(b);
   if (brandHistory.length > 40) brandHistory.pop();
+}
+// 把 JS 商品物件轉成 Supabase row 格式
+function _toRow(p) {
+  return {
+    id:         p.id,
+    url:        p.url,
+    brand:      (p.brand || '').trim(),
+    price:      (p.price || '').toString().trim(),
+    sizes:      p.sizes || [],
+    created_at: p.createdAt || Date.now()
+  };
 }
 // ═══════════════════════════════
 //  UTILITIES
@@ -557,6 +596,11 @@ function applyFilters() {
 function renderProducts(list) {
   const grid  = document.getElementById('productGrid');
   const title = document.getElementById('sectionTitle');
+  if (_productsLoading) {
+    title.textContent = '— 載入商品中… —';
+    grid.innerHTML = `<div class="empty-state"><div class="big-icon">⏳</div><p>正在從雲端載入商品資料…</p></div>`;
+    return;
+  }
   if (!list.length) {
     title.textContent = '— 0 件商品 —';
     const filt = brandFilter !== 'all' || document.getElementById('searchInput').value.trim();
@@ -1033,7 +1077,7 @@ function pickBrand(idx, b) {
 // ═══════════════════════════════
 //  SAVE (發佈)
 // ═══════════════════════════════
-function saveAll() {
+async function saveAll() {
   const newItems = editData.filter(d => d.url).map(d => ({
     id: 'p' + Date.now() + Math.random().toString(36).slice(2,6),
     url: d.url,
@@ -1043,9 +1087,15 @@ function saveAll() {
     createdAt: Date.now()
   }));
   if (!newItems.length) { showToast('沒有可發佈的商品'); return; }
-  newItems.forEach(p => rememberBrand(p.brand));
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
+  const { error } = await sb.from(SUPABASE_TABLE).insert(newItems.map(_toRow));
+  if (error) {
+    console.error('[saveAll error]', error);
+    showToast('⚠️ 上架失敗：' + (error.message || error), 4000);
+    return;
+  }
   products = [...newItems, ...products];
-  save();
+  rebuildBrandHistory();
   // reset upload tab
   editData = [];
   bulkSizes = [];
@@ -1079,28 +1129,38 @@ function importData(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data.products)) throw new Error('格式錯誤');
+      if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
       const incoming = data.products;
       const existingIds = new Set(products.map(p => p.id));
-      const merged = [...products];
-      let added = 0;
-      incoming.forEach(p => {
-        if (!existingIds.has(p.id)) { merged.push(p); added++; }
-      });
-      products = merged;
-      if (data.brandHistory && Array.isArray(data.brandHistory)) {
-        data.brandHistory.forEach(b => rememberBrand(b));
+      const toAdd = incoming.filter(p => !existingIds.has(p.id));
+      if (toAdd.length) {
+        const rows = toAdd.map(p => _toRow({
+          id:        p.id,
+          url:       p.url,
+          brand:     p.brand,
+          price:     p.price,
+          sizes:     p.sizes,
+          createdAt: p.createdAt || Date.now()
+        }));
+        const { error } = await sb.from(SUPABASE_TABLE).insert(rows);
+        if (error) {
+          console.error('[importData error]', error);
+          showToast('⚠️ 匯入失敗：' + (error.message || error), 4000);
+          return;
+        }
       }
-      save();
+      await loadProducts();
       renderBrandTabs();
       applyFilters();
       renderManage();
-      showToast(`✓ 匯入完成！新增 ${added} 件，共 ${products.length} 件商品`);
-    } catch {
-      showToast('⚠️ 檔案格式錯誤，請選擇正確的備份檔');
+      showToast(`✓ 匯入完成！新增 ${toAdd.length} 件，共 ${products.length} 件商品`);
+    } catch (err) {
+      console.error('[importData parse error]', err);
+      showToast('⚠️ 檔案格式錯誤：' + (err.message || err), 4000);
     }
     event.target.value = '';
   };
@@ -1317,16 +1377,26 @@ function cancelEditProd() {
   editingSizes  = [];
   renderManage();
 }
-function saveEditProd(id) {
+async function saveEditProd(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const brand = document.getElementById('ebi_'+id).value.trim();
   const price = document.getElementById('epi_'+id).value.trim();
+  const sizes = [...editingSizes];
+  const { error } = await sb
+    .from(SUPABASE_TABLE)
+    .update({ brand, price, sizes })
+    .eq('id', id);
+  if (error) {
+    console.error('[saveEditProd error]', error);
+    showToast('⚠️ 更新失敗：' + (error.message || error), 4000);
+    return;
+  }
   p.brand = brand;
   p.price = price;
-  p.sizes = [...editingSizes];
-  rememberBrand(brand);
-  save();
+  p.sizes = sizes;
+  rebuildBrandHistory();
   editingProdId = null;
   editingSizes  = [];
   renderBrandTabs();
@@ -1347,10 +1417,17 @@ function pickEditBrand(pid, b) {
   if (inp) inp.value = b;
   hideEditSugg(pid);
 }
-function delProd(id) {
+async function delProd(id) {
   if (!confirm('確定要刪除此商品？')) return;
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
+  const { error } = await sb.from(SUPABASE_TABLE).delete().eq('id', id);
+  if (error) {
+    console.error('[delProd error]', error);
+    showToast('⚠️ 刪除失敗：' + (error.message || error), 4000);
+    return;
+  }
   products = products.filter(p => p.id !== id);
-  save();
+  rebuildBrandHistory();
   if (editingProdId === id) { editingProdId = null; editingSizes = []; }
   renderBrandTabs();
   applyFilters();
@@ -1390,12 +1467,20 @@ function toggleSelectAll() {
   }
   renderManage();
 }
-function batchDelete() {
+async function batchDelete() {
   if (!batchSelected.size) { showToast('請先勾選要刪除的商品'); return; }
   if (!confirm(`確定要刪除已選的 ${batchSelected.size} 件商品嗎？\n此操作無法復原。`)) return;
-  const count = batchSelected.size;
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
+  const ids = [...batchSelected];
+  const count = ids.length;
+  const { error } = await sb.from(SUPABASE_TABLE).delete().in('id', ids);
+  if (error) {
+    console.error('[batchDelete error]', error);
+    showToast('⚠️ 批量刪除失敗：' + (error.message || error), 4000);
+    return;
+  }
   products = products.filter(p => !batchSelected.has(p.id));
-  save();
+  rebuildBrandHistory();
   batchMode = false;
   _resetBatchState();
   renderBrandTabs();
@@ -1429,19 +1514,38 @@ function cancelBatchModify() {
   batchBulkSizes = [];
   renderManage();
 }
-function saveBatchEditAll() {
+async function saveBatchEditAll() {
   if (!batchEditItems.length) { showToast('沒有可儲存的商品'); return; }
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const count = batchEditItems.length;
-  const byId  = new Map(batchEditItems.map(d => [d.id, d]));
-  products.forEach(p => {
-    if (!byId.has(p.id)) return;
-    const d = byId.get(p.id);
-    p.brand = (d.brand || '').trim();
-    p.price = (d.price || '').trim();
-    p.sizes = [...(d.sizes || [])];
-    if (p.brand) rememberBrand(p.brand);
+  // 需要完整 row 來 upsert（否則其他欄位會被蓋成 null），從 products 補齊 url/createdAt
+  const byIdProd = new Map(products.map(p => [p.id, p]));
+  const rows = batchEditItems.map(d => {
+    const p = byIdProd.get(d.id) || {};
+    return _toRow({
+      id:        d.id,
+      url:       p.url || d.url || '',
+      brand:     d.brand,
+      price:     d.price,
+      sizes:     d.sizes,
+      createdAt: p.createdAt || Date.now()
+    });
   });
-  save();
+  const { error } = await sb.from(SUPABASE_TABLE).upsert(rows);
+  if (error) {
+    console.error('[saveBatchEditAll error]', error);
+    showToast('⚠️ 批量更新失敗：' + (error.message || error), 4000);
+    return;
+  }
+  const byIdEdit = new Map(batchEditItems.map(d => [d.id, d]));
+  products.forEach(p => {
+    if (!byIdEdit.has(p.id)) return;
+    const d = byIdEdit.get(p.id);
+    p.brand = (d.brand || '').trim();
+    p.price = (d.price || '').toString().trim();
+    p.sizes = [...(d.sizes || [])];
+  });
+  rebuildBrandHistory();
   batchMode = false;
   _resetBatchState();
   renderBrandTabs();
@@ -1509,10 +1613,14 @@ function pickBatchEditBrand(idx, b) {
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
-load();
-renderBrandTabs();
-applyFilters();
-setupDragDrop();
+(async function init() {
+  // 先渲染一次以顯示「載入中」骨架
+  renderProducts([]);
+  setupDragDrop();
+  await loadProducts();
+  renderBrandTabs();
+  applyFilters();
+})();
 </script>
 </body>
 </html>
