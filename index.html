@@ -111,6 +111,10 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .pw-screen p { color: var(--text-soft); margin-bottom: 16px; font-size: 0.9rem; }
 .pw-input { width: 100%; border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 1rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); outline: none; margin-bottom: 14px; text-align: center; letter-spacing: 0.2em; transition: border-color 0.2s; }
 .pw-input:focus { border-color: var(--soft-brown); }
+.pw-input.login-email { letter-spacing: 0.02em; text-align: left; font-size: 0.95rem; }
+.admin-user { font-size: 0.72rem; color: var(--text-light); margin-top: 2px; letter-spacing: 0.03em; }
+.logout-btn { background: none; border: 1.5px solid var(--cream-mid); color: var(--text-soft); font-size: 0.72rem; padding: 5px 10px; border-radius: 14px; cursor: pointer; font-family: 'Noto Serif TC', serif; letter-spacing: 0.04em; transition: all 0.2s; }
+.logout-btn:hover { background: var(--cream); border-color: var(--soft-brown); color: var(--warm-brown); }
 .pw-btn { width: 100%; background: var(--warm-brown); color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.08em; transition: opacity 0.2s; }
 .pw-btn:hover { opacity: 0.85; }
 .pw-error { color: var(--red); font-size: 0.8rem; margin-top: 8px; }
@@ -259,6 +263,10 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 /* Footer */
 .site-footer { background: var(--dark-brown); color: var(--blush); text-align: center; padding: 30px 20px; font-size: 0.78rem; letter-spacing: 0.1em; line-height: 2; }
 .site-footer .logo-f { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; color: var(--cream); letter-spacing: 0.1em; margin-bottom: 8px; }
+.site-footer .social { margin-top: 12px; display: flex; justify-content: center; gap: 14px; }
+.site-footer .social a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--cream); color: var(--cream); transition: all 0.25s ease; text-decoration: none; }
+.site-footer .social a:hover { background: var(--cream); color: var(--dark-brown); transform: translateY(-2px); }
+.site-footer .social svg { width: 18px; height: 18px; }
 /* Toast */
 .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark-brown); color: var(--cream); padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -301,7 +309,16 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 <footer class="site-footer">
   <div class="logo-f">Janine Chiang Kids</div>
   <div>韓國童裝選品｜用心挑選每一件</div>
-  <div style="margin-top:8px;opacity:0.5;">© 2025 Janine Chiang Kids. All rights reserved.</div>
+  <div class="social">
+    <a href="https://www.instagram.com/jckids_shop?igsh=N2c2MWM3djRtM3No&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+    </a>
+  </div>
+  <div style="margin-top:8px;opacity:0.5;">© 2021 Janine Chiang Kids. All rights reserved.</div>
 </footer>
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="lbOutside(event)">
@@ -353,19 +370,28 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 <div class="modal-overlay" id="adminModal" onclick="adminOutside(event)">
   <div class="admin-panel">
     <div class="admin-handle"></div>
-    <!-- Password -->
+    <!-- Login -->
     <div id="pwScreen" class="pw-screen">
       <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--dark-brown);margin-bottom:6px;">商家後台</p>
-      <p>請輸入管理員密碼</p>
-      <input class="pw-input" type="password" id="pwInput" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()">
-      <button class="pw-btn" onclick="checkPw()">進入後台</button>
+      <p>請登入管理員帳號</p>
+      <input class="pw-input login-email" type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('adminPass').focus()">
+      <input class="pw-input" type="password" id="adminPass" placeholder="密碼" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="pw-btn" id="adminLoginBtn" onclick="adminLogin()">登入</button>
       <div class="pw-error" id="pwError"></div>
     </div>
     <!-- Content -->
     <div id="adminContent" style="display:none;">
       <div class="admin-header">
-        <h2>✦ 商家後台</h2>
-        <button class="close-admin" onclick="closeAdmin()">✕</button>
+        <div>
+          <h2>✦ 商家後台</h2>
+          <div class="admin-user" id="adminUserInfo"></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="logout-btn" onclick="adminLogout()">登出</button>
+          <button class="close-admin" onclick="closeAdmin()">✕</button>
+        </div>
       </div>
       <div class="admin-content">
         <div class="admin-tabs">
@@ -451,7 +477,6 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 // ═══════════════════════════════
 const SK_PROD   = 'jck_products_v3';
 const SK_BRAND  = 'jck_brands_v3';
-const PASS      = '52771314';
 const LINE_URL  = 'https://lin.ee/rCNd7ai';
 // ── Supabase 串接資訊 ──────────────────────────────
 const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';
@@ -670,13 +695,32 @@ function confirmOrder() {
 // ═══════════════════════════════
 //  ADMIN
 // ═══════════════════════════════
-function openAdmin() {
+async function openAdmin() {
   document.getElementById('adminModal').classList.add('active');
+  lock();
+  // 檢查是否已有有效 Session；有則跳過登入畫面
+  if (sb) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      _showAdminContent(session.user);
+      return;
+    }
+  }
+  // 顯示登入畫面
   document.getElementById('pwScreen').style.display   = 'block';
   document.getElementById('adminContent').style.display = 'none';
-  document.getElementById('pwInput').value = '';
+  document.getElementById('adminEmail').value = '';
+  document.getElementById('adminPass').value  = '';
   document.getElementById('pwError').textContent = '';
-  lock();
+  // 等畫面繪完再 focus
+  requestAnimationFrame(() => document.getElementById('adminEmail')?.focus());
+}
+function _showAdminContent(user) {
+  document.getElementById('pwScreen').style.display   = 'none';
+  document.getElementById('adminContent').style.display = 'block';
+  const info = document.getElementById('adminUserInfo');
+  if (info) info.textContent = user?.email ? '已登入：' + user.email : '';
+  renderManage();
 }
 function closeAdmin() {
   document.getElementById('adminModal').classList.remove('active');
@@ -684,15 +728,43 @@ function closeAdmin() {
   unlock();
 }
 function adminOutside(e) { if (e.target === document.getElementById('adminModal')) closeAdmin(); }
-function checkPw() {
-  if (document.getElementById('pwInput').value === PASS) {
-    document.getElementById('pwScreen').style.display   = 'none';
-    document.getElementById('adminContent').style.display = 'block';
-    renderManage();
-  } else {
-    document.getElementById('pwError').textContent = '密碼錯誤，請再試一次';
-    document.getElementById('pwInput').value = '';
+async function adminLogin() {
+  if (!sb) {
+    document.getElementById('pwError').textContent = 'Supabase 尚未初始化';
+    return;
   }
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass  = document.getElementById('adminPass').value;
+  const errEl = document.getElementById('pwError');
+  const btn   = document.getElementById('adminLoginBtn');
+  if (!email || !pass) {
+    errEl.textContent = '請輸入 Email 與密碼';
+    return;
+  }
+  errEl.textContent = '登入中…';
+  if (btn) { btn.disabled = true; btn.textContent = '登入中…'; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (btn) { btn.disabled = false; btn.textContent = '登入'; }
+  if (error) {
+    console.error('[adminLogin error]', error);
+    errEl.textContent = '登入失敗：' + (error.message || '請確認帳號密碼');
+    document.getElementById('adminPass').value = '';
+    return;
+  }
+  errEl.textContent = '';
+  _showAdminContent(data?.user);
+  // 重新載入商品，確保 session 帶進 RLS
+  await loadProducts();
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast('✓ 歡迎回來');
+}
+async function adminLogout() {
+  if (!sb) { closeAdmin(); return; }
+  await sb.auth.signOut();
+  closeAdmin();
+  showToast('✓ 已登出');
 }
 function switchTab(tab) {
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='manage')));
