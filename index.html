@@ -50,37 +50,55 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .brand-tabs { display: flex; white-space: nowrap; min-width: max-content; }
 .brand-tab { padding: 11px 16px; font-size: 0.8rem; font-family: 'Noto Serif TC', serif; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.2s; letter-spacing: 0.05em; flex-shrink: 0; }
 .brand-tab.active { color: var(--warm-brown); border-bottom-color: var(--warm-brown); font-weight: 500; }
-/* PRODUCT GRID */
+/* PRODUCT GRID — 修正 6：改用 grid 確保對齊 */
 .section-title { text-align: center; padding: 24px 20px 16px; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.15rem; color: var(--text-soft); letter-spacing: 0.12em; }
-.product-grid { padding: 0 12px 40px; columns: 2; column-gap: 10px; }
-.product-card { break-inside: avoid; background: var(--white); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; box-shadow: 0 2px 14px var(--shadow); transition: transform 0.22s, box-shadow 0.22s; cursor: pointer; animation: fadeUp 0.4s ease both; }
+.product-grid { padding: 0 12px 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.product-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 14px var(--shadow); transition: transform 0.22s, box-shadow 0.22s; cursor: pointer; animation: fadeUp 0.4s ease both; display: flex; flex-direction: column; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 22px rgba(60,35,15,0.14); }
-.product-img-wrap { position: relative; overflow: hidden; background: var(--cream-dark); }
-.product-img-wrap img { width: 100%; display: block; object-fit: cover; transition: transform 0.4s ease; }
+.product-img-wrap { position: relative; overflow: hidden; background: var(--cream-dark); aspect-ratio: 1 / 1; }
+.product-img-wrap img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 0.4s ease; }
 .product-card:hover .product-img-wrap img { transform: scale(1.04); }
-.product-info { padding: 12px 11px 14px; }
-.product-brand-tag { display: inline-block; font-size: 0.65rem; background: var(--blush-light); color: var(--soft-brown); border-radius: 10px; padding: 1px 7px; margin-bottom: 6px; letter-spacing: 0.04em; }
-/* 尺寸 + 金額一行（放大後仍保留同列排版） */
-.product-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.product-meta-row .product-size { font-size: 0.82rem; color: var(--text-soft); letter-spacing: 0.03em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
-.product-meta-row .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 600; color: var(--warm-brown); flex-shrink: 0; letter-spacing: 0.02em; }
-.order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 20px; padding: 8px 0; font-size: 0.72rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+.product-info { padding: 10px 10px 12px; display: flex; flex-direction: column; flex: 1; }
+.product-brand-tag { display: inline-block; font-size: 0.65rem; background: var(--blush-light); color: var(--soft-brown); border-radius: 10px; padding: 1px 7px; margin-bottom: 5px; letter-spacing: 0.04em; }
+/* 品項標籤 */
+.product-category-tag { display: inline-block; font-size: 0.62rem; background: var(--cream-dark); color: var(--text-soft); border-radius: 10px; padding: 1px 7px; margin-bottom: 5px; margin-left: 4px; letter-spacing: 0.04em; }
+.product-meta-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+.product-meta-row .product-size { font-size: 0.75rem; color: var(--text-soft); letter-spacing: 0.03em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.product-meta-row .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 600; color: var(--warm-brown); flex-shrink: 0; letter-spacing: 0.02em; }
+.order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 20px; padding: 8px 0; font-size: 0.72rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-top: auto; }
 .order-btn:hover { opacity: 0.88; transform: scale(0.98); }
-.empty-state { text-align: center; padding: 60px 30px; color: var(--text-light); column-span: all; }
+.empty-state { text-align: center; padding: 60px 30px; color: var(--text-light); grid-column: 1 / -1; }
 .empty-state .big-icon { font-size: 3rem; margin-bottom: 14px; }
 .empty-state p { font-size: 0.9rem; line-height: 1.8; }
 /* LIGHTBOX */
 .lightbox { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.88); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
 .lightbox.active { display: flex; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-.lightbox-inner { background: var(--white); border-radius: var(--radius); max-width: 420px; width: 100%; overflow: hidden; animation: scaleIn 0.25s ease; position: relative; }
+.lightbox-inner { background: var(--white); border-radius: var(--radius); max-width: 420px; width: 100%; overflow: hidden; animation: scaleIn 0.25s ease; position: relative; max-height: 92vh; overflow-y: auto; }
 @keyframes scaleIn { from { transform: scale(0.94); opacity:0; } to { transform: scale(1); opacity:1; } }
-.lightbox-img { width: 100%; display: block; max-height: 52vh; object-fit: contain; background: var(--cream-dark); }
-.lightbox-body { padding: 16px 18px 20px; }
+.lightbox-img { width: 100%; display: block; max-height: 48vh; object-fit: contain; background: var(--cream-dark); }
+.lightbox-body { padding: 14px 16px 18px; }
 .lightbox-brand { display: inline-block; font-size: 0.72rem; background: var(--blush-light); color: var(--soft-brown); border-radius: 10px; padding: 2px 10px; margin-bottom: 10px; }
-.lightbox-size { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 10px; line-height: 1.7; }
-.lightbox-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--warm-brown); margin-bottom: 14px; }
+/* 燈箱內品項、尺寸、顏色區塊 */
+.lb-attrs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.lb-attr-row { display: flex; align-items: flex-start; gap: 10px; }
+.lb-attr-label { font-size: 0.72rem; color: var(--text-light); letter-spacing: 0.06em; flex-shrink: 0; padding-top: 3px; min-width: 36px; }
+.lb-attr-value { font-size: 0.82rem; color: var(--text-soft); line-height: 1.7; }
+/* 尺寸/顏色按鈕組 */
+.lb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lb-chip { padding: 5px 12px; border-radius: 18px; border: 1.5px solid var(--warm-brown); font-size: 0.78rem; font-family: 'Noto Serif TC', serif; color: var(--warm-brown); cursor: pointer; transition: all 0.18s; user-select: none; background: transparent; letter-spacing: 0.04em; }
+.lb-chip.selected { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border-color: transparent; }
+.lb-chip:hover:not(.selected) { background: var(--blush-light); }
+/* 尺寸表 */
+.lb-size-guide-btn { background: none; border: none; font-size: 0.72rem; color: var(--soft-brown); text-decoration: underline; cursor: pointer; font-family: 'Noto Serif TC', serif; letter-spacing: 0.04em; padding: 0; margin-left: 4px; }
+.lb-size-guide { margin-top: 8px; background: var(--cream); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--cream-mid); display: none; }
+.lb-size-guide.open { display: block; }
+.lb-size-guide table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.lb-size-guide th { background: var(--blush-light); color: var(--text-soft); padding: 5px 8px; text-align: center; font-weight: 500; letter-spacing: 0.04em; }
+.lb-size-guide td { padding: 5px 8px; text-align: center; color: var(--text-soft); border-bottom: 1px solid var(--cream-mid); }
+.lb-size-guide tr:last-child td { border-bottom: none; }
+.lightbox-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--warm-brown); margin-bottom: 12px; }
 .lightbox-order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.9rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.2s; }
 .lightbox-order-btn:hover { opacity: 0.85; }
 .lightbox-close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.92); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--dark-brown); z-index: 2; }
@@ -101,7 +119,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 /* ADMIN MODAL */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.7); z-index: 200; align-items: flex-end; justify-content: center; }
 .modal-overlay.active { display: flex; }
-.admin-panel { background: var(--white); border-radius: 20px 20px 0 0; width: 100%; max-width: 960px; max-height: 93vh; overflow-y: auto; padding: 0 0 40px; animation: slideUp 0.3s ease; }
+.admin-panel { background: var(--white); border-radius: 20px 20px 0 0; width: 100%; max-width: 1400px; height: 96vh; overflow-y: auto; padding: 0 0 40px; animation: slideUp 0.3s ease; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .admin-handle { width: 40px; height: 4px; background: var(--cream-mid); border-radius: 2px; margin: 14px auto 0; }
 .admin-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--cream-dark); display: flex; align-items: center; justify-content: space-between; }
@@ -128,7 +146,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .admin-section-title { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
 .urls-textarea { width: 100%; height: 90px; border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 12px; font-size: 0.78rem; font-family: monospace; color: var(--text-main); background: var(--cream); resize: vertical; outline: none; transition: border-color 0.2s; }
 .urls-textarea:focus { border-color: var(--soft-brown); }
-/* Upload Zone（批量上傳照片） */
+/* Upload Zone */
 .upload-zone { border: 2px dashed var(--blush); border-radius: var(--radius-sm); background: var(--cream); transition: background 0.2s, border-color 0.2s; }
 .upload-zone.dragover { background: var(--blush-light); border-color: var(--soft-brown); }
 .upload-zone-inner { padding: 28px 18px; text-align: center; cursor: pointer; }
@@ -158,8 +176,9 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .bulk-apply-btn:hover { opacity: 0.88; }
 .bulk-apply-btn.full { width: 100%; padding: 11px 18px; margin-top: 10px; }
 .bulk-size-wrap { background: var(--white); border-radius: var(--radius-sm); padding: 2px; }
-/* EDIT CARDS — 3 欄 Grid，圖片完整顯示不裁切 */
-.edit-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* EDIT CARDS */
+.edit-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+@media (max-width: 1200px) { .edit-cards { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 768px) { .edit-cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .edit-cards { grid-template-columns: 1fr; gap: 16px; } }
 .edit-card { background: var(--cream); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--cream-mid); display: flex; flex-direction: column; }
@@ -176,6 +195,11 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .edit-field label { font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.06em; display: flex; align-items: center; gap: 5px; }
 .field-input { border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.88rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); background: var(--white); outline: none; transition: border-color 0.2s; width: 100%; }
 .field-input:focus { border-color: var(--soft-brown); }
+/* 品項/顏色 chips（後台新增商品用） */
+.option-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.option-chip { padding: 4px 10px; border-radius: 12px; border: 1.5px solid var(--cream-mid); font-size: 0.72rem; color: var(--text-soft); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--cream); }
+.option-chip.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
+.option-chip-manual { margin-top: 5px; }
 /* Brand autocomplete */
 .brand-wrap { position: relative; }
 .brand-sugg { position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border: 1px solid var(--cream-mid); border-radius: var(--radius-sm); z-index: 20; max-height: 130px; overflow-y: auto; box-shadow: 0 4px 12px var(--shadow); display: none; }
@@ -218,7 +242,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .del-btn { background: none; border: none; color: var(--red); font-size: 1.05rem; cursor: pointer; padding: 5px 7px; flex-shrink: 0; border-radius: 6px; transition: background 0.15s; }
 .del-btn:hover { background: rgba(192,97,74,0.1); }
 .no-results { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 0.88rem; }
-/* Edit-in-place product form */
+/* Edit-in-place */
 .ep-editing { background: var(--white); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; animation: fadeIn 0.2s ease; }
 .ep-editing-header { padding: 10px 12px; background: var(--blush-light); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--blush); }
 .ep-editing-header img { width: 42px; height: 42px; object-fit: cover; border-radius: 5px; }
@@ -228,7 +252,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .ep-btn { flex: 1; padding: 10px 0; border-radius: 18px; font-size: 0.82rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; border: none; }
 .ep-save-btn { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
 .ep-cancel-btn { background: var(--cream); color: var(--text-soft); border: 1.5px solid var(--cream-mid); }
-/* BATCH MODE (管理頁 批量刪除 / 批量修改) */
+/* BATCH MODE */
 .batch-toggle-btn { width: 100%; background: var(--cream); color: var(--warm-brown); border: 1.5px solid var(--blush); border-radius: 20px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.06em; margin-bottom: 14px; transition: background 0.2s; }
 .batch-toggle-btn:hover { background: var(--blush-light); }
 .batch-action-bar { background: var(--blush-light); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -252,7 +276,6 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .ep.selected { background: var(--blush-light); border-color: var(--blush); }
 .ep.batch-row { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .ep.batch-row:hover { border-color: var(--blush); }
-/* 批量選擇 —— 品牌快選 */
 .batch-brand-chips-wrap { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 12px; }
 .batch-brand-chips-label { font-size: 0.72rem; color: var(--text-soft); margin-bottom: 8px; letter-spacing: 0.05em; }
 .batch-brand-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -260,6 +283,9 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .batch-brand-chip:hover { border-color: var(--blush); background: var(--blush-light); }
 .batch-brand-chip.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
 .batch-brand-chip-count { opacity: 0.75; font-size: 0.7rem; }
+/* 尺寸表後台輸入 */
+.size-guide-wrap { margin-top: 6px; }
+.size-guide-hint { font-size: 0.68rem; color: var(--text-light); margin-bottom: 6px; line-height: 1.6; }
 /* Footer */
 .site-footer { background: var(--dark-brown); color: var(--blush); text-align: center; padding: 30px 20px; font-size: 0.78rem; letter-spacing: 0.1em; line-height: 2; }
 .site-footer .logo-f { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; color: var(--cream); letter-spacing: 0.1em; margin-bottom: 8px; }
@@ -326,8 +352,8 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
     <button class="lightbox-close" onclick="closeLb()">✕</button>
     <img class="lightbox-img" id="lbImg" src="" alt="">
     <div class="lightbox-body">
-      <div class="lightbox-brand" id="lbBrand"></div>
-      <div class="lightbox-size" id="lbSize"></div>
+      <div id="lbBrand" class="lightbox-brand"></div>
+      <div class="lb-attrs" id="lbAttrs"></div>
       <div class="lightbox-price" id="lbPrice"></div>
       <button class="lightbox-order-btn" onclick="initiateOrder(currentLbId)">💬 點我私訊下單</button>
     </div>
@@ -397,6 +423,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
         <div class="admin-tabs">
           <div class="admin-tab active" onclick="switchTab('upload')">📦 新增商品</div>
           <div class="admin-tab" onclick="switchTab('manage')">📋 管理商品</div>
+          <div class="admin-tab" onclick="switchTab('brands')">📐 品牌尺寸表</div>
         </div>
         <!-- UPLOAD -->
         <div class="tab-pane active" id="tab-upload">
@@ -448,7 +475,6 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
         </div>
         <!-- MANAGE -->
         <div class="tab-pane" id="tab-manage">
-          <!-- 匯出／匯入區 -->
           <div class="backup-bar">
             <div class="backup-bar-title">📦 資料備份與還原</div>
             <div class="backup-btns">
@@ -465,6 +491,50 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
           <div id="existingProds"></div>
           <div id="noProd" class="no-results" style="display:none;">尚未上架任何商品</div>
         </div>
+        <!-- BRANDS SIZE GUIDE -->
+        <div class="tab-pane" id="tab-brands">
+          <div class="admin-section">
+            <div class="admin-section-title" style="margin-bottom:4px;">品牌尺寸表管理</div>
+            <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:16px;line-height:1.7;">為每個品牌設定尺寸對照表，客人點開商品燈箱時可直接查看。資料儲存在瀏覽器中，無需重新部署。</p>
+            <!-- 新增品牌 -->
+            <div class="bulk-bar" style="margin-bottom:20px;">
+              <div class="bulk-bar-title">➕ 新增 / 編輯品牌尺寸表</div>
+              <div class="bulk-bar-hint">選擇品牌後設定表格欄位與資料，完成後點「儲存」即可在燈箱中顯示。</div>
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <div class="brand-wrap" style="flex:1;">
+                  <input class="field-input" type="text" id="sgBrandInput" placeholder="輸入品牌名稱"
+                    autocomplete="off"
+                    oninput="showSgBrandSugg(this.value)"
+                    onfocus="showSgBrandSugg(this.value)"
+                    onblur="setTimeout(hideSgBrandSugg,180)">
+                  <div class="brand-sugg" id="sgBrandSugg"></div>
+                </div>
+                <button class="bulk-apply-btn" onclick="loadSgEditor()">載入 / 編輯</button>
+              </div>
+              <div id="sgEditor" style="display:none;">
+                <div style="margin-bottom:8px;">
+                  <label style="font-size:0.72rem;color:var(--text-light);letter-spacing:0.06em;">欄位標題（以逗號分隔，例：尺寸,身高,胸圍,腰圍）</label>
+                  <input class="field-input" type="text" id="sgHeaders" placeholder="尺寸,身高,胸圍,腰圍" style="margin-top:4px;">
+                </div>
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:0.72rem;color:var(--text-light);letter-spacing:0.06em;">每行一筆資料，欄位以逗號分隔（例：90,85-95cm,50,46）</label>
+                  <textarea class="urls-textarea" id="sgRows" placeholder="90,85-95cm,50,46&#10;100,95-105cm,54,48&#10;110,105-115cm,58,50" style="margin-top:4px;height:140px;"></textarea>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="bulk-apply-btn" style="flex:1;padding:11px 0;" onclick="saveSizeGuide()">💾 儲存尺寸表</button>
+                  <button class="bulk-apply-btn" style="flex:1;padding:11px 0;background:var(--red);" onclick="deleteSizeGuide()">🗑 刪除此品牌尺寸表</button>
+                </div>
+                <div id="sgPreview" style="margin-top:14px;display:none;">
+                  <div style="font-size:0.72rem;color:var(--text-soft);margin-bottom:6px;letter-spacing:0.06em;">預覽</div>
+                  <div class="lb-size-guide open" id="sgPreviewTable"></div>
+                </div>
+              </div>
+            </div>
+            <!-- 現有品牌尺寸表列表 -->
+            <div class="admin-section-title" style="margin-bottom:10px;">已設定尺寸表的品牌</div>
+            <div id="sgList"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -478,27 +548,43 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 const SK_PROD   = 'jck_products_v3';
 const SK_BRAND  = 'jck_brands_v3';
 const LINE_URL  = 'https://lin.ee/rCNd7ai';
-// ── Supabase 串接資訊 ──────────────────────────────
 const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';
 const SUPABASE_KEY    = 'sb_publishable__-Ac_0k27vvy8r456Hq_0g_AiRWZPHD';
 const SUPABASE_BUCKET = 'products';
-const SUPABASE_TABLE  = 'products';   // 資料表名稱（和圖片 storage bucket 同名但用途不同）
-// 壓縮參數
-const IMG_MAX_WIDTH   = 1200;          // 寬度最大 1200px
-const IMG_QUALITY     = 0.8;           // JPEG 品質約 80%
-const IMG_TARGET_SIZE = 200 * 1024;    // 目標 ≦ 200KB
-// 初始化 Supabase client（createClient 會在 <script> 載入後掛在 window.supabase 上）
+const SUPABASE_TABLE  = 'products';
+const IMG_MAX_WIDTH   = 1200;
+const IMG_QUALITY     = 0.8;
+const IMG_TARGET_SIZE = 200 * 1024;
 const sb = (window.supabase && window.supabase.createClient)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
+
+// ── 修正 3：尺寸新增「F」──────────────────────────
 const SIZE_GROUPS = [
-  { label:'Baby',  sizes:['BXS','BS','BM','BL'] },
-  { label:'小童',  sizes:['XS','S','M','L','XL','XXL'] },
-  { label:'大童',  sizes:['JS','JM','JL'] },
-  { label:'大人',  sizes:['F'] },
+  { label:'單一尺寸', sizes:['F'] },
+  { label:'Baby',     sizes:['BXS','BS','BM','BL'] },
+  { label:'小童',     sizes:['XS','S','M','L','XL','XXL'] },
+  { label:'大童',     sizes:['JS','JM','JL'] },
   { label:'身高(cm)', sizes:['90','95','100','105','110','115','120','125','130','140','150'] },
 ];
+
+// ── 修正 2：品項 & 顏色清單 ──────────────────────
+const CATEGORY_LIST = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭'];
+const COLOR_LIST    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫'];
+
 const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect fill%3D%22%23EDE3D5%22 width%3D%22200%22 height%3D%22200%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2255%25%22 text-anchor%3D%22middle%22 fill%3D%22%23B09880%22 font-size%3D%2230%22%3E%F0%9F%91%97%3C%2Ftext%3E%3C%2Fsvg%3E';
+
+// ── 尺寸表資料（按品牌存放，存於 localStorage）────────────────────
+// 格式：{ 品牌名: { headers:['尺寸','胸圍',...], rows:[['90','50',...], ...] } }
+const SK_SIZE_GUIDE = 'jck_size_guide_v1';
+let sizeGuideData = {};
+function _loadSizeGuide() {
+  try { sizeGuideData = JSON.parse(localStorage.getItem(SK_SIZE_GUIDE) || '{}'); } catch(e) { sizeGuideData = {}; }
+}
+function _saveSizeGuideToStorage() {
+  localStorage.setItem(SK_SIZE_GUIDE, JSON.stringify(sizeGuideData));
+}
+
 // ═══════════════════════════════
 //  STATE
 // ═══════════════════════════════
@@ -508,35 +594,28 @@ let editData       = [];
 let brandFilter    = 'all';
 let currentLbId    = null;
 let pendingOrderId = null;
-let editingProdId  = null;   // 正在編輯的商品 id（管理頁）
-let editingSizes   = [];     // 管理頁編輯中暫存的尺寸
-let bulkSizes      = [];     // 批量尺寸暫存（新增商品流程）
-// --- 管理頁 批量管理 ---
+let editingProdId  = null;
+let editingSizes   = [];
+let bulkSizes      = [];
 let batchMode       = false;
 let batchSelected   = new Set();
 let batchEditing    = false;
-// 批量修改：卡片式個別編輯（對每件商品分別輸入品牌 / 價格 / 尺寸）
-let batchEditItems  = [];     // [{id, url, brand, price, sizes}]
-let batchBulkSizes  = [];     // 批量修改面板中「批量套用尺寸」暫存
+let batchEditItems  = [];
+let batchBulkSizes  = [];
+
 // ═══════════════════════════════
-//  STORAGE —— 全面改用 Supabase database table
+//  STORAGE
 // ═══════════════════════════════
-let _productsLoading = true;  // 初始就是 true，等 loadProducts() 結束後才 false
-// 從 Supabase 讀取所有商品
+let _productsLoading = true;
+
 async function loadProducts() {
-  if (!sb) {
-    console.error('[loadProducts] Supabase 尚未初始化');
-    _productsLoading = false;
-    products = [];
-    return;
-  }
+  if (!sb) { _productsLoading = false; products = []; return; }
   const { data, error } = await sb
     .from(SUPABASE_TABLE)
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false }); // 修正 1：最新上架排最前
   _productsLoading = false;
   if (error) {
-    console.error('[loadProducts error]', error);
     showToast('⚠️ 讀取商品失敗：' + (error.message || error), 4000);
     products = [];
     return;
@@ -547,15 +626,16 @@ async function loadProducts() {
     brand:     row.brand || '',
     price:     row.price || '',
     sizes:     Array.isArray(row.sizes) ? row.sizes : [],
+    category:  row.category || '',   // 修正 2：品項
+    color:     row.color || '',      // 修正 2：顏色
     createdAt: Number(row.created_at) || 0
   }));
   rebuildBrandHistory();
 }
-// brandHistory 從 products 即時衍生（自動保持同步、無需 localStorage）
+
 function rebuildBrandHistory() {
   brandHistory = [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];
 }
-// 記住一個新輸入的品牌（未儲存前的暫時快取，提供 autocomplete）
 function rememberBrand(b) {
   if (!b || !b.trim()) return;
   b = b.trim();
@@ -563,7 +643,6 @@ function rememberBrand(b) {
   brandHistory.unshift(b);
   if (brandHistory.length > 40) brandHistory.pop();
 }
-// 把 JS 商品物件轉成 Supabase row 格式
 function _toRow(p) {
   return {
     id:         p.id,
@@ -571,9 +650,12 @@ function _toRow(p) {
     brand:      (p.brand || '').trim(),
     price:      (p.price || '').toString().trim(),
     sizes:      p.sizes || [],
+    category:   (p.category || '').trim(),
+    color:      (p.color || '').trim(),
     created_at: p.createdAt || Date.now()
   };
 }
+
 // ═══════════════════════════════
 //  UTILITIES
 // ═══════════════════════════════
@@ -587,6 +669,7 @@ function showToast(msg, dur=2600) {
 }
 function lock()   { document.body.style.overflow = 'hidden'; }
 function unlock() { document.body.style.overflow = ''; }
+
 // ═══════════════════════════════
 //  BRAND TABS
 // ═══════════════════════════════
@@ -605,19 +688,24 @@ function renderBrandTabs() {
   }).join('');
 }
 function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); }
+
 // ═══════════════════════════════
-//  FILTER + RENDER (前台)
+//  FILTER + RENDER
 // ═══════════════════════════════
 function applyFilters() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  let list = [...products];
+  // 修正 1：保持 createdAt 降序（最新在前）
+  let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   if (brandFilter !== 'all') list = list.filter(p => (p.brand||'').trim() === brandFilter);
   if (q) list = list.filter(p =>
     (p.brand||'').toLowerCase().includes(q) ||
-    (p.sizes||[]).join(' ').toLowerCase().includes(q)
+    (p.sizes||[]).join(' ').toLowerCase().includes(q) ||
+    (p.category||'').toLowerCase().includes(q) ||
+    (p.color||'').toLowerCase().includes(q)
   );
   renderProducts(list);
 }
+
 function renderProducts(list) {
   const grid  = document.getElementById('productGrid');
   const title = document.getElementById('sectionTitle');
@@ -633,6 +721,7 @@ function renderProducts(list) {
     return;
   }
   title.textContent = `— 共 ${list.length} 件商品 —`;
+  // 修正 6：grid layout 已在 CSS 設定，card 結構統一
   grid.innerHTML = list.map((p,i) => {
     const sz = (p.sizes||[]).join(' / ');
     return `
@@ -641,37 +730,125 @@ function renderProducts(list) {
         <img src="${p.url}" alt="${esc(p.brand||'商品')}" loading="lazy" onerror="this.onerror=null;this.src=FALLBACK_IMG">
       </div>
       <div class="product-info">
-        ${p.brand ? `<div class="product-brand-tag">${esc(p.brand)}</div>` : ''}
+        <div>
+          ${p.brand ? `<span class="product-brand-tag">${esc(p.brand)}</span>` : ''}
+          ${p.category ? `<span class="product-category-tag">${esc(p.category)}</span>` : ''}
+        </div>
         <div class="product-meta-row">
           <span class="product-size">${sz ? '📐 '+esc(sz) : ''}</span>
           <span class="product-price">${p.price ? 'NT$ '+esc(p.price) : ''}</span>
         </div>
-        <button class="order-btn" onclick="event.stopPropagation();initiateOrder('${p.id}')">💬 點我私訊下單</button>
+        <button class="order-btn" onclick="event.stopPropagation();openLb('${p.id}')">📸 點我選規格並截圖</button>
       </div>
     </div>`;
   }).join('');
 }
+
 // ═══════════════════════════════
-//  LIGHTBOX
+//  LIGHTBOX（修正 4：品項/顏色/尺寸顯示＋按鈕）
 // ═══════════════════════════════
 function openLb(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
   currentLbId = id;
   document.getElementById('lbImg').src = p.url;
+
   const brand = document.getElementById('lbBrand');
   brand.textContent = p.brand || '';
   brand.style.display = p.brand ? 'inline-block' : 'none';
-  document.getElementById('lbSize').textContent  = (p.sizes||[]).length ? '尺寸：' + p.sizes.join(' / ') : '';
+
   document.getElementById('lbPrice').textContent = p.price ? 'NT$ ' + p.price : '';
+
+  // 建立 attrs 區塊：品項（文字）、尺寸（按鈕）、顏色（按鈕）
+  const attrsEl = document.getElementById('lbAttrs');
+
+  // 尺寸表按鈕（如有此品牌的尺寸表）
+  const hasSizeGuide = p.brand && sizeGuideData[p.brand];
+  const sgBtn = hasSizeGuide
+    ? `<button class="lb-size-guide-btn" onclick="toggleSizeGuide('${esc(p.brand||'')}')">尺寸表</button>`
+    : '';
+
+  // 品牌行：品牌標籤 + 尺寸表按鈕靠右
+  const brandEl = document.getElementById('lbBrand');
+  brandEl.style.display = 'flex';
+  brandEl.style.alignItems = 'center';
+  brandEl.style.justifyContent = 'space-between';
+  brandEl.style.width = '100%';
+  brandEl.style.background = 'none';
+  brandEl.style.padding = '0';
+  brandEl.style.marginBottom = '10px';
+  brandEl.innerHTML = p.brand
+    ? `<span style="display:inline-block;font-size:0.72rem;background:var(--blush-light);color:var(--soft-brown);border-radius:10px;padding:2px 10px;">${esc(p.brand)}</span>${sgBtn}`
+    : sgBtn;
+
+  let html = '';
+
+  // 品項（放最左邊，純文字顯示）
+  if (p.category) {
+    html += `<div class="lb-attr-row">
+      <span class="lb-attr-label">品項</span>
+      <span class="lb-attr-value">${esc(p.category)}</span>
+    </div>`;
+  }
+
+  // 尺寸按鈕
+  if ((p.sizes||[]).length) {
+    const chips = p.sizes.map(s =>
+      `<div class="lb-chip" onclick="toggleLbChip(this)">${esc(s)}</div>`
+    ).join('');
+    html += `<div class="lb-attr-row" style="align-items:flex-start;">
+      <span class="lb-attr-label" style="padding-top:5px;">尺寸</span>
+      <div style="flex:1;">
+        <div class="lb-chips">${chips}</div>
+        <div class="lb-size-guide" id="lbSizeGuide"></div>
+      </div>
+    </div>`;
+  }
+
+  // 顏色按鈕
+  if (p.color) {
+    const colors = p.color.split(/[\/、,]/).map(c => c.trim()).filter(Boolean);
+    const chips = colors.map(c =>
+      `<div class="lb-chip" onclick="toggleLbChip(this)">${esc(c)}</div>`
+    ).join('');
+    html += `<div class="lb-attr-row">
+      <span class="lb-attr-label">顏色</span>
+      <div class="lb-chips">${chips}</div>
+    </div>`;
+  }
+
+  attrsEl.innerHTML = html;
   document.getElementById('lightbox').classList.add('active');
   lock();
 }
+
+function toggleLbChip(el) {
+  el.classList.toggle('selected');
+}
+
+function toggleSizeGuide(brand) {
+  const el = document.getElementById('lbSizeGuide');
+  if (!el) return;
+  if (el.classList.contains('open')) {
+    el.classList.remove('open');
+    return;
+  }
+  const guide = sizeGuideData[brand];
+  if (!guide) return;
+  let tableHtml = `<div style="font-size:0.72rem;color:var(--text-soft);margin-bottom:6px;font-weight:500;">${esc(brand)} 尺寸表</div>
+    <table><thead><tr>${guide.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>
+    ${guide.rows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>`;
+  el.innerHTML = tableHtml;
+  el.classList.add('open');
+}
+
 function closeLb() {
   document.getElementById('lightbox').classList.remove('active');
   unlock();
 }
 function lbOutside(e) { if (e.target === document.getElementById('lightbox')) closeLb(); }
+
 // ═══════════════════════════════
 //  RULES MODAL
 // ═══════════════════════════════
@@ -689,30 +866,24 @@ function closeRules() {
 function confirmOrder() {
   closeRules();
   if (LINE_URL === '#') { showToast('LINE 連結尚未設定，請聯繫管理員'); return; }
-  // 連結至官方 LINE（與 header 的官方Line按鈕相同）
   window.open(LINE_URL, '_blank');
 }
+
 // ═══════════════════════════════
 //  ADMIN
 // ═══════════════════════════════
 async function openAdmin() {
   document.getElementById('adminModal').classList.add('active');
   lock();
-  // 檢查是否已有有效 Session；有則跳過登入畫面
   if (sb) {
     const { data: { session } } = await sb.auth.getSession();
-    if (session && session.user) {
-      _showAdminContent(session.user);
-      return;
-    }
+    if (session && session.user) { _showAdminContent(session.user); return; }
   }
-  // 顯示登入畫面
   document.getElementById('pwScreen').style.display   = 'block';
   document.getElementById('adminContent').style.display = 'none';
   document.getElementById('adminEmail').value = '';
   document.getElementById('adminPass').value  = '';
   document.getElementById('pwError').textContent = '';
-  // 等畫面繪完再 focus
   requestAnimationFrame(() => document.getElementById('adminEmail')?.focus());
 }
 function _showAdminContent(user) {
@@ -729,31 +900,23 @@ function closeAdmin() {
 }
 function adminOutside(e) { if (e.target === document.getElementById('adminModal')) closeAdmin(); }
 async function adminLogin() {
-  if (!sb) {
-    document.getElementById('pwError').textContent = 'Supabase 尚未初始化';
-    return;
-  }
+  if (!sb) { document.getElementById('pwError').textContent = 'Supabase 尚未初始化'; return; }
   const email = document.getElementById('adminEmail').value.trim();
   const pass  = document.getElementById('adminPass').value;
   const errEl = document.getElementById('pwError');
   const btn   = document.getElementById('adminLoginBtn');
-  if (!email || !pass) {
-    errEl.textContent = '請輸入 Email 與密碼';
-    return;
-  }
+  if (!email || !pass) { errEl.textContent = '請輸入 Email 與密碼'; return; }
   errEl.textContent = '登入中…';
   if (btn) { btn.disabled = true; btn.textContent = '登入中…'; }
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (btn) { btn.disabled = false; btn.textContent = '登入'; }
   if (error) {
-    console.error('[adminLogin error]', error);
     errEl.textContent = '登入失敗：' + (error.message || '請確認帳號密碼');
     document.getElementById('adminPass').value = '';
     return;
   }
   errEl.textContent = '';
   _showAdminContent(data?.user);
-  // 重新載入商品，確保 session 帶進 RLS
   await loadProducts();
   renderBrandTabs();
   applyFilters();
@@ -767,16 +930,17 @@ async function adminLogout() {
   showToast('✓ 已登出');
 }
 function switchTab(tab) {
-  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='manage')));
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='manage')||(i===2&&tab==='brands')));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   if (tab === 'manage') { editingProdId = null; renderManage(); }
   if (tab === 'upload') { batchMode = false; _resetBatchState(); }
+  if (tab === 'brands') { renderSgList(); }
 }
+
 // ═══════════════════════════════
-//  IMAGE COMPRESSION + SUPABASE UPLOAD
+//  IMAGE COMPRESSION + UPLOAD
 // ═══════════════════════════════
-// 讀取檔案為 Image
 function _loadImage(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -786,28 +950,21 @@ function _loadImage(file) {
     img.src = url;
   });
 }
-// Canvas 轉 Blob（Promise 版）
 function _canvasToBlob(canvas, quality) {
   return new Promise(res => canvas.toBlob(b => res(b), 'image/jpeg', quality));
 }
-// 前端壓縮：寬度最大 1200px、JPEG ~80%、並自動降質到 ≦200KB
 async function compressImage(file) {
   const { img, url } = await _loadImage(file);
   let w = img.naturalWidth  || img.width;
   let h = img.naturalHeight || img.height;
-  if (w > IMG_MAX_WIDTH) {
-    h = Math.round(h * IMG_MAX_WIDTH / w);
-    w = IMG_MAX_WIDTH;
-  }
+  if (w > IMG_MAX_WIDTH) { h = Math.round(h * IMG_MAX_WIDTH / w); w = IMG_MAX_WIDTH; }
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
-  // 處理透明 PNG → JPEG 會變黑底，先鋪白底
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(img, 0, 0, w, h);
   URL.revokeObjectURL(url);
-  // 先用 0.8 壓一次；若超過 200KB 再逐級降到最低 0.4
   let q = IMG_QUALITY;
   let blob = await _canvasToBlob(canvas, q);
   while (blob && blob.size > IMG_TARGET_SIZE && q > 0.4) {
@@ -816,52 +973,36 @@ async function compressImage(file) {
   }
   return { blob, width: w, height: h, quality: q };
 }
-// 產生不易撞名的檔名
 function _uniqueName() {
   const d = new Date();
-  const stamp = d.getFullYear().toString()
-    + String(d.getMonth()+1).padStart(2,'0')
-    + String(d.getDate()).padStart(2,'0')
-    + '_' + d.getTime();
+  const stamp = d.getFullYear().toString() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + '_' + d.getTime();
   const rnd = Math.random().toString(36).slice(2, 8);
   return `jck_${stamp}_${rnd}.jpg`;
 }
-// 單張上傳：壓縮 → 上傳 → 取 Public URL
 async function uploadOne(file) {
-  if (!sb) throw new Error('Supabase 尚未初始化，請確認 SUPABASE_URL 已填入');
+  if (!sb) throw new Error('Supabase 尚未初始化');
   const { blob } = await compressImage(file);
   const filename = _uniqueName();
-  const { error } = await sb.storage
-    .from(SUPABASE_BUCKET)
-    .upload(filename, blob, {
-      contentType: 'image/jpeg',
-      cacheControl: '31536000',
-      upsert: false
-    });
+  const { error } = await sb.storage.from(SUPABASE_BUCKET).upload(filename, blob, {
+    contentType: 'image/jpeg', cacheControl: '31536000', upsert: false
+  });
   if (error) throw error;
   const { data: pub } = sb.storage.from(SUPABASE_BUCKET).getPublicUrl(filename);
   return { url: pub.publicUrl, size: blob.size, filename };
 }
-// 從 input[type=file] 選檔後進入這裡
 async function handleFileSelect(ev) {
   const files = Array.from(ev.target.files || []).filter(f => f.type.startsWith('image/'));
-  ev.target.value = '';  // 重置，讓同檔名可再次選擇
+  ev.target.value = '';
   if (!files.length) { showToast('請選擇圖片檔案'); return; }
   await uploadFiles(files);
 }
-// 批量上傳主流程（壓縮 → 上傳 → 寫入 editData → 渲染商品小卡）
 async function uploadFiles(files) {
-  if (!sb) {
-    showToast('⚠️ 請先在程式碼中填入你的 SUPABASE_URL');
-    return;
-  }
+  if (!sb) { showToast('⚠️ 請先在程式碼中填入你的 SUPABASE_URL'); return; }
   const progEl = document.getElementById('uploadProgress');
   const txtEl  = document.getElementById('uploadProgressText');
   const fillEl = document.getElementById('uploadProgressFill');
-  progEl.style.display = 'block';
-  fillEl.style.width = '0%';
-  const uploaded = [];
-  const failed   = [];
+  progEl.style.display = 'block'; fillEl.style.width = '0%';
+  const uploaded = [], failed = [];
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
     const kbOrig = Math.round(f.size / 1024);
@@ -869,47 +1010,30 @@ async function uploadFiles(files) {
     try {
       const res = await uploadOne(f);
       uploaded.push(res);
-      const kbNew = Math.round(res.size / 1024);
-      txtEl.textContent = `已完成（${i+1}/${files.length}）：${f.name}（壓縮後 ${kbNew}KB）`;
+      txtEl.textContent = `已完成（${i+1}/${files.length}）：壓縮後 ${Math.round(res.size/1024)}KB`;
     } catch (err) {
-      console.error('[upload error]', f.name, err);
       failed.push({ name: f.name, msg: (err && err.message) || String(err) });
     }
     fillEl.style.width = `${((i+1)/files.length)*100}%`;
   }
-  // 讓進度條最後一格停留半秒再收起
   setTimeout(() => { progEl.style.display = 'none'; fillEl.style.width = '0%'; }, 600);
-  if (!uploaded.length) {
-    showToast(failed.length ? `上傳全部失敗：${failed[0].msg}` : '沒有成功上傳的圖片', 3600);
-    return;
-  }
-  // 追加到 editData（允許多批次累積；個別想移除可用小卡上的 ✕ 鈕）
+  if (!uploaded.length) { showToast(failed.length ? `上傳全部失敗：${failed[0].msg}` : '沒有成功上傳的圖片', 3600); return; }
   const startIdx = editData.length;
   uploaded.forEach((u, k) => {
-    editData.push({ url: u.url, price:'', brand:'', sizes:[], _id:'tmp'+(startIdx+k) });
+    editData.push({ url: u.url, price:'', brand:'', sizes:[], category:'', color:'', _id:'tmp'+(startIdx+k) });
   });
-  // 若已先在「批量套用」區輸入了品牌／尺寸，對新加入的商品也自動套用
   const bulkBrandVal = (document.getElementById('bulkBrandInput')?.value || '').trim();
-  if (bulkBrandVal) {
-    for (let k = startIdx; k < editData.length; k++) editData[k].brand = bulkBrandVal;
-  }
-  if (bulkSizes.length) {
-    for (let k = startIdx; k < editData.length; k++) editData[k].sizes = [...bulkSizes];
-  }
-  // 初次上傳時才重建「批量尺寸」選擇器
+  if (bulkBrandVal) for (let k = startIdx; k < editData.length; k++) editData[k].brand = bulkBrandVal;
+  if (bulkSizes.length) for (let k = startIdx; k < editData.length; k++) editData[k].sizes = [...bulkSizes];
   const bulkCont = document.getElementById('bulkSizeContainer');
   if (bulkCont && !bulkCont.innerHTML.trim()) bulkCont.innerHTML = sizePicker('bulk', 0, bulkSizes);
   renderEditCards();
   const editSec = document.getElementById('editSection');
   editSec.style.display = 'block';
   editSec.scrollIntoView({ behavior:'smooth' });
-  if (failed.length) {
-    showToast(`✓ 成功 ${uploaded.length} 張；失敗 ${failed.length} 張（詳見 Console）`, 3600);
-  } else {
-    showToast(`✓ 已成功上傳 ${uploaded.length} 張照片`);
-  }
+  if (failed.length) showToast(`✓ 成功 ${uploaded.length} 張；失敗 ${failed.length} 張`, 3600);
+  else showToast(`✓ 已成功上傳 ${uploaded.length} 張照片`);
 }
-// 拖曳上傳
 function setupDragDrop() {
   const zone = document.getElementById('uploadZone');
   if (!zone) return;
@@ -924,23 +1048,19 @@ function setupDragDrop() {
     if (!files.length) { showToast('請拖曳圖片檔案'); return; }
     await uploadFiles(files);
   });
-  // 避免頁面其他地方誤被拖曳行為觸發預覽
   window.addEventListener('dragover', e => e.preventDefault());
   window.addEventListener('drop',     e => e.preventDefault());
 }
+
 // ═══════════════════════════════
-//  BULK BRAND
+//  BULK BRAND / SIZES
 // ═══════════════════════════════
 function applyBulkBrand() {
   const val = document.getElementById('bulkBrandInput').value.trim();
   if (!val) { showToast('請先輸入品牌名稱'); return; }
   if (!editData.length) { showToast('尚無商品可套用'); return; }
   editData.forEach(d => { d.brand = val; });
-  // 更新所有 brand 輸入框
-  editData.forEach((_, i) => {
-    const inp = document.getElementById('bi' + i);
-    if (inp) inp.value = val;
-  });
+  editData.forEach((_, i) => { const inp = document.getElementById('bi' + i); if (inp) inp.value = val; });
   hideBulkSugg();
   showToast(`✓ 已將 ${editData.length} 件商品的品牌設為「${val}」`);
 }
@@ -952,22 +1072,17 @@ function showBulkSugg(val) {
   el.classList.add('open');
 }
 function hideBulkSugg() { document.getElementById('bulkBs')?.classList.remove('open'); }
-function pickBulkBrand(b) {
-  document.getElementById('bulkBrandInput').value = b;
-  hideBulkSugg();
-}
-// ═══════════════════════════════
-//  BULK SIZES
-// ═══════════════════════════════
+function pickBulkBrand(b) { document.getElementById('bulkBrandInput').value = b; hideBulkSugg(); }
 function applyBulkSizes() {
   if (!bulkSizes.length) { showToast('請先勾選要套用的尺寸'); return; }
-  if (!editData.length)  { showToast('尚無商品可套用');   return; }
+  if (!editData.length)  { showToast('尚無商品可套用'); return; }
   editData.forEach(d => { d.sizes = [...bulkSizes]; });
   renderEditCards();
   showToast(`✓ 已將 ${editData.length} 件商品的尺寸設為：${bulkSizes.join(' / ')}`);
 }
+
 // ═══════════════════════════════
-//  EDIT CARDS (新增商品)
+//  EDIT CARDS（修正 2：品項 & 顏色欄位）
 // ═══════════════════════════════
 function renderEditCards() {
   document.getElementById('editCards').innerHTML = editData.map((d,i) => `
@@ -977,10 +1092,8 @@ function renderEditCards() {
           <div class="img-spinner"></div>
           <div class="img-loading-txt">圖片載入中…</div>
         </div>
-        <img class="edit-card-img" id="eimg${i}" src=""
-          style="display:none;"
-          onload="onImgLoad(${i})"
-          onerror="onImgError(${i})">
+        <img class="edit-card-img" id="eimg${i}" src="" style="display:none;"
+          onload="onImgLoad(${i})" onerror="onImgError(${i})">
       </div>
       <div class="edit-card-fields">
         <div class="edit-field">
@@ -1000,6 +1113,14 @@ function renderEditCards() {
             value="${esc(d.price)}" oninput="editData[${i}].price=this.value">
         </div>
         <div class="edit-field">
+          <label>👗 品項</label>
+          ${categoryPicker('new', i, d.category)}
+        </div>
+        <div class="edit-field">
+          <label>🎨 顏色</label>
+          ${colorPicker('new', i, d.color)}
+        </div>
+        <div class="edit-field">
           <label>📐 尺寸（可多選，可整組全選）</label>
           ${sizePicker('new', i, d.sizes)}
         </div>
@@ -1009,31 +1130,115 @@ function renderEditCards() {
       </div>
     </div>
   `).join('');
-  // 等 DOM 就緒後再設定 src
   requestAnimationFrame(() => {
-    editData.forEach((d, i) => {
-      const img = document.getElementById('eimg' + i);
-      if (img) img.src = d.url;
-    });
+    editData.forEach((d, i) => { const img = document.getElementById('eimg' + i); if (img) img.src = d.url; });
   });
 }
 function onImgLoad(i) {
   const img  = document.getElementById('eimg' + i);
   const load = document.getElementById('imgload' + i);
-  if (img)  { img.style.display = 'block'; }
-  if (load) { load.style.display = 'none'; }
+  if (img)  img.style.display = 'block';
+  if (load) load.style.display = 'none';
 }
 function onImgError(i) {
   const load = document.getElementById('imgload' + i);
-  if (load) {
-    load.innerHTML = '<div class="img-error-txt">⚠️ 圖片無法顯示<br><span>請確認網址是否為圖片直鏈</span></div>';
-  }
+  if (load) load.innerHTML = '<div class="img-error-txt">⚠️ 圖片無法顯示<br><span>請確認網址是否為圖片直鏈</span></div>';
 }
+
+// ── 品項選擇器 ───────────────────────────────────
+function categoryPicker(mode, idx, selected) {
+  const manualId = `cat_manual_${mode}_${idx}`;
+  const pickerId = `cat_picker_${mode}_${idx}`;
+  const chips = CATEGORY_LIST.map(c => {
+    const isOn = selected === c;
+    return `<div class="option-chip ${isOn?'on':''}" id="${pickerId}_${esc(c)}"
+      onclick="selectCategory('${mode}',${idx},'${esc(c)}')">${esc(c)}</div>`;
+  }).join('');
+  const manualVal = CATEGORY_LIST.includes(selected) ? '' : (selected || '');
+  return `<div>
+    <div class="option-chips">${chips}</div>
+    <input class="field-input option-chip-manual" type="text" id="${manualId}"
+      placeholder="手動輸入品項"
+      value="${esc(manualVal)}"
+      oninput="selectCategoryManual('${mode}',${idx},this.value)">
+  </div>`;
+}
+function selectCategory(mode, idx, val) {
+  _setCategory(mode, idx, val);
+  // 更新 chip 狀態
+  const prefix = `cat_picker_${mode}_${idx}_`;
+  CATEGORY_LIST.forEach(c => {
+    const el = document.getElementById(prefix + c);
+    if (el) el.classList.toggle('on', c === val);
+  });
+  // 清空手動輸入
+  const manualEl = document.getElementById(`cat_manual_${mode}_${idx}`);
+  if (manualEl) manualEl.value = '';
+}
+function selectCategoryManual(mode, idx, val) {
+  _setCategory(mode, idx, val);
+  // 取消所有 chip 選取
+  const prefix = `cat_picker_${mode}_${idx}_`;
+  CATEGORY_LIST.forEach(c => {
+    const el = document.getElementById(prefix + c);
+    if (el) el.classList.remove('on');
+  });
+}
+function _setCategory(mode, idx, val) {
+  if (mode === 'new')       { if (editData[idx]) editData[idx].category = val; }
+  else if (mode === 'batchEdit') { if (batchEditItems[idx]) batchEditItems[idx].category = val; }
+  else if (mode === 'edit') { /* handled by edit form read on save */ }
+}
+
+// ── 顏色選擇器 ───────────────────────────────────
+function colorPicker(mode, idx, selected) {
+  const manualId = `col_manual_${mode}_${idx}`;
+  const pickerId = `col_picker_${mode}_${idx}`;
+  // 支援多選，以「/」分隔儲存
+  const selArr = selected ? selected.split(/[\/、,]/).map(c=>c.trim()).filter(Boolean) : [];
+  const chips = COLOR_LIST.map(c => {
+    const isOn = selArr.includes(c);
+    return `<div class="option-chip ${isOn?'on':''}" id="${pickerId}_${esc(c)}"
+      onclick="toggleColor('${mode}',${idx},'${esc(c)}')">${esc(c)}</div>`;
+  }).join('');
+  const manualVal = selArr.filter(c => !COLOR_LIST.includes(c)).join('/');
+  return `<div>
+    <div class="option-chips">${chips}</div>
+    <input class="field-input option-chip-manual" type="text" id="${manualId}"
+      placeholder="手動輸入顏色（可用 / 分隔多色）"
+      value="${esc(manualVal)}"
+      oninput="setColorManual('${mode}',${idx},this.value)">
+  </div>`;
+}
+function toggleColor(mode, idx, val) {
+  const current = _getColor(mode, idx);
+  const arr = current ? current.split('/').map(c=>c.trim()).filter(Boolean) : [];
+  const exists = arr.includes(val);
+  const newArr = exists ? arr.filter(c => c !== val) : [...arr, val];
+  const newVal = newArr.join('/');
+  _setColor(mode, idx, newVal);
+  // 更新 chip
+  const el = document.getElementById(`col_picker_${mode}_${idx}_${val}`);
+  if (el) el.classList.toggle('on', !exists);
+}
+function setColorManual(mode, idx, val) {
+  _setColor(mode, idx, val);
+  // 取消所有 chip
+  const prefix = `col_picker_${mode}_${idx}_`;
+  COLOR_LIST.forEach(c => { const el = document.getElementById(prefix+c); if (el) el.classList.remove('on'); });
+}
+function _getColor(mode, idx) {
+  if (mode === 'new')       return editData[idx]?.color || '';
+  if (mode === 'batchEdit') return batchEditItems[idx]?.color || '';
+  return '';
+}
+function _setColor(mode, idx, val) {
+  if (mode === 'new')       { if (editData[idx]) editData[idx].color = val; }
+  else if (mode === 'batchEdit') { if (batchEditItems[idx]) batchEditItems[idx].color = val; }
+}
+
 // ═══════════════════════════════
-//  SIZE PICKER（共用：新增 + 編輯 + 批量）
-//  mode='new'   → 作用於 editData[idx]
-//  mode='edit'  → 作用於 editingSizes（編輯商品）
-//  mode='bulk'  → 作用於 bulkSizes（批量套用）
+//  SIZE PICKER
 // ═══════════════════════════════
 function sizePicker(mode, idx, sel) {
   sel = sel || [];
@@ -1079,18 +1284,12 @@ function _previewId(mode, idx) {
   if (mode === 'batchBulk') return 'batchBulkSp';
   return 'espv_'+idx;
 }
-function _afterSizeChange(mode) {
-  // 保留 hook，日後如需在特定 mode 做額外副作用可擴充
-}
 function toggleSz(mode, idx, s, el) {
   let sizes = _getSizes(mode, idx);
   if (sizes.includes(s)) { sizes = sizes.filter(x => x !== s); el.classList.remove('on'); }
   else                    { sizes.push(s); el.classList.add('on'); }
   _setSizes(mode, idx, sizes);
-  _afterSizeChange(mode);
-  // 更新預覽
   document.getElementById(_previewId(mode, idx)).textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
-  // 更新該組的「全選」按鈕狀態
   const groupEl = el.closest('.size-group');
   const selectAllBtn = groupEl.querySelector('.select-all-chip');
   if (selectAllBtn) {
@@ -1104,24 +1303,14 @@ function toggleAllSizes(mode, idx, groupIdx, el) {
   let sizes = _getSizes(mode, idx);
   const g = SIZE_GROUPS[groupIdx];
   const allOn = g.sizes.every(s => sizes.includes(s));
-  if (allOn) {
-    sizes = sizes.filter(s => !g.sizes.includes(s));
-  } else {
-    g.sizes.forEach(s => { if (!sizes.includes(s)) sizes.push(s); });
-  }
+  if (allOn) sizes = sizes.filter(s => !g.sizes.includes(s));
+  else g.sizes.forEach(s => { if (!sizes.includes(s)) sizes.push(s); });
   _setSizes(mode, idx, sizes);
-  _afterSizeChange(mode);
-  // 更新該組所有 chip
   const groupEl = el.closest('.size-group');
-  groupEl.querySelectorAll('.size-chip').forEach(chip => {
-    const sz = chip.textContent;
-    chip.classList.toggle('on', sizes.includes(sz));
-  });
-  // 更新全選按鈕
+  groupEl.querySelectorAll('.size-chip').forEach(chip => chip.classList.toggle('on', sizes.includes(chip.textContent)));
   const newAllOn = g.sizes.every(s => sizes.includes(s));
   el.classList.toggle('on', newAllOn);
   el.textContent = newAllOn ? '✓ 已全選' : '全選';
-  // 更新預覽
   document.getElementById(_previewId(mode, idx)).textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
 }
 function removeCard(i) {
@@ -1129,6 +1318,7 @@ function removeCard(i) {
   if (!editData.length) document.getElementById('editSection').style.display = 'none';
   else renderEditCards();
 }
+
 // ═══════════════════════════════
 //  BRAND SUGGESTIONS
 // ═══════════════════════════════
@@ -1146,8 +1336,9 @@ function pickBrand(idx, b) {
   if (inp) inp.value = b;
   hideSugg(idx);
 }
+
 // ═══════════════════════════════
-//  SAVE (發佈)
+//  SAVE
 // ═══════════════════════════════
 async function saveAll() {
   const newItems = editData.filter(d => d.url).map(d => ({
@@ -1156,19 +1347,16 @@ async function saveAll() {
     price: d.price || '',
     brand: (d.brand||'').trim(),
     sizes: d.sizes || [],
+    category: (d.category||'').trim(),
+    color: (d.color||'').trim(),
     createdAt: Date.now()
   }));
   if (!newItems.length) { showToast('沒有可發佈的商品'); return; }
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const { error } = await sb.from(SUPABASE_TABLE).insert(newItems.map(_toRow));
-  if (error) {
-    console.error('[saveAll error]', error);
-    showToast('⚠️ 上架失敗：' + (error.message || error), 4000);
-    return;
-  }
+  if (error) { showToast('⚠️ 上架失敗：' + (error.message || error), 4000); return; }
   products = [...newItems, ...products];
   rebuildBrandHistory();
-  // reset upload tab
   editData = [];
   bulkSizes = [];
   document.getElementById('bulkBrandInput').value = '';
@@ -1181,6 +1369,7 @@ async function saveAll() {
   showToast(`✓ 已成功上架 ${newItems.length} 件商品！`);
   setTimeout(() => { switchTab('manage'); renderManage(); }, 800);
 }
+
 // ═══════════════════════════════
 //  匯出 / 匯入
 // ═══════════════════════════════
@@ -1190,10 +1379,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  const date = new Date().toISOString().slice(0,10);
-  a.href     = url;
-  a.download = `jck-backup-${date}.json`;
-  a.click();
+  a.href = url; a.download = `jck-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
   URL.revokeObjectURL(url);
   showToast(`✓ 已匯出 ${products.length} 件商品資料`);
 }
@@ -1206,40 +1392,23 @@ function importData(event) {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data.products)) throw new Error('格式錯誤');
       if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
-      const incoming = data.products;
       const existingIds = new Set(products.map(p => p.id));
-      const toAdd = incoming.filter(p => !existingIds.has(p.id));
+      const toAdd = data.products.filter(p => !existingIds.has(p.id));
       if (toAdd.length) {
-        const rows = toAdd.map(p => _toRow({
-          id:        p.id,
-          url:       p.url,
-          brand:     p.brand,
-          price:     p.price,
-          sizes:     p.sizes,
-          createdAt: p.createdAt || Date.now()
-        }));
+        const rows = toAdd.map(p => _toRow({ id:p.id, url:p.url, brand:p.brand, price:p.price, sizes:p.sizes, category:p.category||'', color:p.color||'', createdAt:p.createdAt||Date.now() }));
         const { error } = await sb.from(SUPABASE_TABLE).insert(rows);
-        if (error) {
-          console.error('[importData error]', error);
-          showToast('⚠️ 匯入失敗：' + (error.message || error), 4000);
-          return;
-        }
+        if (error) { showToast('⚠️ 匯入失敗：' + (error.message || error), 4000); return; }
       }
-      await loadProducts();
-      renderBrandTabs();
-      applyFilters();
-      renderManage();
+      await loadProducts(); renderBrandTabs(); applyFilters(); renderManage();
       showToast(`✓ 匯入完成！新增 ${toAdd.length} 件，共 ${products.length} 件商品`);
-    } catch (err) {
-      console.error('[importData parse error]', err);
-      showToast('⚠️ 檔案格式錯誤：' + (err.message || err), 4000);
-    }
+    } catch (err) { showToast('⚠️ 檔案格式錯誤：' + (err.message || err), 4000); }
     event.target.value = '';
   };
   reader.readAsText(file);
 }
+
 // ═══════════════════════════════
-//  MANAGE TAB (列表 + 編輯)
+//  MANAGE TAB
 // ═══════════════════════════════
 function renderManage() {
   const batch = document.getElementById('batchSection');
@@ -1248,22 +1417,14 @@ function renderManage() {
   document.getElementById('prodCount').textContent = products.length;
   if (!products.length) {
     if (batch) batch.innerHTML = '';
-    cont.innerHTML = '';
-    none.style.display = 'block';
-    batchMode = false;
-    batchEditing = false;
-    return;
+    cont.innerHTML = ''; none.style.display = 'block';
+    batchMode = false; batchEditing = false; return;
   }
   none.style.display = 'none';
-  // 批量區塊：未開啟時顯示切換按鈕；開啟時顯示操作列 + 可選修改面板
   if (batch) {
-    if (batchMode) {
-      batch.innerHTML = renderBatchActionBar() + (batchEditing ? renderBatchModifyPanel() : '');
-    } else {
-      batch.innerHTML = `<button class="batch-toggle-btn" onclick="toggleBatchMode()">🗂 批量管理（多選刪除 / 修改）</button>`;
-    }
+    if (batchMode) batch.innerHTML = renderBatchActionBar() + (batchEditing ? renderBatchModifyPanel() : '');
+    else batch.innerHTML = `<button class="batch-toggle-btn" onclick="toggleBatchMode()">🗂 批量管理（多選刪除 / 修改）</button>`;
   }
-  // 商品列
   cont.innerHTML = products.map(p => {
     if (!batchMode && editingProdId === p.id) return renderEditingProd(p);
     if (batchMode) {
@@ -1273,8 +1434,8 @@ function renderManage() {
           <input type="checkbox" class="ep-checkbox" ${selected?'checked':''}>
           <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
           <div class="ep-info">
-            <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}</div>
-            <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
+            <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}</div>
+            <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
           </div>
         </div>`;
     }
@@ -1282,8 +1443,8 @@ function renderManage() {
       <div class="ep">
         <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
         <div class="ep-info">
-          <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}</div>
-          <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
+          <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}</div>
+          <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
         </div>
         <button class="edit-btn-sm" onclick="startEditProd('${p.id}')" title="編輯">✏️</button>
         <button class="del-btn" onclick="delProd('${p.id}')" title="刪除">🗑</button>
@@ -1291,14 +1452,12 @@ function renderManage() {
   }).join('');
 }
 function renderBatchActionBar() {
-  const total = products.length;
-  const selected = batchSelected.size;
+  const total = products.length, selected = batchSelected.size;
   const allChecked = selected === total && total > 0;
-  // 品牌快選 Chips
   const brands = uniqueBrands();
   const brandChipsHTML = brands.length ? `
     <div class="batch-brand-chips-wrap">
-      <div class="batch-brand-chips-label">🏷 依品牌快速選取（點擊切換）</div>
+      <div class="batch-brand-chips-label">🏷 依品牌快速選取</div>
       <div class="batch-brand-chips">
         ${brands.map(b => {
           const brandIds = products.filter(p => (p.brand||'').trim() === b).map(p => p.id);
@@ -1309,28 +1468,20 @@ function renderBatchActionBar() {
         }).join('')}
       </div>
     </div>` : '';
-  return `
-    <div class="batch-action-bar">
-      <label>
-        <input type="checkbox" ${allChecked?'checked':''} onchange="toggleSelectAll()">
-        <span>全選</span>
-      </label>
-      <div class="batch-count">已選 <strong>${selected}</strong> / ${total} 件</div>
-      <button class="batch-btn batch-btn-edit" onclick="openBatchModify()">✏️ 批量修改</button>
-      <button class="batch-btn batch-btn-del" onclick="batchDelete()">🗑 批量刪除</button>
-      <button class="batch-btn batch-btn-cancel" onclick="toggleBatchMode()">✕ 取消</button>
-    </div>
-    ${brandChipsHTML}`;
+  return `<div class="batch-action-bar">
+    <label><input type="checkbox" ${allChecked?'checked':''} onchange="toggleSelectAll()"><span>全選</span></label>
+    <div class="batch-count">已選 <strong>${selected}</strong> / ${total} 件</div>
+    <button class="batch-btn batch-btn-edit" onclick="openBatchModify()">✏️ 批量修改</button>
+    <button class="batch-btn batch-btn-del" onclick="batchDelete()">🗑 批量刪除</button>
+    <button class="batch-btn batch-btn-cancel" onclick="toggleBatchMode()">✕ 取消</button>
+  </div>${brandChipsHTML}`;
 }
 function toggleSelectBrand(brand) {
   const brandIds = products.filter(p => (p.brand||'').trim() === brand).map(p => p.id);
   if (!brandIds.length) return;
   const allSelected = brandIds.every(id => batchSelected.has(id));
-  if (allSelected) {
-    brandIds.forEach(id => batchSelected.delete(id));
-  } else {
-    brandIds.forEach(id => batchSelected.add(id));
-  }
+  if (allSelected) brandIds.forEach(id => batchSelected.delete(id));
+  else brandIds.forEach(id => batchSelected.add(id));
   renderManage();
 }
 function renderBatchModifyPanel() {
@@ -1353,127 +1504,111 @@ function renderBatchModifyPanel() {
           </div>
         </div>
         <div class="edit-field">
-          <label>💰 價格（數字）</label>
-          <input class="field-input" type="text" placeholder="例：580"
-            value="${esc(d.price)}" oninput="batchEditItems[${i}].price=this.value">
+          <label>💰 價格</label>
+          <input class="field-input" type="text" value="${esc(d.price)}" oninput="batchEditItems[${i}].price=this.value">
         </div>
         <div class="edit-field">
-          <label>📐 尺寸（可多選，可整組全選）</label>
+          <label>👗 品項</label>
+          ${categoryPicker('batchEdit', i, d.category)}
+        </div>
+        <div class="edit-field">
+          <label>🎨 顏色</label>
+          ${colorPicker('batchEdit', i, d.color)}
+        </div>
+        <div class="edit-field">
+          <label>📐 尺寸</label>
           ${sizePicker('batchEdit', i, d.sizes)}
         </div>
       </div>
-    </div>
-  `).join('');
-  return `
-    <div class="batch-modify-panel">
-      <div class="batch-modify-title">✏️ 批量修改 ${count} 件商品（每件可個別調整）</div>
-      <!-- 批量套用品牌 -->
-      <div class="bulk-bar">
-        <div class="bulk-bar-title">🏷 批量套用品牌</div>
-        <div class="bulk-bar-hint">這批選中的商品都是同一個品牌？輸入後點「套用」會一次填入所有卡片；個別商品仍可在下方卡片微調。</div>
-        <div class="bulk-bar-row">
-          <div class="brand-wrap" style="flex:1;">
-            <input class="field-input" type="text" id="bmBulkBrand" placeholder="例：Mini Balabala"
-              autocomplete="off"
-              oninput="showBmBulkBrandSugg(this.value)"
-              onfocus="showBmBulkBrandSugg(this.value)"
-              onblur="setTimeout(hideBmBulkBrandSugg,180)"
-              onkeydown="if(event.key==='Enter')applyBmBulkBrand()">
-            <div class="brand-sugg" id="bmBulkBrandSugg"></div>
-          </div>
-          <button class="bulk-apply-btn" onclick="applyBmBulkBrand()">✓ 套用</button>
+    </div>`).join('');
+  return `<div class="batch-modify-panel">
+    <div class="batch-modify-title">✏️ 批量修改 ${count} 件商品</div>
+    <div class="bulk-bar">
+      <div class="bulk-bar-title">🏷 批量套用品牌</div>
+      <div class="bulk-bar-row">
+        <div class="brand-wrap" style="flex:1;">
+          <input class="field-input" type="text" id="bmBulkBrand" placeholder="例：Mini Balabala"
+            autocomplete="off" oninput="showBmBulkBrandSugg(this.value)" onfocus="showBmBulkBrandSugg(this.value)"
+            onblur="setTimeout(hideBmBulkBrandSugg,180)" onkeydown="if(event.key==='Enter')applyBmBulkBrand()">
+          <div class="brand-sugg" id="bmBulkBrandSugg"></div>
         </div>
+        <button class="bulk-apply-btn" onclick="applyBmBulkBrand()">✓ 套用</button>
       </div>
-      <!-- 批量套用尺寸 -->
-      <div class="bulk-bar">
-        <div class="bulk-bar-title">📐 批量套用尺寸</div>
-        <div class="bulk-bar-hint">勾選後點「套用至所有商品」一次填入所有卡片；個別商品仍可在下方卡片彈性微調。</div>
-        <div class="bulk-size-wrap" id="bmBulkSizeContainer">${sizePicker('batchBulk', 0, batchBulkSizes)}</div>
-        <button class="bulk-apply-btn full" onclick="applyBmBulkSizes()">✓ 套用至所有商品</button>
-      </div>
-      <!-- 每件商品個別編輯卡 -->
-      <div class="edit-cards">${cardsHTML}</div>
-      <div class="batch-modify-actions">
-        <button class="ep-btn ep-cancel-btn" onclick="cancelBatchModify()">取消</button>
-        <button class="ep-btn ep-save-btn" onclick="saveBatchEditAll()">✓ 儲存 ${count} 件商品變更</button>
-      </div>
-    </div>`;
+    </div>
+    <div class="bulk-bar">
+      <div class="bulk-bar-title">📐 批量套用尺寸</div>
+      <div class="bulk-size-wrap" id="bmBulkSizeContainer">${sizePicker('batchBulk', 0, batchBulkSizes)}</div>
+      <button class="bulk-apply-btn full" onclick="applyBmBulkSizes()">✓ 套用至所有商品</button>
+    </div>
+    <div class="edit-cards">${cardsHTML}</div>
+    <div class="batch-modify-actions">
+      <button class="ep-btn ep-cancel-btn" onclick="cancelBatchModify()">取消</button>
+      <button class="ep-btn ep-save-btn" onclick="saveBatchEditAll()">✓ 儲存 ${count} 件商品變更</button>
+    </div>
+  </div>`;
 }
 function renderEditingProd(p) {
-  return `
-    <div class="ep-editing">
-      <div class="ep-editing-header">
-        <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
-        <div class="ep-editing-title">編輯商品</div>
-      </div>
-      <div class="ep-editing-body">
-        <div class="edit-field">
-          <label>🏷 品牌</label>
-          <div class="brand-wrap">
-            <input class="field-input" type="text" id="ebi_${p.id}" value="${esc(p.brand||'')}" autocomplete="off"
-              oninput="showEditSugg('${p.id}',this.value)"
-              onfocus="showEditSugg('${p.id}',this.value)"
-              onblur="setTimeout(()=>hideEditSugg('${p.id}'),180)">
-            <div class="brand-sugg" id="ebs_${p.id}"></div>
-          </div>
-        </div>
-        <div class="edit-field">
-          <label>💰 價格（數字）</label>
-          <input class="field-input" type="text" id="epi_${p.id}" value="${esc(p.price||'')}">
-        </div>
-        <div class="edit-field">
-          <label>📐 尺寸（可多選，可整組全選）</label>
-          ${sizePicker('edit', p.id, editingSizes)}
-        </div>
-        <div class="ep-editing-actions">
-          <button class="ep-btn ep-cancel-btn" onclick="cancelEditProd()">取消</button>
-          <button class="ep-btn ep-save-btn" onclick="saveEditProd('${p.id}')">💾 儲存變更</button>
+  return `<div class="ep-editing">
+    <div class="ep-editing-header">
+      <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+      <div class="ep-editing-title">編輯商品</div>
+    </div>
+    <div class="ep-editing-body">
+      <div class="edit-field">
+        <label>🏷 品牌</label>
+        <div class="brand-wrap">
+          <input class="field-input" type="text" id="ebi_${p.id}" value="${esc(p.brand||'')}" autocomplete="off"
+            oninput="showEditSugg('${p.id}',this.value)" onfocus="showEditSugg('${p.id}',this.value)"
+            onblur="setTimeout(()=>hideEditSugg('${p.id}'),180)">
+          <div class="brand-sugg" id="ebs_${p.id}"></div>
         </div>
       </div>
-    </div>`;
+      <div class="edit-field">
+        <label>💰 價格</label>
+        <input class="field-input" type="text" id="epi_${p.id}" value="${esc(p.price||'')}">
+      </div>
+      <div class="edit-field">
+        <label>👗 品項</label>
+        <input class="field-input" type="text" id="ecat_${p.id}" value="${esc(p.category||'')}" placeholder="例：上衣">
+      </div>
+      <div class="edit-field">
+        <label>🎨 顏色</label>
+        <input class="field-input" type="text" id="ecol_${p.id}" value="${esc(p.color||'')}" placeholder="例：藍/白">
+      </div>
+      <div class="edit-field">
+        <label>📐 尺寸</label>
+        ${sizePicker('edit', p.id, editingSizes)}
+      </div>
+      <div class="ep-editing-actions">
+        <button class="ep-btn ep-cancel-btn" onclick="cancelEditProd()">取消</button>
+        <button class="ep-btn ep-save-btn" onclick="saveEditProd('${p.id}')">💾 儲存變更</button>
+      </div>
+    </div>
+  </div>`;
 }
 function startEditProd(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  editingProdId = id;
-  editingSizes  = [...(p.sizes||[])];
+  editingProdId = id; editingSizes = [...(p.sizes||[])];
   renderManage();
-  // 自動捲到編輯卡片
-  requestAnimationFrame(() => {
-    const el = document.querySelector('.ep-editing');
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
-  });
+  requestAnimationFrame(() => { const el = document.querySelector('.ep-editing'); if (el) el.scrollIntoView({ behavior:'smooth', block:'center' }); });
 }
-function cancelEditProd() {
-  editingProdId = null;
-  editingSizes  = [];
-  renderManage();
-}
+function cancelEditProd() { editingProdId = null; editingSizes = []; renderManage(); }
 async function saveEditProd(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
-  const brand = document.getElementById('ebi_'+id).value.trim();
-  const price = document.getElementById('epi_'+id).value.trim();
-  const sizes = [...editingSizes];
-  const { error } = await sb
-    .from(SUPABASE_TABLE)
-    .update({ brand, price, sizes })
-    .eq('id', id);
-  if (error) {
-    console.error('[saveEditProd error]', error);
-    showToast('⚠️ 更新失敗：' + (error.message || error), 4000);
-    return;
-  }
-  p.brand = brand;
-  p.price = price;
-  p.sizes = sizes;
+  const brand    = document.getElementById('ebi_'+id).value.trim();
+  const price    = document.getElementById('epi_'+id).value.trim();
+  const category = document.getElementById('ecat_'+id).value.trim();
+  const color    = document.getElementById('ecol_'+id).value.trim();
+  const sizes    = [...editingSizes];
+  const { error } = await sb.from(SUPABASE_TABLE).update({ brand, price, sizes, category, color }).eq('id', id);
+  if (error) { showToast('⚠️ 更新失敗：' + (error.message || error), 4000); return; }
+  p.brand = brand; p.price = price; p.sizes = sizes; p.category = category; p.color = color;
   rebuildBrandHistory();
-  editingProdId = null;
-  editingSizes  = [];
-  renderBrandTabs();
-  applyFilters();
-  renderManage();
+  editingProdId = null; editingSizes = [];
+  renderBrandTabs(); applyFilters(); renderManage();
   showToast('✓ 商品已更新');
 }
 function showEditSugg(pid, val) {
@@ -1484,157 +1619,84 @@ function showEditSugg(pid, val) {
   el.classList.add('open');
 }
 function hideEditSugg(pid) { document.getElementById('ebs_'+pid)?.classList.remove('open'); }
-function pickEditBrand(pid, b) {
-  const inp = document.getElementById('ebi_'+pid);
-  if (inp) inp.value = b;
-  hideEditSugg(pid);
-}
+function pickEditBrand(pid, b) { const inp = document.getElementById('ebi_'+pid); if (inp) inp.value = b; hideEditSugg(pid); }
 async function delProd(id) {
   if (!confirm('確定要刪除此商品？')) return;
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const { error } = await sb.from(SUPABASE_TABLE).delete().eq('id', id);
-  if (error) {
-    console.error('[delProd error]', error);
-    showToast('⚠️ 刪除失敗：' + (error.message || error), 4000);
-    return;
-  }
+  if (error) { showToast('⚠️ 刪除失敗：' + (error.message || error), 4000); return; }
   products = products.filter(p => p.id !== id);
   rebuildBrandHistory();
   if (editingProdId === id) { editingProdId = null; editingSizes = []; }
-  renderBrandTabs();
-  applyFilters();
-  renderManage();
+  renderBrandTabs(); applyFilters(); renderManage();
   showToast('已刪除商品');
 }
+
 // ═══════════════════════════════
-//  BATCH MODE（管理頁：批量刪除 / 批量修改）
+//  BATCH MODE
 // ═══════════════════════════════
 function toggleBatchMode() {
   batchMode = !batchMode;
-  if (batchMode) {
-    // 進入批量模式 → 取消任何個別編輯
-    editingProdId = null;
-    editingSizes  = [];
-  } else {
-    _resetBatchState();
-  }
+  if (batchMode) { editingProdId = null; editingSizes = []; }
+  else _resetBatchState();
   renderManage();
 }
-function _resetBatchState() {
-  batchSelected.clear();
-  batchEditing    = false;
-  batchEditItems  = [];
-  batchBulkSizes  = [];
-}
-function toggleBatchSelect(id) {
-  if (batchSelected.has(id)) batchSelected.delete(id);
-  else batchSelected.add(id);
-  renderManage();
-}
+function _resetBatchState() { batchSelected.clear(); batchEditing = false; batchEditItems = []; batchBulkSizes = []; }
+function toggleBatchSelect(id) { if (batchSelected.has(id)) batchSelected.delete(id); else batchSelected.add(id); renderManage(); }
 function toggleSelectAll() {
-  if (batchSelected.size === products.length && products.length > 0) {
-    batchSelected.clear();
-  } else {
-    products.forEach(p => batchSelected.add(p.id));
-  }
+  if (batchSelected.size === products.length && products.length > 0) batchSelected.clear();
+  else products.forEach(p => batchSelected.add(p.id));
   renderManage();
 }
 async function batchDelete() {
   if (!batchSelected.size) { showToast('請先勾選要刪除的商品'); return; }
   if (!confirm(`確定要刪除已選的 ${batchSelected.size} 件商品嗎？\n此操作無法復原。`)) return;
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
-  const ids = [...batchSelected];
-  const count = ids.length;
+  const ids = [...batchSelected]; const count = ids.length;
   const { error } = await sb.from(SUPABASE_TABLE).delete().in('id', ids);
-  if (error) {
-    console.error('[batchDelete error]', error);
-    showToast('⚠️ 批量刪除失敗：' + (error.message || error), 4000);
-    return;
-  }
+  if (error) { showToast('⚠️ 批量刪除失敗：' + (error.message || error), 4000); return; }
   products = products.filter(p => !batchSelected.has(p.id));
-  rebuildBrandHistory();
-  batchMode = false;
-  _resetBatchState();
-  renderBrandTabs();
-  applyFilters();
-  renderManage();
+  rebuildBrandHistory(); batchMode = false; _resetBatchState();
+  renderBrandTabs(); applyFilters(); renderManage();
   showToast(`✓ 已刪除 ${count} 件商品`);
 }
 function openBatchModify() {
   if (!batchSelected.size) { showToast('請先勾選要修改的商品'); return; }
-  // 從已選中的商品複製一份資料到 batchEditItems 供個別編輯
-  batchEditItems = products
-    .filter(p => batchSelected.has(p.id))
-    .map(p => ({
-      id:    p.id,
-      url:   p.url,
-      brand: p.brand || '',
-      price: p.price || '',
-      sizes: [...(p.sizes || [])]
-    }));
-  batchBulkSizes = [];
-  batchEditing   = true;
-  renderManage();
-  requestAnimationFrame(() => {
-    const el = document.querySelector('.batch-modify-panel');
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
+  batchEditItems = products.filter(p => batchSelected.has(p.id)).map(p => ({
+    id: p.id, url: p.url, brand: p.brand||'', price: p.price||'',
+    sizes: [...(p.sizes||[])], category: p.category||'', color: p.color||''
+  }));
+  batchBulkSizes = []; batchEditing = true; renderManage();
+  requestAnimationFrame(() => { const el = document.querySelector('.batch-modify-panel'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); });
 }
-function cancelBatchModify() {
-  batchEditing   = false;
-  batchEditItems = [];
-  batchBulkSizes = [];
-  renderManage();
-}
+function cancelBatchModify() { batchEditing = false; batchEditItems = []; batchBulkSizes = []; renderManage(); }
 async function saveBatchEditAll() {
   if (!batchEditItems.length) { showToast('沒有可儲存的商品'); return; }
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const count = batchEditItems.length;
-  // 需要完整 row 來 upsert（否則其他欄位會被蓋成 null），從 products 補齊 url/createdAt
   const byIdProd = new Map(products.map(p => [p.id, p]));
   const rows = batchEditItems.map(d => {
     const p = byIdProd.get(d.id) || {};
-    return _toRow({
-      id:        d.id,
-      url:       p.url || d.url || '',
-      brand:     d.brand,
-      price:     d.price,
-      sizes:     d.sizes,
-      createdAt: p.createdAt || Date.now()
-    });
+    return _toRow({ id:d.id, url:p.url||d.url||'', brand:d.brand, price:d.price, sizes:d.sizes, category:d.category||'', color:d.color||'', createdAt:p.createdAt||Date.now() });
   });
   const { error } = await sb.from(SUPABASE_TABLE).upsert(rows);
-  if (error) {
-    console.error('[saveBatchEditAll error]', error);
-    showToast('⚠️ 批量更新失敗：' + (error.message || error), 4000);
-    return;
-  }
+  if (error) { showToast('⚠️ 批量更新失敗：' + (error.message || error), 4000); return; }
   const byIdEdit = new Map(batchEditItems.map(d => [d.id, d]));
   products.forEach(p => {
     if (!byIdEdit.has(p.id)) return;
     const d = byIdEdit.get(p.id);
-    p.brand = (d.brand || '').trim();
-    p.price = (d.price || '').toString().trim();
-    p.sizes = [...(d.sizes || [])];
+    p.brand = (d.brand||'').trim(); p.price = (d.price||'').toString().trim();
+    p.sizes = [...(d.sizes||[])]; p.category = (d.category||'').trim(); p.color = (d.color||'').trim();
   });
-  rebuildBrandHistory();
-  batchMode = false;
-  _resetBatchState();
-  renderBrandTabs();
-  applyFilters();
-  renderManage();
+  rebuildBrandHistory(); batchMode = false; _resetBatchState();
+  renderBrandTabs(); applyFilters(); renderManage();
   showToast(`✓ 已更新 ${count} 件商品`);
 }
-// 批量修改面板內 —— 批量套用品牌
 function applyBmBulkBrand() {
-  const val = (document.getElementById('bmBulkBrand')?.value || '').trim();
+  const val = (document.getElementById('bmBulkBrand')?.value||'').trim();
   if (!val) { showToast('請先輸入品牌名稱'); return; }
-  if (!batchEditItems.length) { showToast('尚無商品可套用'); return; }
   batchEditItems.forEach(d => { d.brand = val; });
-  batchEditItems.forEach((_, i) => {
-    const inp = document.getElementById('bei_brand_' + i);
-    if (inp) inp.value = val;
-  });
+  batchEditItems.forEach((_, i) => { const inp = document.getElementById('bei_brand_'+i); if (inp) inp.value = val; });
   hideBmBulkBrandSugg();
   showToast(`✓ 已將 ${batchEditItems.length} 件商品的品牌設為「${val}」`);
 }
@@ -1647,46 +1709,138 @@ function showBmBulkBrandSugg(val) {
   el.classList.add('open');
 }
 function hideBmBulkBrandSugg() { document.getElementById('bmBulkBrandSugg')?.classList.remove('open'); }
-function pickBmBulkBrand(b) {
-  const inp = document.getElementById('bmBulkBrand');
-  if (inp) inp.value = b;
-  hideBmBulkBrandSugg();
-}
-// 批量修改面板內 —— 批量套用尺寸
+function pickBmBulkBrand(b) { const inp = document.getElementById('bmBulkBrand'); if (inp) inp.value = b; hideBmBulkBrandSugg(); }
 function applyBmBulkSizes() {
   if (!batchBulkSizes.length) { showToast('請先勾選要套用的尺寸'); return; }
-  if (!batchEditItems.length) { showToast('尚無商品可套用'); return; }
   batchEditItems.forEach(d => { d.sizes = [...batchBulkSizes]; });
-  // 重新渲染批量修改面板以反映新選尺寸
   renderManage();
-  requestAnimationFrame(() => {
-    const el = document.querySelector('.batch-modify-panel');
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
+  requestAnimationFrame(() => { const el = document.querySelector('.batch-modify-panel'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); });
   showToast(`✓ 已將 ${batchEditItems.length} 件商品的尺寸設為：${batchBulkSizes.join(' / ')}`);
 }
-// 批量修改面板內 —— 個別卡片品牌建議
 function showBatchEditSugg(idx, val) {
-  const el = document.getElementById('bes_' + idx);
+  const el = document.getElementById('bes_'+idx);
   if (!el) return;
   const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);
   if (!hit.length) { el.classList.remove('open'); return; }
   el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBatchEditBrand(${idx},'${esc(b)}')">${esc(b)}</div>`).join('');
   el.classList.add('open');
 }
-function hideBatchEditSugg(idx) { document.getElementById('bes_' + idx)?.classList.remove('open'); }
+function hideBatchEditSugg(idx) { document.getElementById('bes_'+idx)?.classList.remove('open'); }
 function pickBatchEditBrand(idx, b) {
   if (!batchEditItems[idx]) return;
   batchEditItems[idx].brand = b;
-  const inp = document.getElementById('bei_brand_' + idx);
+  const inp = document.getElementById('bei_brand_'+idx);
   if (inp) inp.value = b;
   hideBatchEditSugg(idx);
 }
+
+// ═══════════════════════════════
+//  SIZE GUIDE MANAGEMENT（品牌尺寸表後台）
+// ═══════════════════════════════
+function showSgBrandSugg(val) {
+  const el  = document.getElementById('sgBrandSugg');
+  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,8);
+  if (!hit.length) { el.classList.remove('open'); return; }
+  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickSgBrand('${esc(b)}')">${esc(b)}</div>`).join('');
+  el.classList.add('open');
+}
+function hideSgBrandSugg() { document.getElementById('sgBrandSugg')?.classList.remove('open'); }
+function pickSgBrand(b) {
+  document.getElementById('sgBrandInput').value = b;
+  hideSgBrandSugg();
+  loadSgEditor();
+}
+function loadSgEditor() {
+  const brand = document.getElementById('sgBrandInput').value.trim();
+  if (!brand) { showToast('請先輸入品牌名稱'); return; }
+  const editor = document.getElementById('sgEditor');
+  editor.style.display = 'block';
+  const existing = sizeGuideData[brand];
+  if (existing) {
+    document.getElementById('sgHeaders').value = existing.headers.join(',');
+    document.getElementById('sgRows').value = existing.rows.map(r => r.join(',')).join('\n');
+    renderSgPreview(existing);
+  } else {
+    document.getElementById('sgHeaders').value = '';
+    document.getElementById('sgRows').value = '';
+    document.getElementById('sgPreview').style.display = 'none';
+  }
+}
+function saveSizeGuide() {
+  const brand   = document.getElementById('sgBrandInput').value.trim();
+  const headers = document.getElementById('sgHeaders').value.trim();
+  const rowsRaw = document.getElementById('sgRows').value.trim();
+  if (!brand)   { showToast('請先輸入品牌名稱'); return; }
+  if (!headers) { showToast('請填入欄位標題'); return; }
+  if (!rowsRaw) { showToast('請填入至少一行資料'); return; }
+  const headerArr = headers.split(',').map(h => h.trim()).filter(Boolean);
+  const rowArr = rowsRaw.split('\n').map(line =>
+    line.split(',').map(c => c.trim())
+  ).filter(r => r.some(c => c));
+  sizeGuideData[brand] = { headers: headerArr, rows: rowArr };
+  _saveSizeGuideToStorage();
+  renderSgPreview(sizeGuideData[brand]);
+  renderSgList();
+  showToast(`✓ 已儲存「${brand}」的尺寸表`);
+}
+function deleteSizeGuide() {
+  const brand = document.getElementById('sgBrandInput').value.trim();
+  if (!brand || !sizeGuideData[brand]) { showToast('此品牌尚無尺寸表'); return; }
+  if (!confirm(`確定要刪除「${brand}」的尺寸表？`)) return;
+  delete sizeGuideData[brand];
+  _saveSizeGuideToStorage();
+  document.getElementById('sgEditor').style.display = 'none';
+  document.getElementById('sgBrandInput').value = '';
+  renderSgList();
+  showToast(`已刪除「${brand}」的尺寸表`);
+}
+function renderSgPreview(guide) {
+  const el = document.getElementById('sgPreviewTable');
+  const preview = document.getElementById('sgPreview');
+  if (!guide || !el) return;
+  el.innerHTML = `<table><thead><tr>${guide.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>
+    ${guide.rows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>`;
+  preview.style.display = 'block';
+}
+function renderSgList() {
+  const el = document.getElementById('sgList');
+  if (!el) return;
+  const brands = Object.keys(sizeGuideData);
+  if (!brands.length) {
+    el.innerHTML = `<div class="no-results" style="padding:20px;">尚未設定任何品牌尺寸表</div>`;
+    return;
+  }
+  el.innerHTML = brands.map(b => {
+    const g = sizeGuideData[b];
+    return `<div class="ep" style="flex-wrap:wrap;gap:8px;">
+      <div class="ep-info" style="min-width:120px;">
+        <div class="ep-brand">${esc(b)}</div>
+        <div class="ep-meta">${g.headers.join(' / ')} ・ ${g.rows.length} 筆資料</div>
+      </div>
+      <button class="edit-btn-sm" onclick="editSgBrand('${esc(b)}')" title="編輯">✏️ 編輯</button>
+      <button class="del-btn" onclick="deleteSgBrandDirect('${esc(b)}')" title="刪除">🗑</button>
+    </div>`;
+  }).join('');
+}
+function editSgBrand(brand) {
+  document.getElementById('sgBrandInput').value = brand;
+  loadSgEditor();
+  document.getElementById('sgEditor').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function deleteSgBrandDirect(brand) {
+  if (!confirm(`確定要刪除「${brand}」的尺寸表？`)) return;
+  delete sizeGuideData[brand];
+  _saveSizeGuideToStorage();
+  renderSgList();
+  showToast(`已刪除「${brand}」的尺寸表`);
+}
+
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
 (async function init() {
-  // 先渲染一次以顯示「載入中」骨架
+  _loadSizeGuide();
   renderProducts([]);
   setupDragDrop();
   await loadProducts();
