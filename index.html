@@ -207,18 +207,24 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .brand-sugg-item { padding: 8px 12px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); transition: background 0.15s; }
 .brand-sugg-item:hover { background: var(--cream-dark); }
 /* Size picker */
-.size-picker { background: var(--white); border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 10px 12px; }
-.size-group { margin-bottom: 10px; }
+.size-picker { background: var(--white); border: 1.5px solid var(--cream-mid); border-radius: var(--radius-sm); padding: 8px 10px; }
+.size-group { margin-bottom: 7px; }
 .size-group:last-of-type { margin-bottom: 0; }
-.size-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px; }
-.size-group-label { font-size: 0.7rem; color: var(--text-soft); letter-spacing: 0.08em; font-weight: 500; }
-.select-all-chip { font-size: 0.65rem; padding: 3px 10px; border-radius: 10px; border: 1.5px solid var(--blush); color: var(--soft-brown); cursor: pointer; transition: all 0.15s; background: var(--white); letter-spacing: 0.04em; user-select: none; white-space: nowrap; }
+.size-group-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; flex-wrap: nowrap; }
+.size-group-label { font-size: 0.66rem; color: var(--text-soft); letter-spacing: 0.04em; font-weight: 500; min-width: 44px; white-space: nowrap; }
+.select-all-chip { font-size: 0.6rem; padding: 2px 7px; border-radius: 10px; border: 1.5px solid var(--blush); color: var(--soft-brown); cursor: pointer; transition: all 0.15s; background: var(--white); user-select: none; white-space: nowrap; flex-shrink: 0; }
 .select-all-chip:hover { background: var(--blush-light); }
 .select-all-chip.on { background: var(--soft-brown); color: var(--white); border-color: var(--soft-brown); }
-.size-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.size-chip { padding: 4px 9px; border-radius: 12px; border: 1.5px solid var(--cream-mid); font-size: 0.72rem; color: var(--text-soft); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--cream); }
+.group-price-input { width: 62px; border: 1.5px solid var(--blush); border-radius: 7px; padding: 2px 5px; font-size: 0.68rem; font-family: 'Noto Serif TC', serif; color: var(--warm-brown); background: var(--white); outline: none; text-align: center; flex-shrink: 0; margin-left: auto; }
+.group-price-input:focus { border-color: var(--warm-brown); }
+.group-price-input::placeholder { color: var(--text-light); font-size: 0.6rem; }
+.size-chips-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+.size-chip-wrap { display: flex; flex-direction: column; align-items: center; }
+.sz-price-input { width: 52px; border: 1.5px solid var(--blush); border-radius: 6px; padding: 2px 4px; font-size: 0.65rem; font-family: 'Noto Serif TC', serif; color: var(--warm-brown); background: var(--white); outline: none; text-align: center; }
+.sz-price-input:focus { border-color: var(--warm-brown); }
+.size-chip { padding: 3px 7px; border-radius: 10px; border: 1.5px solid var(--cream-mid); font-size: 0.68rem; color: var(--text-soft); cursor: pointer; transition: all 0.15s; user-select: none; background: var(--cream); white-space: nowrap; }
 .size-chip.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
-.size-preview { font-size: 0.72rem; color: var(--soft-brown); margin-top: 8px; min-height: 16px; padding-top: 8px; border-top: 1px dashed var(--cream-mid); }
+.size-preview { font-size: 0.66rem; color: var(--soft-brown); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--cream-mid); }
 .remove-btn { background: none; border: none; color: var(--red); font-size: 0.75rem; cursor: pointer; text-align: right; font-family: 'Noto Serif TC', serif; }
 .save-all-btn { width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 24px; padding: 14px; font-size: 1rem; font-family: 'Noto Serif TC', serif; cursor: pointer; letter-spacing: 0.1em; transition: opacity 0.2s, transform 0.15s; margin-top: 14px; }
 .save-all-btn:hover { opacity: 0.88; transform: scale(0.99); }
@@ -332,7 +338,15 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .line-send-go-btn { display: block; width: 100%; background: #06C755; color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; text-align: center; text-decoration: none; box-sizing: border-box; }
 .line-send-go-btn:hover { opacity: 0.88; }
 .line-send-close { display: block; text-align: center; font-size: 0.78rem; color: var(--text-light); cursor: pointer; padding: 4px; letter-spacing: 0.06em; }
-/* ── 訂單查詢（前台） ── */
+/* EDIT CARDS */
+.edit-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+@media (max-width: 1200px) { .edit-cards { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px)  { .edit-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .edit-cards { grid-template-columns: 1fr; } }
+.edit-card { background: var(--cream); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--cream-mid); display: flex; flex-direction: column; }
+.edit-card-img-wrap { position: relative; aspect-ratio: 1/1; background: var(--cream-dark); overflow: hidden; }
+.edit-card-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.edit-card-fields { padding: 8px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .order-query-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: var(--dark-brown); letter-spacing: 0.08em; margin-bottom: 10px; text-align: center; }
 .order-query-row { display: flex; gap: 8px; }
 .order-query-result { margin-top: 14px; display: none; }
@@ -348,17 +362,36 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .oq-items { font-size: 0.78rem; color: var(--text-soft); line-height: 1.9; }
 .oq-total { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--warm-brown); margin-top: 8px; }
 /* ── 後台訂單管理 ── */
-.order-card { background: var(--cream); border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--cream-mid); margin-bottom: 10px; }
+.order-card { background: var(--cream); border-radius: var(--radius-sm); padding: 12px 14px; border: 1px solid var(--cream-mid); margin-bottom: 8px; transition: border-color 0.15s; }
+.order-card.selected { border-color: var(--warm-brown); background: var(--blush-light); }
+.order-card.merged { opacity: 0.6; border-style: dashed; }
 .order-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
 .order-no { font-size: 0.68rem; color: var(--text-light); letter-spacing: 0.06em; }
 .order-customer { font-size: 0.9rem; font-weight: 500; color: var(--text-main); margin-top: 2px; }
 .order-contact { font-size: 0.72rem; color: var(--text-soft); margin-top: 1px; }
 .order-status-select { border: 1.5px solid var(--blush); border-radius: 12px; padding: 4px 10px; font-size: 0.78rem; font-family: 'Noto Serif TC', serif; color: var(--text-main); background: var(--white); cursor: pointer; outline: none; }
-.order-items-list { font-size: 0.78rem; color: var(--text-soft); line-height: 1.9; border-top: 1px dashed var(--cream-mid); padding-top: 8px; margin-top: 4px; }
-.order-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cream-mid); }
-.order-total-amt { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--warm-brown); }
-.order-del-btn { background: none; border: none; color: var(--text-light); font-size: 0.78rem; cursor: pointer; font-family: 'Noto Serif TC', serif; transition: color 0.15s; }
+.order-items-list { border-top: 1px dashed var(--cream-mid); padding-top: 8px; margin-top: 4px; }
+.order-item-row { display: flex; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--cream-dark); }
+.order-item-row:last-child { border-bottom: none; }
+.order-item-check { width: 16px; height: 16px; accent-color: var(--warm-brown); cursor: pointer; flex-shrink: 0; }
+.order-item-label { flex: 1; font-size: 0.78rem; color: var(--text-soft); line-height: 1.6; }
+.order-item-label.arrived { color: var(--warm-brown); font-weight: 500; }
+.order-item-label.oos { color: var(--text-light); text-decoration: line-through; }
+.order-item-tag { font-size: 0.62rem; padding: 1px 6px; border-radius: 8px; flex-shrink: 0; white-space: nowrap; }
+.order-item-tag.arrived { background: #D4EDDA; color: #155724; }
+.order-item-tag.oos { background: var(--cream-mid); color: var(--text-light); }
+.order-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cream-mid); flex-wrap: wrap; gap: 6px; }
+.order-total-amt { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 600; color: var(--warm-brown); }
+.order-action-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.order-ordered-btn { font-size: 0.68rem; padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--blush); background: var(--white); color: var(--soft-brown); cursor: pointer; font-family: 'Noto Serif TC', serif; transition: all 0.15s; white-space: nowrap; }
+.order-ordered-btn.on { background: var(--warm-brown); color: var(--white); border-color: var(--warm-brown); }
+.order-checkout-btn { font-size: 0.68rem; padding: 3px 10px; border-radius: 12px; background: #D4EDDA; color: #155724; border: none; cursor: pointer; font-family: 'Noto Serif TC', serif; white-space: nowrap; }
+.order-del-btn { background: none; border: none; color: var(--text-light); font-size: 0.78rem; cursor: pointer; font-family: 'Noto Serif TC', serif; transition: color 0.15s; white-space: nowrap; }
 .order-del-btn:hover { color: var(--red); }
+.order-edit-btn { background: none; border: none; color: var(--soft-brown); font-size: 0.78rem; cursor: pointer; font-family: 'Noto Serif TC', serif; white-space: nowrap; }
+.order-merged-tag { font-size: 0.62rem; background: var(--blush-light); color: var(--soft-brown); padding: 1px 7px; border-radius: 8px; }
+.order-edit-panel { background: var(--white); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 10px; margin-top: 8px; display: none; }
+.order-edit-panel.open { display: block; }
 .new-order-form { background: var(--blush-light); border: 1.5px solid var(--blush); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 18px; }
 .new-order-form-title { font-size: 0.82rem; font-weight: 500; color: var(--text-main); margin-bottom: 12px; letter-spacing: 0.04em; }
 .new-order-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
@@ -627,7 +660,6 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
         <div class="tab-pane" id="tab-orders">
           <div class="admin-section">
             <div class="admin-section-title" style="margin-bottom:4px;">訂單管理</div>
-            <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:16px;line-height:1.7;">顧客透過 Line 下單後，在這裡手動建立訂單並管理貨況，顧客可用訂單編號在首頁查詢。</p>
             <!-- 新增訂單 -->
             <div class="new-order-form">
               <div class="new-order-form-title">➕ 新增訂單</div>
@@ -637,7 +669,7 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
                 <input class="field-input" type="text" id="noPhone" placeholder="電話（選填）" style="grid-column:1/-1;">
               </div>
               <div class="new-order-items-area">
-                <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:6px;letter-spacing:0.06em;">商品明細（每行一件）</div>
+                <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:6px;letter-spacing:0.06em;">商品明細</div>
                 <div id="noItemRows">
                   <div class="new-order-item-row">
                     <input class="field-input" type="text" placeholder="品牌＋品項描述" style="flex:2;min-width:140px;">
@@ -651,18 +683,38 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
               </div>
               <button class="save-all-btn" style="margin-top:8px;padding:12px;" onclick="createOrder()">建立訂單</button>
             </div>
-            <!-- 訂單列表 -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <div class="admin-section-title" style="margin-bottom:0;">所有訂單（<span id="orderCount">0</span> 筆）</div>
-              <div style="display:flex;gap:6px;">
+            <!-- 工具列 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <div class="admin-section-title" style="margin-bottom:0;">所有訂單（<span id="orderCount">0</span> 筆）</div>
+                <button class="batch-toggle-btn" style="margin-bottom:0;padding:6px 14px;font-size:0.78rem;" onclick="toggleOrderBatch()">批量選取</button>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="add-item-btn" onclick="showUnordered()">⚠️ 未叫貨</button>
                 <select id="orderFilterStatus" class="order-status-select" onchange="renderOrders()">
                   <option value="">全部</option>
-                  <option value="0">待確認</option>
-                  <option value="1">備貨中</option>
-                  <option value="2">已出貨</option>
-                  <option value="3">已取消</option>
+                  <option value="0">訂購中</option>
+                  <option value="1">待回台</option>
+                  <option value="2">在台打包</option>
+                  <option value="3">斷貨</option>
                 </select>
               </div>
+            </div>
+            <!-- 未叫貨列表（收合式） -->
+            <div id="unorderedAlert" style="display:none;" class="bulk-bar">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="bulk-bar-title" style="color:var(--red);">⚠️ 尚未叫貨的商品</div>
+                <button onclick="document.getElementById('unorderedAlert').style.display='none'" style="background:none;border:none;color:var(--text-light);cursor:pointer;">✕</button>
+              </div>
+              <div id="unorderedList" style="font-size:0.78rem;color:var(--text-soft);margin-top:8px;line-height:2;"></div>
+            </div>
+            <!-- 批量操作列 -->
+            <div id="orderBatchBar" style="display:none;" class="batch-action-bar">
+              <label><input type="checkbox" id="orderSelectAll" onchange="toggleOrderSelectAll()"> 全選</label>
+              <div class="batch-count">已選 <strong id="orderSelectedCount">0</strong> 筆</div>
+              <button class="batch-btn batch-btn-edit" onclick="mergeOrders()">合併訂單</button>
+              <button class="batch-btn batch-btn-del" onclick="batchDeleteOrders()">批量刪除</button>
+              <button class="batch-btn batch-btn-cancel" onclick="toggleOrderBatch()">✕ 取消</button>
             </div>
             <div id="orderList"></div>
           </div>
@@ -735,22 +787,43 @@ const SIZE_GROUPS = [
 ];
 
 // ── 修正 2：品項 & 顏色清單 ──────────────────────
-const CATEGORY_LIST = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭'];
+const CATEGORY_LIST = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭','包屁衣','配件'];
 const COLOR_LIST    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫','粉','棕','素色','花花','圖案'];
 
 const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect fill%3D%22%23EDE3D5%22 width%3D%22200%22 height%3D%22200%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2255%25%22 text-anchor%3D%22middle%22 fill%3D%22%23B09880%22 font-size%3D%2230%22%3E%F0%9F%91%97%3C%2Ftext%3E%3C%2Fsvg%3E';
 
 // ── 尺寸表資料（按品牌存放，存於 localStorage）────────────────────
 // 格式：{ 品牌名: { headers:['尺寸','胸圍',...], rows:[['90','50',...], ...] } }
-const SK_SIZE_GUIDE = 'jck_size_guide_v1';
-const SK_ORDERS     = 'jck_orders_v1';
+const SK_ORDERS = 'jck_orders_v1';
 let sizeGuideData = {};
 let orders = [];
-function _loadSizeGuide() {
-  try { sizeGuideData = JSON.parse(localStorage.getItem(SK_SIZE_GUIDE) || '{}'); } catch(e) { sizeGuideData = {}; }
+
+async function _loadSizeGuide() {
+  if (!sb) return;
+  const { data, error } = await sb.from('size_guides').select('*');
+  if (error) { console.error('[loadSizeGuide]', error); return; }
+  sizeGuideData = {};
+  (data || []).forEach(row => {
+    sizeGuideData[row.brand] = {
+      headers: Array.isArray(row.headers) ? row.headers : [],
+      rows:    Array.isArray(row.rows)    ? row.rows    : []
+    };
+  });
 }
-function _saveSizeGuideToStorage() {
-  localStorage.setItem(SK_SIZE_GUIDE, JSON.stringify(sizeGuideData));
+async function _saveSizeGuideToStorage(brand, guide) {
+  if (!sb) return;
+  const { error } = await sb.from('size_guides').upsert([{
+    brand,
+    headers: guide.headers,
+    rows:    guide.rows,
+    updated_at: Date.now()
+  }]);
+  if (error) { console.error('[saveSizeGuide]', error); throw error; }
+}
+async function _deleteSizeGuideFromStorage(brand) {
+  if (!sb) return;
+  const { error } = await sb.from('size_guides').delete().eq('brand', brand);
+  if (error) { console.error('[deleteSizeGuide]', error); throw error; }
 }
 function _loadOrders() {
   try { orders = JSON.parse(localStorage.getItem(SK_ORDERS) || '[]'); } catch(e) { orders = []; }
@@ -797,14 +870,15 @@ async function loadProducts() {
     return;
   }
   products = (data || []).map(row => ({
-    id:        row.id,
-    url:       row.url,
-    brand:     row.brand || '',
-    price:     row.price || '',
-    sizes:     Array.isArray(row.sizes) ? row.sizes : [],
-    category:  row.category || '',   // 修正 2：品項
-    color:     row.color || '',      // 修正 2：顏色
-    createdAt: Number(row.created_at) || 0
+    id:          row.id,
+    url:         row.url,
+    brand:       row.brand || '',
+    price:       row.price || '',
+    sizes:       Array.isArray(row.sizes) ? row.sizes : [],
+    category:    row.category || '',
+    color:       row.color || '',
+    sizePrices:  (row.price_groups && typeof row.price_groups === 'object' && !Array.isArray(row.price_groups)) ? row.price_groups : {},
+    createdAt:   Number(row.created_at) || 0
   }));
   rebuildBrandHistory();
 }
@@ -821,14 +895,15 @@ function rememberBrand(b) {
 }
 function _toRow(p) {
   return {
-    id:         p.id,
-    url:        p.url,
-    brand:      (p.brand || '').trim(),
-    price:      (p.price || '').toString().trim(),
-    sizes:      p.sizes || [],
-    category:   (p.category || '').trim(),
-    color:      (p.color || '').trim(),
-    created_at: p.createdAt || Date.now()
+    id:           p.id,
+    url:          p.url,
+    brand:        (p.brand || '').trim(),
+    price:        (p.price || '').toString().trim(),
+    sizes:        p.sizes || [],
+    category:     (p.category || '').trim(),
+    color:        (p.color || '').trim(),
+    price_groups: p.sizePrices || {},
+    created_at:   p.createdAt || Date.now()
   };
 }
 
@@ -846,8 +921,16 @@ function showToast(msg, dur=2600) {
 function lock()   { document.body.style.overflow = 'hidden'; }
 function unlock() { document.body.style.overflow = ''; }
 
+// 首頁商品卡價格顯示：單一價格直接顯示，多價格顯示區間
+function _displayPrice(p) {
+  const sp = p.sizePrices || {};
+  const vals = [...new Set(Object.values(sp).filter(Boolean).map(Number))].sort((a,b)=>a-b);
+  if (vals.length >= 2) return `NT$ ${vals[0]} – ${vals[vals.length-1]}`;
+  if (vals.length === 1) return `NT$ ${vals[0]}`;
+  return p.price ? `NT$ ${esc(p.price)}` : '';
+}
+
 // ═══════════════════════════════
-//  BRAND TABS
 // ═══════════════════════════════
 function uniqueBrands() {
   return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];
@@ -912,7 +995,7 @@ function renderProducts(list) {
         </div>
         <div class="product-meta-row">
           <span class="product-size">${sz ? esc(sz) : ''}</span>
-          <span class="product-price">${p.price ? 'NT$ '+esc(p.price) : ''}</span>
+          <span class="product-price">${_displayPrice(p)}</span>
         </div>
         <button class="order-btn" onclick="event.stopPropagation();openLb('${p.id}')">點我選規格</button>
       </div>
@@ -929,7 +1012,6 @@ function openLb(id) {
   currentLbId = id;
   document.getElementById('lbImg').src = p.url;
 
-  // 修正 2：每次開燈箱重置「加入清單」按鈕狀態
   const cartBtn = document.getElementById('lbCartBtn');
   if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
 
@@ -937,7 +1019,8 @@ function openLb(id) {
   brand.textContent = p.brand || '';
   brand.style.display = p.brand ? 'inline-block' : 'none';
 
-  document.getElementById('lbPrice').textContent = p.price ? 'NT$ ' + p.price : '';
+  // 顯示起始價格（未選尺寸時顯示第一個群組的價格）
+  _updateLbPrice(p, null);
 
   // 建立 attrs 區塊：品項（文字）、尺寸（按鈕）、顏色（按鈕）
   const attrsEl = document.getElementById('lbAttrs');
@@ -948,39 +1031,42 @@ function openLb(id) {
     ? `<button class="lb-size-guide-btn" onclick="toggleSizeGuide('${esc(p.brand||'')}')">尺寸表</button>`
     : '';
 
-  // 品牌行：品牌標籤 + 尺寸表按鈕靠右
+  // 品牌行：只顯示品牌標籤
   const brandEl = document.getElementById('lbBrand');
-  brandEl.style.display = 'flex';
-  brandEl.style.alignItems = 'center';
-  brandEl.style.justifyContent = 'space-between';
-  brandEl.style.width = '100%';
-  brandEl.style.background = 'none';
-  brandEl.style.padding = '0';
+  brandEl.style.display = 'block';
+  brandEl.style.background = '';
+  brandEl.style.padding = '';
   brandEl.style.marginBottom = '10px';
   brandEl.innerHTML = p.brand
-    ? `<span style="display:inline-block;font-size:0.72rem;background:var(--blush-light);color:var(--soft-brown);border-radius:10px;padding:2px 10px;">${esc(p.brand)}</span>${sgBtn}`
-    : sgBtn;
+    ? `<span style="display:inline-block;font-size:0.72rem;background:var(--blush-light);color:var(--soft-brown);border-radius:10px;padding:2px 10px;">${esc(p.brand)}</span>`
+    : '';
 
   let html = '';
 
-  // 品項（放最左邊，純文字顯示）
-  if (p.category) {
-    html += `<div class="lb-attr-row">
+  // 品項 + 尺寸表按鈕同一行，尺寸表靠最右
+  if (p.category || hasSizeGuide) {
+    const sgBtnInline = hasSizeGuide
+      ? `<button class="lb-size-guide-btn" onclick="toggleSizeGuide('${esc(p.brand||'')}')">尺寸表</button>`
+      : '';
+    html += `<div class="lb-attr-row" style="align-items:center;">
       <span class="lb-attr-label">品項</span>
-      <span class="lb-attr-value">${esc(p.category)}</span>
-    </div>`;
+      <div style="flex:1;display:flex;align-items:center;justify-content:space-between;">
+        <span class="lb-attr-value">${p.category ? esc(p.category) : ''}</span>
+        ${sgBtnInline}
+      </div>
+    </div>
+    <div class="lb-size-guide" id="lbSizeGuide" style="margin-bottom:8px;"></div>`;
   }
 
   // 尺寸按鈕
   if ((p.sizes||[]).length) {
     const chips = p.sizes.map(s =>
-      `<div class="lb-chip" onclick="toggleLbChip(this)">${esc(s)}</div>`
+      `<div class="lb-chip" onclick="toggleLbChip(this);_updateLbPriceFromChips('${p.id}')">${esc(s)}</div>`
     ).join('');
     html += `<div class="lb-attr-row" style="align-items:flex-start;">
       <span class="lb-attr-label" style="padding-top:5px;">尺寸</span>
       <div style="flex:1;">
         <div class="lb-chips">${chips}</div>
-        <div class="lb-size-guide" id="lbSizeGuide"></div>
       </div>
     </div>`;
   }
@@ -1003,7 +1089,36 @@ function openLb(id) {
 }
 
 function toggleLbChip(el) {
-  el.classList.toggle('selected');
+  const row = el.closest('.lb-attr-row');
+  if (!row) { el.classList.toggle('selected'); return; }
+  // 同一列只能選一個（單選）
+  row.querySelectorAll('.lb-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function _updateLbPrice(p, selectedSize) {
+  const priceEl = document.getElementById('lbPrice');
+  if (!priceEl) return;
+  const sp = p.sizePrices || {};
+  const hasMulti = Object.keys(sp).length > 0;
+  if (hasMulti && !selectedSize) {
+    const prices = [...new Set(Object.values(sp).filter(Boolean))];
+    if (prices.length === 0) { priceEl.textContent = p.price ? 'NT$ '+p.price : ''; }
+    else if (prices.length === 1) { priceEl.textContent = 'NT$ ' + prices[0]; }
+    else { priceEl.textContent = 'NT$ ' + Math.min(...prices.map(Number)) + ' – ' + Math.max(...prices.map(Number)); }
+  } else {
+    const price = getPriceForSize(sp, p.price, selectedSize);
+    priceEl.textContent = price ? 'NT$ ' + price : '';
+  }
+}
+function _updateLbPriceFromChips(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+  const sizeRow = Array.from(document.querySelectorAll('#lbAttrs .lb-attr-row'))
+    .find(r => r.querySelector('.lb-attr-label')?.textContent === '尺寸');
+  const selSize = sizeRow
+    ? Array.from(sizeRow.querySelectorAll('.lb-chip.selected')).map(e => e.textContent)[0] || null
+    : null;
+  _updateLbPrice(p, selSize);
 }
 
 function toggleSizeGuide(brand) {
@@ -1015,11 +1130,18 @@ function toggleSizeGuide(brand) {
   }
   const guide = sizeGuideData[brand];
   if (!guide) return;
-  let tableHtml = `<div style="font-size:0.72rem;color:var(--text-soft);margin-bottom:6px;font-weight:500;">${esc(brand)} 尺寸表</div>
-    <table><thead><tr>${guide.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>
-    ${guide.rows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}
+  // 過濾掉「適合」欄
+  const keepIdx = guide.headers
+    .map((h, i) => ({ h, i }))
+    .filter(({ h }) => h !== '適合')
+    .map(({ i }) => i);
+  const filteredHeaders = keepIdx.map(i => guide.headers[i]);
+  const filteredRows    = guide.rows.map(row => keepIdx.map(i => row[i] || ''));
+  el.innerHTML = `
+    <div style="font-size:0.72rem;color:var(--text-soft);margin-bottom:6px;font-weight:500;">${esc(brand)} 尺寸表</div>
+    <table><thead><tr>${filteredHeaders.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>
+    ${filteredRows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}
     </tbody></table>`;
-  el.innerHTML = tableHtml;
   el.classList.add('open');
 }
 
@@ -1202,7 +1324,7 @@ async function uploadFiles(files) {
   if (!uploaded.length) { showToast(failed.length ? `上傳全部失敗：${failed[0].msg}` : '沒有成功上傳的圖片', 3600); return; }
   const startIdx = editData.length;
   uploaded.forEach((u, k) => {
-    editData.push({ url: u.url, price:'', brand:'', sizes:[], category:'', color:'', _id:'tmp'+(startIdx+k) });
+    editData.push({ url: u.url, price:'', brand:'', sizes:[], category:'', color:'', sizePrices:{}, _id:'tmp'+(startIdx+k) });
   });
   const bulkBrandVal = (document.getElementById('bulkBrandInput')?.value || '').trim();
   if (bulkBrandVal) for (let k = startIdx; k < editData.length; k++) editData[k].brand = bulkBrandVal;
@@ -1232,6 +1354,13 @@ function setupDragDrop() {
   });
   window.addEventListener('dragover', e => e.preventDefault());
   window.addEventListener('drop',     e => e.preventDefault());
+  // 點擊卡片外部關閉展開面板
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.edit-card')) {
+      document.querySelectorAll('.edit-card-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.edit-card.expanded').forEach(c => c.classList.remove('expanded'));
+    }
+  });
 }
 
 // ═══════════════════════════════
@@ -1264,24 +1393,20 @@ function applyBulkSizes() {
 }
 
 // ═══════════════════════════════
-//  EDIT CARDS（修正 2：品項 & 顏色欄位）
+//  EDIT CARDS
 // ═══════════════════════════════
 function renderEditCards() {
   document.getElementById('editCards').innerHTML = editData.map((d,i) => `
-    <div class="edit-card">
-      <div class="edit-card-img-wrap" id="imgwrap${i}">
-        <div class="img-loading" id="imgload${i}">
-          <div class="img-spinner"></div>
-          <div class="img-loading-txt">圖片載入中…</div>
-        </div>
+    <div class="edit-card" id="ecard${i}">
+      <div class="edit-card-img-wrap">
+        <div class="img-loading" id="imgload${i}"><div class="img-spinner"></div></div>
         <img class="edit-card-img" id="eimg${i}" src="" style="display:none;"
           onload="onImgLoad(${i})" onerror="onImgError(${i})">
       </div>
       <div class="edit-card-fields">
         <div class="edit-field">
-          <label>🏷 品牌</label>
           <div class="brand-wrap">
-            <input class="field-input" type="text" id="bi${i}" placeholder="例：Mini Balabala"
+            <input class="field-input" type="text" id="bi${i}" placeholder="🏷 品牌"
               autocomplete="off" value="${esc(d.brand)}"
               oninput="editData[${i}].brand=this.value;showSugg(${i},this.value)"
               onfocus="showSugg(${i},this.value)"
@@ -1290,25 +1415,15 @@ function renderEditCards() {
           </div>
         </div>
         <div class="edit-field">
-          <label>💰 價格（數字）</label>
-          <input class="field-input" type="text" placeholder="例：580"
-            value="${esc(d.price)}" oninput="editData[${i}].price=this.value">
-        </div>
-        <div class="edit-field">
-          <label>👗 品項</label>
           ${categoryPicker('new', i, d.category)}
         </div>
         <div class="edit-field">
-          <label>🎨 顏色</label>
           ${colorPicker('new', i, d.color)}
         </div>
         <div class="edit-field">
-          <label>📐 尺寸（可多選，可整組全選）</label>
-          ${sizePicker('new', i, d.sizes)}
+          ${sizePicker('new', i, d.sizes, d.sizePrices)}
         </div>
-        <div style="text-align:right;">
-          <button class="remove-btn" onclick="removeCard(${i})">✕ 移除此商品</button>
-        </div>
+        <button class="remove-btn" onclick="removeCard(${i})">✕ 移除</button>
       </div>
     </div>
   `).join('');
@@ -1316,6 +1431,9 @@ function renderEditCards() {
     editData.forEach((d, i) => { const img = document.getElementById('eimg' + i); if (img) img.src = d.url; });
   });
 }
+function toggleEditCard(i) {}
+function closeEditCard(i) {}
+function updateCardSummary(i) {}
 function onImgLoad(i) {
   const img  = document.getElementById('eimg' + i);
   const load = document.getElementById('imgload' + i);
@@ -1419,38 +1537,195 @@ function _setColor(mode, idx, val) {
   else if (mode === 'batchEdit') { if (batchEditItems[idx]) batchEditItems[idx].color = val; }
 }
 
+// ── 價格群組編輯器 ─────────────────────────────────
+// priceGroups 格式：[{sizes: ['XS','S','M'], price: '580'}, ...]
+function priceGroupEditor(mode, idx, priceGroups, legacyPrice) {
+  const groups = (priceGroups && priceGroups.length) ? priceGroups : (legacyPrice ? [{sizes:[], price: legacyPrice}] : [{sizes:[], price:''}]);
+  const wrapperId = `pg_wrap_${mode}_${idx}`;
+  const modeEsc = esc(mode);
+  const rows = groups.map((g, gi) => `
+    <div class="price-group-row">
+      <span class="pg-label">尺寸</span>
+      <input class="pg-sizes" type="text" placeholder="例：XS/S/M 或留空"
+        value="${esc((g.sizes||[]).join('/'))}"
+        data-mode="${modeEsc}" data-idx="${idx}" data-gi="${gi}" data-field="sizes"
+        oninput="updatePriceGroup(this.dataset.mode,this.dataset.idx,this.dataset.gi,'sizes',this.value)">
+      <span class="pg-label">NT$</span>
+      <input class="pg-price" type="number" placeholder="金額"
+        value="${esc(g.price||'')}"
+        data-mode="${modeEsc}" data-idx="${idx}" data-gi="${gi}" data-field="price"
+        oninput="updatePriceGroup(this.dataset.mode,this.dataset.idx,this.dataset.gi,'price',this.value)">
+      <button class="rm-item-btn"
+        data-mode="${modeEsc}" data-idx="${idx}" data-gi="${gi}"
+        onclick="removePriceGroup(this.dataset.mode,this.dataset.idx,this.dataset.gi)">✕</button>
+    </div>`).join('');
+  return `<div class="price-group-wrap" id="${wrapperId}">
+    ${rows}
+    <button class="price-group-add-btn"
+      data-mode="${modeEsc}" data-idx="${idx}"
+      onclick="addPriceGroup(this.dataset.mode,this.dataset.idx)">＋ 新增價格群組</button>
+  </div>`;
+}
+function _getPriceGroups(mode, idx) {
+  if (mode === 'new') return editData[idx]?.priceGroups || [];
+  if (mode.startsWith('edit_')) {
+    const pid = mode.replace('edit_', '');
+    const p = products.find(x => x.id === pid);
+    return p ? (p._editPriceGroups || p.priceGroups || []) : [];
+  }
+  return [];
+}
+function _setPriceGroups(mode, idx, arr) {
+  if (mode === 'new') {
+    if (editData[idx]) { editData[idx].priceGroups = arr; editData[idx].price = arr[0]?.price || ''; }
+  } else if (mode.startsWith('edit_')) {
+    const pid = mode.replace('edit_', '');
+    const p = products.find(x => x.id === pid);
+    if (p) p._editPriceGroups = arr;
+  }
+}
+function updatePriceGroup(mode, idx, gi, field, val) {
+  const groups = _getPriceGroups(mode, idx);
+  if (!groups[gi]) return;
+  if (field === 'sizes') groups[gi].sizes = val.split('/').map(s=>s.trim()).filter(Boolean);
+  if (field === 'price') groups[gi].price = val;
+  _setPriceGroups(mode, idx, groups);
+}
+function addPriceGroup(mode, idx) {
+  idx = Number(idx);
+  const groups = _getPriceGroups(mode, idx);
+  groups.push({ sizes: [], price: '' });
+  _setPriceGroups(mode, idx, groups);
+  _rerenderPriceGroupEditor(mode, idx);
+}
+function removePriceGroup(mode, idx, gi) {
+  idx = Number(idx); gi = Number(gi);
+  const groups = _getPriceGroups(mode, idx);
+  if (groups.length <= 1) { showToast('至少需要一個價格'); return; }
+  groups.splice(gi, 1);
+  _setPriceGroups(mode, idx, groups);
+  _rerenderPriceGroupEditor(mode, idx);
+}
+function _rerenderPriceGroupEditor(mode, idx) {
+  const wrapperId = `pg_wrap_${mode}_${idx}`;
+  const wrap = document.getElementById(wrapperId);
+  if (!wrap) return;
+  let groups, legacyPrice;
+  if (mode === 'new') {
+    const d = editData[Number(idx)];
+    groups = d?.priceGroups || []; legacyPrice = d?.price || '';
+  } else {
+    const pid = mode.replace('edit_', '');
+    const p = products.find(x => x.id === pid);
+    groups = p?._editPriceGroups || p?.priceGroups || []; legacyPrice = p?.price || '';
+  }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = priceGroupEditor(mode, idx, groups, legacyPrice);
+  wrap.replaceWith(tmp.firstElementChild);
+}
+// 根據選的尺寸找對應價格
+function getPriceForSize(sizePrices, legacyPrice, selectedSize) {
+  if (!sizePrices || !Object.keys(sizePrices).length) return legacyPrice || '';
+  if (selectedSize && sizePrices[selectedSize]) return sizePrices[selectedSize];
+  // 找第一個有價格的尺寸
+  const first = Object.values(sizePrices).find(Boolean);
+  return first || legacyPrice || '';
+}
+
 // ═══════════════════════════════
-//  SIZE PICKER
+//  SIZE PICKER（含群組價格輸入）
 // ═══════════════════════════════
-function sizePicker(mode, idx, sel) {
+// sizePrices 格式：{ 'XS': '580', 'JS': '680', ... }
+// 每個群組只需輸入一次，整組共用同一個價格
+function sizePicker(mode, idx, sel, sizePrices) {
   sel = sel || [];
+  sizePrices = sizePrices || {};
+  const isBulk = mode === 'bulk' || mode === 'batchBulk' || mode === 'batchEdit';
   const previewId =
     mode === 'new'       ? `sp${idx}` :
     mode === 'bulk'      ? 'bulkSp' :
     mode === 'batchEdit' ? `besp_${idx}` :
     mode === 'batchBulk' ? 'batchBulkSp' :
     `espv_${idx}`;
+
   const groups = SIZE_GROUPS.map((g, gi) => {
     const allOn = g.sizes.every(s => sel.includes(s));
+    // 群組代表價格：取該群組第一個已選尺寸的價格
+    const groupPrice = g.sizes.map(s => sizePrices[s]).find(Boolean) || '';
+    const priceInputId = `gp_${mode}_${idx}_${gi}`;
+
+    const chips = g.sizes.map(s => {
+      const on = sel.includes(s);
+      return `<div class="size-chip ${on?'on':''}"
+        data-mode="${esc(mode)}" data-idx="${idx}" data-size="${esc(s)}" data-gi="${gi}"
+        onclick="toggleSz(this.dataset.mode,this.dataset.idx,this.dataset.size,this,${gi})">${s}</div>`;
+    }).join('');
+
+    const priceInput = !isBulk ? `
+      <input type="number" class="group-price-input" id="${priceInputId}"
+        placeholder="NT$" value="${esc(groupPrice)}"
+        data-mode="${esc(mode)}" data-idx="${idx}" data-gi="${gi}"
+        oninput="applyGroupPrice(this.dataset.mode,this.dataset.idx,this.dataset.gi,this.value)"
+        onclick="event.stopPropagation()">` : '';
+
     return `
     <div class="size-group">
       <div class="size-group-header">
         <div class="size-group-label">${g.label}</div>
-        <div class="select-all-chip ${allOn?'on':''}" onclick="toggleAllSizes('${mode}','${idx}',${gi},this)">${allOn?'✓ 已全選':'全選'}</div>
+        <div class="select-all-chip ${allOn?'on':''}"
+          data-mode="${esc(mode)}" data-idx="${idx}" data-gi="${gi}"
+          onclick="toggleAllSizes(this.dataset.mode,this.dataset.idx,this.dataset.gi,this)">${allOn?'✓ 已全選':'全選'}</div>
+        ${priceInput}
       </div>
-      <div class="size-chips">
-        ${g.sizes.map(s => `<div class="size-chip ${sel.includes(s)?'on':''}" onclick="toggleSz('${mode}','${idx}','${s}',this)">${s}</div>`).join('')}
-      </div>
+      <div class="size-chips-wrap">${chips}</div>
     </div>`;
   }).join('');
+
   return `<div class="size-picker">${groups}<div class="size-preview" id="${previewId}">已選：${sel.length ? sel.join(' / ') : '尚未選取'}</div></div>`;
 }
+
+// 套用群組價格到該群組所有已選尺寸
+function applyGroupPrice(mode, idx, gi, val) {
+  idx = Number(idx); gi = Number(gi);
+  const g = SIZE_GROUPS[gi];
+  const sizes = _getSizes(mode, idx);
+  g.sizes.forEach(s => {
+    if (sizes.includes(s)) _setSizePrice(mode, idx, s, val);
+  });
+}
+
+function _setSizePrice(mode, idx, size, val) {
+  if (mode === 'new') {
+    if (!editData[idx].sizePrices) editData[idx].sizePrices = {};
+    editData[idx].sizePrices[size] = val;
+    const prices = Object.values(editData[idx].sizePrices).filter(Boolean);
+    if (prices.length) editData[idx].price = prices[0];
+  } else {
+    const pid = mode.replace('edit_','');
+    const p = products.find(x => x.id === pid);
+    if (p) {
+      if (!p._editSizePrices) p._editSizePrices = {...(p.sizePrices||{})};
+      p._editSizePrices[size] = val;
+    }
+  }
+}
+
 function _getSizes(mode, idx) {
   if (mode === 'new')       return editData[idx].sizes;
   if (mode === 'bulk')      return bulkSizes;
   if (mode === 'batchEdit') return batchEditItems[idx].sizes;
   if (mode === 'batchBulk') return batchBulkSizes;
   return editingSizes;
+}
+function _getSizePrices(mode, idx) {
+  if (mode === 'new') return editData[idx]?.sizePrices || {};
+  const pid = mode.replace('edit_','');
+  const p = products.find(x => x.id === pid);
+  return p?._editSizePrices || p?.sizePrices || {};
+}
+function setSizePrice(mode, idx, size, val) {
+  idx = Number(idx);
+  _setSizePrice(mode, idx, size, val);
 }
 function _setSizes(mode, idx, arr) {
   if (mode === 'new')            editData[idx].sizes = arr;
@@ -1466,14 +1741,24 @@ function _previewId(mode, idx) {
   if (mode === 'batchBulk') return 'batchBulkSp';
   return 'espv_'+idx;
 }
-function toggleSz(mode, idx, s, el) {
+function toggleSz(mode, idx, s, el, gi) {
+  idx = Number(idx);
   let sizes = _getSizes(mode, idx);
-  if (sizes.includes(s)) { sizes = sizes.filter(x => x !== s); el.classList.remove('on'); }
-  else                    { sizes.push(s); el.classList.add('on'); }
+  const isOn = sizes.includes(s);
+  if (isOn) { sizes = sizes.filter(x => x !== s); el.classList.remove('on'); }
+  else {
+    sizes.push(s); el.classList.add('on');
+    // 自動套用群組價格
+    if (gi !== undefined) {
+      const groupPriceInput = document.getElementById(`gp_${mode}_${idx}_${gi}`);
+      if (groupPriceInput?.value) _setSizePrice(mode, idx, s, groupPriceInput.value);
+    }
+  }
   _setSizes(mode, idx, sizes);
   document.getElementById(_previewId(mode, idx)).textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
+  if (mode === 'new') updateCardSummary(idx);
   const groupEl = el.closest('.size-group');
-  const selectAllBtn = groupEl.querySelector('.select-all-chip');
+  const selectAllBtn = groupEl?.querySelector('.select-all-chip');
   if (selectAllBtn) {
     const groupSizes = Array.from(groupEl.querySelectorAll('.size-chip')).map(c => c.textContent);
     const allOn = groupSizes.every(sz => sizes.includes(sz));
@@ -1482,11 +1767,20 @@ function toggleSz(mode, idx, s, el) {
   }
 }
 function toggleAllSizes(mode, idx, groupIdx, el) {
+  idx = Number(idx); groupIdx = Number(groupIdx);
   let sizes = _getSizes(mode, idx);
   const g = SIZE_GROUPS[groupIdx];
   const allOn = g.sizes.every(s => sizes.includes(s));
-  if (allOn) sizes = sizes.filter(s => !g.sizes.includes(s));
-  else g.sizes.forEach(s => { if (!sizes.includes(s)) sizes.push(s); });
+  if (allOn) {
+    sizes = sizes.filter(s => !g.sizes.includes(s));
+  } else {
+    g.sizes.forEach(s => { if (!sizes.includes(s)) sizes.push(s); });
+    // 自動套用群組價格到新加入的尺寸
+    const groupPriceInput = document.getElementById(`gp_${mode}_${idx}_${groupIdx}`);
+    if (groupPriceInput?.value) {
+      g.sizes.forEach(s => _setSizePrice(mode, idx, s, groupPriceInput.value));
+    }
+  }
   _setSizes(mode, idx, sizes);
   const groupEl = el.closest('.size-group');
   groupEl.querySelectorAll('.size-chip').forEach(chip => chip.classList.toggle('on', sizes.includes(chip.textContent)));
@@ -1523,16 +1817,21 @@ function pickBrand(idx, b) {
 //  SAVE
 // ═══════════════════════════════
 async function saveAll() {
-  const newItems = editData.filter(d => d.url).map(d => ({
-    id: 'p' + Date.now() + Math.random().toString(36).slice(2,6),
-    url: d.url,
-    price: d.price || '',
-    brand: (d.brand||'').trim(),
-    sizes: d.sizes || [],
-    category: (d.category||'').trim(),
-    color: (d.color||'').trim(),
-    createdAt: Date.now()
-  }));
+  const newItems = editData.filter(d => d.url).map(d => {
+    const sp = d.sizePrices || {};
+    const prices = Object.values(sp).filter(Boolean);
+    return {
+      id: 'p' + Date.now() + Math.random().toString(36).slice(2,6),
+      url: d.url,
+      price: prices.length ? prices[0] : (d.price || ''),
+      brand: (d.brand||'').trim(),
+      sizes: d.sizes || [],
+      category: (d.category||'').trim(),
+      color: (d.color||'').trim(),
+      sizePrices: sp,
+      createdAt: Date.now()
+    };
+  });
   if (!newItems.length) { showToast('沒有可發佈的商品'); return; }
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const { error } = await sb.from(SUPABASE_TABLE).insert(newItems.map(_toRow));
@@ -1699,7 +1998,7 @@ function renderBatchModifyPanel() {
         </div>
         <div class="edit-field">
           <label>📐 尺寸</label>
-          ${sizePicker('batchEdit', i, d.sizes)}
+          ${sizePicker('batchEdit', i, d.sizes, d.sizePrices || {})}
         </div>
       </div>
     </div>`).join('');
@@ -1746,20 +2045,8 @@ function renderEditingProd(p) {
         </div>
       </div>
       <div class="edit-field">
-        <label>💰 價格</label>
-        <input class="field-input" type="text" id="epi_${p.id}" value="${esc(p.price||'')}">
-      </div>
-      <div class="edit-field">
-        <label>👗 品項</label>
-        <input class="field-input" type="text" id="ecat_${p.id}" value="${esc(p.category||'')}" placeholder="例：上衣">
-      </div>
-      <div class="edit-field">
-        <label>🎨 顏色</label>
-        <input class="field-input" type="text" id="ecol_${p.id}" value="${esc(p.color||'')}" placeholder="例：藍/白">
-      </div>
-      <div class="edit-field">
-        <label>📐 尺寸</label>
-        ${sizePicker('edit', p.id, editingSizes)}
+        <label>📐 尺寸 ＋ 💰 價格</label>
+        ${sizePicker('edit_' + p.id, 0, editingSizes, p.sizePrices || {})}
       </div>
       <div class="ep-editing-actions">
         <button class="ep-btn ep-cancel-btn" onclick="cancelEditProd()">取消</button>
@@ -1780,14 +2067,19 @@ async function saveEditProd(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
-  const brand    = document.getElementById('ebi_'+id).value.trim();
-  const price    = document.getElementById('epi_'+id).value.trim();
-  const category = document.getElementById('ecat_'+id).value.trim();
-  const color    = document.getElementById('ecol_'+id).value.trim();
-  const sizes    = [...editingSizes];
-  const { error } = await sb.from(SUPABASE_TABLE).update({ brand, price, sizes, category, color }).eq('id', id);
+  const brand      = document.getElementById('ebi_'+id).value.trim();
+  const category   = document.getElementById('ecat_'+id).value.trim();
+  const color      = document.getElementById('ecol_'+id).value.trim();
+  const sizes      = [...editingSizes];
+  const sizePrices = p._editSizePrices || p.sizePrices || {};
+  const prices     = sizes.map(s => sizePrices[s]).filter(Boolean);
+  const price      = prices.length ? prices[0] : (p.price || '');
+  const { error } = await sb.from(SUPABASE_TABLE)
+    .update({ brand, price, sizes, category, color, price_groups: sizePrices }).eq('id', id);
   if (error) { showToast('⚠️ 更新失敗：' + (error.message || error), 4000); return; }
-  p.brand = brand; p.price = price; p.sizes = sizes; p.category = category; p.color = color;
+  p.brand = brand; p.price = price; p.sizes = sizes;
+  p.category = category; p.color = color; p.sizePrices = sizePrices;
+  delete p._editSizePrices;
   rebuildBrandHistory();
   editingProdId = null; editingSizes = [];
   renderBrandTabs(); applyFilters(); renderManage();
@@ -1846,7 +2138,8 @@ function openBatchModify() {
   if (!batchSelected.size) { showToast('請先勾選要修改的商品'); return; }
   batchEditItems = products.filter(p => batchSelected.has(p.id)).map(p => ({
     id: p.id, url: p.url, brand: p.brand||'', price: p.price||'',
-    sizes: [...(p.sizes||[])], category: p.category||'', color: p.color||''
+    sizes: [...(p.sizes||[])], category: p.category||'', color: p.color||'',
+    sizePrices: {...(p.sizePrices||{})}
   }));
   batchBulkSizes = []; batchEditing = true; renderManage();
   requestAnimationFrame(() => { const el = document.querySelector('.batch-modify-panel'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); });
@@ -1859,7 +2152,10 @@ async function saveBatchEditAll() {
   const byIdProd = new Map(products.map(p => [p.id, p]));
   const rows = batchEditItems.map(d => {
     const p = byIdProd.get(d.id) || {};
-    return _toRow({ id:d.id, url:p.url||d.url||'', brand:d.brand, price:d.price, sizes:d.sizes, category:d.category||'', color:d.color||'', createdAt:p.createdAt||Date.now() });
+    const sp = d.sizePrices || {};
+    const prices = d.sizes.map(s => sp[s]).filter(Boolean);
+    const price = prices.length ? prices[0] : (d.price || '');
+    return _toRow({ id:d.id, url:p.url||d.url||'', brand:d.brand, price, sizes:d.sizes, category:d.category||'', color:d.color||'', sizePrices:sp, createdAt:p.createdAt||Date.now() });
   });
   const { error } = await sb.from(SUPABASE_TABLE).upsert(rows);
   if (error) { showToast('⚠️ 批量更新失敗：' + (error.message || error), 4000); return; }
@@ -1956,6 +2252,9 @@ function addToCart() {
     return;
   }
 
+  const selectedSize = selSizeArr[0] || '';
+  const correctPrice = getPriceForSize(p.sizePrices, p.price, selectedSize);
+
   cart.push({
     cartId:   Date.now() + Math.random().toString(36).slice(2,5),
     id:       p.id,
@@ -1964,7 +2263,7 @@ function addToCart() {
     category: p.category || '',
     size:     selSizeArr.join('/') || (p.sizes||[]).join('/'),
     color:    selColorArr.join('/') || p.color || '',
-    price:    p.price || ''
+    price:    correctPrice || p.price || ''
   });
   updateCartFab();
   const btn = document.getElementById('lbCartBtn');
@@ -2097,12 +2396,13 @@ async function submitCartToSupabase() {
 //  LINE SEND MODAL
 // ═══════════════════════════════
 let _lineMsgText = '';
-function showLineSendModal(msg) {
+function showLineSendModal(msg, title) {
   _lineMsgText = msg;
   document.getElementById('lineSendMsg').textContent = msg;
   document.getElementById('lineGoBtn').href = LINE_URL;
   document.getElementById('lineCopyBtn').textContent = '複製訊息';
   document.getElementById('lineCopyBtn').classList.remove('copied');
+  document.querySelector('.line-send-title').textContent = title || '傳送清單至官方 Line';
   document.getElementById('lineSendOverlay').classList.add('active');
   lock();
 }
@@ -2130,8 +2430,50 @@ async function copyLineMsg() {
 // ═══════════════════════════════
 //  ORDERS（後台訂單管理 — Supabase customer_orders）
 // ═══════════════════════════════
-const ORDER_STATUS       = ['待確認','備貨中','已出貨','已取消'];
+const ORDER_STATUS       = ['訂購中','待回台','在台打包','斷貨'];
 const ORDER_STATUS_CLASS = ['s0','s1','s2','s3'];
+
+// 批量選取狀態
+let orderBatchMode = false;
+let orderSelected  = new Set();
+
+function toggleOrderBatch() {
+  orderBatchMode = !orderBatchMode;
+  orderSelected.clear();
+  document.getElementById('orderBatchBar').style.display = orderBatchMode ? 'flex' : 'none';
+  renderOrders();
+}
+// 4: 叫貨與到貨獨立 — 叫貨用 'ordered' 狀態，可切換
+async function toggleItemOrdered(orderId, idx, currentSt) {
+  // 叫貨狀態：若目前是 ordered 則取消，否則設為 ordered（不影響 arrived/oos）
+  const newSt = (currentSt === 'ordered') ? '' : 'ordered';
+  await setItemStatus(orderId, idx, newSt);
+}
+
+function toggleOrderSelect(id) {
+  if (orderSelected.has(id)) orderSelected.delete(id);
+  else orderSelected.add(id);
+  document.getElementById('orderSelectedCount').textContent = orderSelected.size;
+  // 只更新該卡片樣式，不重新渲染整個列表（避免跳動）
+  const card = document.querySelector(`.order-card[data-id="${id}"]`);
+  if (card) {
+    card.classList.toggle('selected', orderSelected.has(id));
+    const cb = card.querySelector('.ep-checkbox');
+    if (cb) cb.checked = orderSelected.has(id);
+  }
+  document.getElementById('orderSelectAll').checked = false;
+}
+function toggleOrderSelectAll() {
+  const all = document.getElementById('orderSelectAll').checked;
+  document.querySelectorAll('.order-card[data-id]').forEach(c => {
+    if (all) orderSelected.add(c.dataset.id);
+    else orderSelected.delete(c.dataset.id);
+    c.classList.toggle('selected', all);
+    const cb = c.querySelector('.ep-checkbox');
+    if (cb) cb.checked = all;
+  });
+  document.getElementById('orderSelectedCount').textContent = orderSelected.size;
+}
 
 function _genOrderNo() {
   const d = new Date();
@@ -2162,10 +2504,8 @@ async function createOrder() {
   const items = [];
   rows.forEach(row => {
     const inputs = row.querySelectorAll('input');
-    const desc  = inputs[0].value.trim();
-    const size  = inputs[1].value.trim();
-    const color = inputs[2].value.trim();
-    const price = inputs[3].value.trim();
+    const desc = inputs[0].value.trim(), size = inputs[1].value.trim();
+    const color = inputs[2].value.trim(), price = inputs[3].value.trim();
     if (desc) items.push({ brand: desc, category:'', size, color, price, url:'' });
   });
   if (!items.length) { showToast('請至少填入一件商品'); return; }
@@ -2173,18 +2513,13 @@ async function createOrder() {
   const token = 'jck' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const id    = 'co' + Date.now() + Math.random().toString(36).slice(2,5);
   const { error } = await sb.from('customer_orders').insert([{
-    id, token,
-    customer_name: name,
-    line_id: lineId,
-    items,
-    status: 0,
-    note: phone ? '電話：' + phone : '',
-    created_at: Date.now()
+    id, token, customer_name: name, line_id: lineId, items, status: 0,
+    ordered: false, item_status: {}, merged_into: null, merged_orders: [],
+    note: phone ? '電話：' + phone : '', created_at: Date.now()
   }]);
   if (error) { showToast('⚠️ 建立失敗：' + (error.message||error), 4000); return; }
-  // reset form
-  document.getElementById('noName').value  = '';
-  document.getElementById('noLine').value  = '';
+  document.getElementById('noName').value = '';
+  document.getElementById('noLine').value = '';
   document.getElementById('noPhone').value = '';
   document.getElementById('noItemRows').innerHTML = `
     <div class="new-order-item-row">
@@ -2195,11 +2530,12 @@ async function createOrder() {
       <button class="rm-item-btn" onclick="this.closest('.new-order-item-row').remove()">✕</button>
     </div>`;
   await renderOrders();
-  showToast(`✓ 訂單已建立，查詢連結：${location.origin}${location.pathname}?c=${token}`);
+  showToast(`✓ 訂單已建立`);
 }
+
 async function renderOrders() {
-  const el     = document.getElementById('orderList');
-  const cnt    = document.getElementById('orderCount');
+  const el  = document.getElementById('orderList');
+  const cnt = document.getElementById('orderCount');
   if (!el) return;
   el.innerHTML = `<div class="no-results">載入中…</div>`;
   if (!sb) { el.innerHTML = `<div class="no-results">Supabase 未連線</div>`; return; }
@@ -2211,40 +2547,270 @@ async function renderOrders() {
   const list = data || [];
   if (cnt) cnt.textContent = list.length;
   if (!list.length) { el.innerHTML = `<div class="no-results">尚無訂單紀錄</div>`; return; }
+
   el.innerHTML = list.map(o => {
-    const items = Array.isArray(o.items) ? o.items : [];
-    const total = items.reduce((s, item) => s + (Number(item.price)||0), 0);
-    const orderUrl = `${location.origin}${location.pathname}?c=${o.token}`;
-    return `<div class="order-card">
-      <div class="order-card-head">
-        <div>
-          <div class="order-no">${esc(o.token)}</div>
-          <div class="order-customer" contenteditable="true" onblur="updateOrderName('${o.id}',this.textContent)">${esc(o.customer_name||'')}</div>
-          <div class="order-contact">${o.line_id?'Line: '+esc(o.line_id):''}${o.note?' · '+esc(o.note):''}</div>
-          <div style="font-size:0.68rem;margin-top:3px;"><a href="${orderUrl}" target="_blank" style="color:var(--soft-brown);">顧客查詢連結 ↗</a></div>
+    const items      = Array.isArray(o.items) ? o.items : [];
+    const itemStatus = (o.item_status && typeof o.item_status === 'object') ? o.item_status : {};
+    const total = items.reduce((s, item, i) =>
+      itemStatus[i] === 'oos' ? s : s + (Number(item.price)||0), 0);
+    // 計算已到貨金額
+    const arrivedTotal = items.reduce((s, item, i) =>
+      itemStatus[i] === 'arrived' ? s + (Number(item.price)||0) : s, 0);
+    const orderUrl   = `${location.origin}${location.pathname}?c=${o.token}`;
+    const isMerged   = o.merged_into;
+    const hasChildren = o.merged_orders && o.merged_orders.length > 0;
+
+    const itemsHTML = items.map((item, i) => {
+      const st = itemStatus[i] || '';
+      const labelClass = st === 'arrived' ? 'arrived' : st === 'oos' ? 'oos' : '';
+      const orderedBtn = `<button class="order-ordered-btn ${st==='ordered'?'on':''}"
+        onclick="event.stopPropagation();toggleItemOrdered('${o.id}',${i},'${st}')"
+        style="font-size:0.72rem;padding:3px 10px;">
+        ${st==='ordered'?'✓ 叫貨':'叫貨'}
+      </button>`;
+      // 到貨：按鈕切換，斷貨：按鈕切換
+      const arrivedBtn = `<button class="order-ordered-btn ${st==='arrived'?'on':''}"
+        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},this.classList.contains('on')?'':'arrived')"
+        style="font-size:0.72rem;padding:3px 10px;${st==='arrived'?'':'background:transparent;border:1.5px solid var(--cream-mid);color:var(--text-soft);'}">
+        ${st==='arrived'?'✓ 到貨':'到貨'}
+      </button>`;
+      const oosBtn = `<button class="order-ordered-btn ${st==='oos'?'on':''}"
+        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},this.classList.contains('on')?'':'oos')"
+        style="font-size:0.72rem;padding:3px 10px;${st==='oos'?'background:var(--red);border-color:var(--red);':'background:transparent;border:1.5px solid var(--cream-mid);color:var(--text-soft);'}">
+        ${st==='oos'?'✓ 斷貨':'斷貨'}
+      </button>`;
+      return `<div class="order-item-row">
+        <div class="order-item-label ${labelClass}">
+          ${item.url?`<img src="${esc(item.url)}" style="width:26px;height:26px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`:''}
+          <strong>${esc(item.brand||item.desc||'')}</strong>${item.category?' · '+esc(item.category):''}
+          ${item.size?' ／'+esc(item.size):''}${item.color?' ／'+esc(item.color):''}
+          ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''}
         </div>
-        <select class="order-status-select" onchange="updateOrderStatus('${o.id}',this.value)">
-          ${ORDER_STATUS.map((s,i)=>`<option value="${i}" ${o.status===i?'selected':''}>${s}</option>`).join('')}
+        ${orderedBtn}
+        <select class="order-status-select" style="font-size:0.72rem;" onclick="event.stopPropagation()" onchange="updateOrderStatus('${o.id}',this.value)">
+          ${ORDER_STATUS.map((s,idx)=>`<option value="${idx}" ${o.status===idx?'selected':''}>${s}</option>`).join('')}
         </select>
+        ${arrivedBtn}${oosBtn}
+      </div>`;
+    }).join('');
+
+    return `<div class="order-card ${orderBatchMode&&orderSelected.has(o.id)?'selected':''}"
+      data-id="${o.id}">
+      <div class="order-card-head" onclick="${orderBatchMode?`toggleOrderSelect('${o.id}')`:''}" style="${orderBatchMode?'cursor:pointer;':''}">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            ${orderBatchMode?`<input type="checkbox" class="ep-checkbox" ${orderSelected.has(o.id)?'checked':''} onclick="event.stopPropagation();toggleOrderSelect('${o.id}')" style="pointer-events:none;">`:''}
+            <div class="order-no">${esc(o.token)}</div>
+            ${hasChildren?`<span class="order-merged-tag" style="background:var(--blush);">主單</span>`:''}
+            ${o.ordered?`<span class="order-merged-tag" style="background:#D4EDDA;color:#155724;">已叫貨</span>`:''}
+          </div>
+          <div class="order-customer" contenteditable="${orderBatchMode?'false':'true'}"
+            onblur="updateOrderName('${o.id}',this.textContent)"
+            onclick="event.stopPropagation()">${esc(o.customer_name||'')}</div>
+          <div class="order-contact">${o.line_id?'Line: '+esc(o.line_id):''}${o.note?' · '+esc(o.note):''}</div>
+          <div style="font-size:0.68rem;margin-top:2px;" onclick="event.stopPropagation()">
+            <a href="${orderUrl}" target="_blank" style="color:var(--soft-brown);" onclick="event.stopPropagation()">查詢連結 ↗</a>
+            ${hasChildren?`<span style="color:var(--text-light);margin-left:8px;">合併了 ${o.merged_orders.length} 筆訂單</span>`:''}
+          </div>
+        </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;">
-        ${items.map(item=>`
-          <div style="display:flex;gap:8px;align-items:center;background:var(--cream-dark);border-radius:8px;padding:6px 8px;min-width:0;">
-            ${item.url?`<img src="${esc(item.url)}" style="width:36px;height:36px;object-fit:cover;border-radius:5px;flex-shrink:0;" onerror="this.style.display='none'">`:''}
-            <div style="font-size:0.72rem;color:var(--text-soft);line-height:1.7;">
-              <div style="font-weight:500;color:var(--text-main);">${esc(item.brand||item.desc||'')}${item.category?' · '+esc(item.category):''}</div>
-              ${item.size?esc(item.size):''}${item.color?' / '+esc(item.color):''}
-              ${item.price?`<br><span style="color:var(--warm-brown);">NT$ ${esc(item.price)}</span>`:''}
-            </div>
-          </div>`).join('')}
-      </div>
+      <div class="order-items-list">${itemsHTML}</div>
       <div class="order-total-row">
-        <span class="order-total-amt">合計 NT$ ${total.toLocaleString()}</span>
-        <button class="order-del-btn" onclick="deleteOrder('${o.id}')">🗑 刪除</button>
+        <div>
+          <span class="order-total-amt">NT$ ${total.toLocaleString()}</span>
+          ${arrivedTotal>0&&arrivedTotal<total?`<span style="font-size:0.72rem;color:#155724;margin-left:8px;">到貨 NT$${arrivedTotal.toLocaleString()}</span>`:''}
+        </div>
+        <div class="order-action-row" onclick="event.stopPropagation()">
+          <button class="order-ordered-btn ${o.ordered?'on':''}" onclick="toggleOrdered('${o.id}',${!o.ordered})">
+            ${o.ordered?'✓ 已叫貨':'叫貨'}
+          </button>
+          <button class="order-checkout-btn" onclick="exportCheckout('${o.id}')">結帳單</button>
+          <button class="order-edit-btn" onclick="toggleOrderEdit('${o.id}')">✏️ 編輯</button>
+          <button class="order-del-btn" onclick="deleteOrder('${o.id}')">🗑</button>
+        </div>
+      </div>
+      <!-- 編輯面板 -->
+      <div class="order-edit-panel" id="oedit_${o.id}">
+        <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:8px;">手動修改訂單內容</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <input class="field-input" type="text" id="oe_name_${o.id}" value="${esc(o.customer_name||'')}" placeholder="顧客姓名" style="font-size:0.82rem;">
+          <input class="field-input" type="text" id="oe_line_${o.id}" value="${esc(o.line_id||'')}" placeholder="Line ID" style="font-size:0.82rem;">
+          <textarea class="urls-textarea" id="oe_items_${o.id}" style="height:80px;font-size:0.75rem;">${items.map(it=>`${it.brand||it.desc||''}${it.size?'，'+it.size:''}${it.color?'，'+it.color:''}${it.price?'，NT$'+it.price:''}`).join('\n')}</textarea>
+          <div style="font-size:0.68rem;color:var(--text-light);">每行一件，格式：品牌描述，尺寸，顏色，NT$金額</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="ep-btn ep-save-btn" style="flex:1;padding:8px;" onclick="saveOrderEdit('${o.id}')">💾 儲存</button>
+          <button class="ep-btn ep-cancel-btn" style="flex:1;padding:8px;" onclick="toggleOrderEdit('${o.id}')">取消</button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
+
+function toggleOrderEdit(id) {
+  const panel = document.getElementById('oedit_' + id);
+  if (panel) panel.classList.toggle('open');
+}
+
+async function saveOrderEdit(id) {
+  if (!sb) return;
+  const name   = document.getElementById('oe_name_' + id)?.value.trim();
+  const lineId = document.getElementById('oe_line_' + id)?.value.trim();
+  const rawItems = document.getElementById('oe_items_' + id)?.value.trim();
+  const items = rawItems.split('\n').map(line => {
+    const parts = line.split('，').map(s => s.trim());
+    return {
+      brand: parts[0] || '', category: '', url: '',
+      size:  parts[1] || '',
+      color: parts[2] || '',
+      price: (parts[3] || '').replace(/NT\$|,/g, '')
+    };
+  }).filter(it => it.brand);
+  const { error } = await sb.from('customer_orders')
+    .update({ customer_name: name, line_id: lineId, items }).eq('id', id);
+  if (error) { showToast('⚠️ 儲存失敗'); return; }
+  showToast('✓ 訂單已更新');
+  await renderOrders();
+}
+
+async function toggleItemStatus(id, idx, checked) {
+  // checkbox 勾選 = arrived，取消 = 清除狀態
+  await setItemStatus(id, idx, checked ? 'arrived' : '');
+}
+
+async function setItemStatus(id, idx, val) {
+  if (!sb) return;
+  // 先讀取現有 item_status
+  const { data } = await sb.from('customer_orders').select('item_status').eq('id', id).single();
+  const st = (data?.item_status && typeof data.item_status === 'object') ? {...data.item_status} : {};
+  if (val) st[idx] = val; else delete st[idx];
+  await sb.from('customer_orders').update({ item_status: st }).eq('id', id);
+  await renderOrders();
+}
+
+async function toggleOrdered(id, val) {
+  if (!sb) return;
+  await sb.from('customer_orders').update({ ordered: val }).eq('id', id);
+  showToast(val ? '✓ 已標記叫貨' : '已取消叫貨標記');
+  await renderOrders();
+}
+
+async function exportCheckout(id) {
+  if (!sb) return;
+  const { data } = await sb.from('customer_orders').select('*').eq('id', id).single();
+  if (!data) return;
+  const items      = Array.isArray(data.items) ? data.items : [];
+  const itemStatus = data.item_status || {};
+  const arrivedItems = items.map((item, i) => ({ ...item, _i: i }))
+    .filter(item => itemStatus[item._i] === 'arrived');
+  if (!arrivedItems.length) { showToast('尚無已到貨商品'); return; }
+  const total = arrivedItems.reduce((s, it) => s + (Number(it.price)||0), 0);
+
+  // 建立結帳單 token（先存入 Supabase）
+  const token = 'chk' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  const { error } = await sb.from('customer_orders').insert([{
+    id: 'ck' + Date.now(), token,
+    customer_name: data.customer_name + '（結帳單）',
+    line_id: data.line_id, items: arrivedItems.map(({_i,...item}) => item),
+    status: 2, ordered: true, item_status: {}, merged_into: id, merged_orders: [],
+    note: '結帳單', created_at: Date.now()
+  }]);
+  if (error) { showToast('⚠️ 建立失敗'); return; }
+
+  const orderUrl = `${location.origin}${location.pathname}?c=${token}`;
+
+  // 組結帳訊息
+  const msg = `【Janine Chiang Kids 到貨結帳通知】\n\n`
+    + `Hi ${data.customer_name}，以下商品已到貨請準備付款：\n\n`
+    + arrivedItems.map((item, i) =>
+        `${i+1}. ${item.brand||''}${item.category?' '+item.category:''}${item.size?' ／'+item.size:''}${item.color?' ／'+item.color:''} NT$${item.price||0}`
+      ).join('\n')
+    + `\n\n合計：NT$ ${total.toLocaleString()}`
+    + `\n\n查看結帳清單：\n${orderUrl}`;
+
+  // 跳出確認視窗（沿用 lineSendModal）
+  showLineSendModal(msg, '結帳單確認 → 傳送至 Line');
+  await renderOrders();
+}
+
+async function mergeOrders() {
+  if (orderSelected.size < 2) { showToast('請至少選取 2 筆訂單'); return; }
+  if (!sb) return;
+  const ids = [...orderSelected];
+  const { data } = await sb.from('customer_orders').select('*').in('id', ids);
+  if (!data || data.length < 2) return;
+  const main   = data[0];
+  const others = data.slice(1);
+  const mergedItems = data.flatMap(o => Array.isArray(o.items) ? o.items : []);
+  const mergedNames = [...new Set(data.map(o => o.customer_name))].join(' + ');
+  await sb.from('customer_orders').update({
+    items: mergedItems, customer_name: mergedNames,
+    merged_orders: others.map(o => o.id)
+  }).eq('id', main.id);
+  // 修正 4：合併後直接刪除原始訂單，不再保留
+  await sb.from('customer_orders').delete().in('id', others.map(o => o.id));
+  orderSelected.clear();
+  orderBatchMode = false;
+  document.getElementById('orderBatchBar').style.display = 'none';
+  await renderOrders();
+  showToast(`✓ 已合併 ${ids.length} 筆訂單`);
+}
+
+async function batchDeleteOrders() {
+  if (!orderSelected.size) { showToast('請先選取要刪除的訂單'); return; }
+  if (!confirm(`確定要刪除 ${orderSelected.size} 筆訂單？`)) return;
+  if (!sb) return;
+  await sb.from('customer_orders').delete().in('id', [...orderSelected]);
+  orderSelected.clear();
+  orderBatchMode = false;
+  document.getElementById('orderBatchBar').style.display = 'none';
+  await renderOrders();
+  showToast('✓ 已刪除所選訂單');
+}
+
+async function showUnordered() {
+  if (!sb) return;
+  // 修正 3：以單個商品為單位顯示未叫貨
+  const { data } = await sb.from('customer_orders')
+    .select('*').is('merged_into', null)
+    .order('created_at', { ascending: false });
+  const el   = document.getElementById('unorderedAlert');
+  const list = document.getElementById('unorderedList');
+  if (!data) return;
+  const unorderedItems = [];
+  data.forEach(o => {
+    const items      = Array.isArray(o.items) ? o.items : [];
+    const itemStatus = o.item_status || {};
+    items.forEach((item, i) => {
+      if (itemStatus[i] !== 'arrived' && itemStatus[i] !== 'oos') {
+        unorderedItems.push({ orderId: o.id, idx: i, customerName: o.customer_name, item });
+      }
+    });
+  });
+  if (!unorderedItems.length) { showToast('✓ 所有商品都已叫貨！'); el.style.display='none'; return; }
+  list.innerHTML = unorderedItems.map(({ orderId, idx, customerName, item }) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--cream-mid);">
+      <div style="flex:1;font-size:0.78rem;color:var(--text-soft);">
+        <span style="color:var(--text-main);font-weight:500;">${esc(customerName)}</span>
+        ・${esc(item.brand||'')}${item.size?' '+esc(item.size):''}${item.color?' '+esc(item.color):''}
+        ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''}
+      </div>
+      <button class="order-ordered-btn" data-oid="${orderId}" data-idx="${idx}"
+        onclick="markItemOrderedFromList(this)">叫貨</button>
+    </div>`).join('');
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function markItemOrderedFromList(btn) {
+  const orderId = btn.dataset.oid;
+  const idx     = Number(btn.dataset.idx);
+  await setItemStatus(orderId, idx, 'arrived');
+  btn.closest('div[style]').remove();
+  showToast('✓ 已標記叫貨');
+  await renderOrders();
+}
+
 async function updateOrderName(id, name) {
   if (!sb) return;
   await sb.from('customer_orders').update({ customer_name: name.trim() }).eq('id', id);
@@ -2282,7 +2848,7 @@ async function showOrderByToken(token) {
   }
   const items = Array.isArray(data.items) ? data.items : [];
   const total = items.reduce((s, item) => s + (Number(item.price)||0), 0);
-  const statusLabels = ['待確認','備貨中','已出貨','已取消'];
+  const statusLabels = ['訂購中','待回台','在台打包','斷貨'];
   const statusClass  = ['s0','s1','s2','s3'];
   inner.innerHTML = `
     <div class="oq-name" style="margin-bottom:6px;">${esc(data.customer_name)} 的清單</div>
@@ -2305,6 +2871,7 @@ async function showOrderByToken(token) {
 
 // ═══════════════════════════════
 //  SIZE GUIDE MANAGEMENT
+// ═══════════════════════════════
 function showSgBrandSugg(val) {
   const el  = document.getElementById('sgBrandSugg');
   const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,8);
@@ -2334,7 +2901,7 @@ function loadSgEditor() {
     document.getElementById('sgPreview').style.display = 'none';
   }
 }
-function saveSizeGuide() {
+async function saveSizeGuide() {
   const brand   = document.getElementById('sgBrandInput').value.trim();
   const headers = document.getElementById('sgHeaders').value.trim();
   const rowsRaw = document.getElementById('sgRows').value.trim();
@@ -2345,22 +2912,31 @@ function saveSizeGuide() {
   const rowArr = rowsRaw.split('\n').map(line =>
     line.split(',').map(c => c.trim())
   ).filter(r => r.some(c => c));
-  sizeGuideData[brand] = { headers: headerArr, rows: rowArr };
-  _saveSizeGuideToStorage();
-  renderSgPreview(sizeGuideData[brand]);
-  renderSgList();
-  showToast(`✓ 已儲存「${brand}」的尺寸表`);
+  const guide = { headers: headerArr, rows: rowArr };
+  try {
+    await _saveSizeGuideToStorage(brand, guide);
+    sizeGuideData[brand] = guide;
+    renderSgPreview(guide);
+    renderSgList();
+    showToast(`✓ 已儲存「${brand}」的尺寸表`);
+  } catch(e) {
+    showToast('⚠️ 儲存失敗：' + (e.message||e), 4000);
+  }
 }
-function deleteSizeGuide() {
+async function deleteSizeGuide() {
   const brand = document.getElementById('sgBrandInput').value.trim();
   if (!brand || !sizeGuideData[brand]) { showToast('此品牌尚無尺寸表'); return; }
   if (!confirm(`確定要刪除「${brand}」的尺寸表？`)) return;
-  delete sizeGuideData[brand];
-  _saveSizeGuideToStorage();
-  document.getElementById('sgEditor').style.display = 'none';
-  document.getElementById('sgBrandInput').value = '';
-  renderSgList();
-  showToast(`已刪除「${brand}」的尺寸表`);
+  try {
+    await _deleteSizeGuideFromStorage(brand);
+    delete sizeGuideData[brand];
+    document.getElementById('sgEditor').style.display = 'none';
+    document.getElementById('sgBrandInput').value = '';
+    renderSgList();
+    showToast(`已刪除「${brand}」的尺寸表`);
+  } catch(e) {
+    showToast('⚠️ 刪除失敗：' + (e.message||e), 4000);
+  }
 }
 function renderSgPreview(guide) {
   const el = document.getElementById('sgPreviewTable');
@@ -2396,26 +2972,153 @@ function editSgBrand(brand) {
   loadSgEditor();
   document.getElementById('sgEditor').scrollIntoView({ behavior:'smooth', block:'start' });
 }
-function deleteSgBrandDirect(brand) {
+async function deleteSgBrandDirect(brand) {
   if (!confirm(`確定要刪除「${brand}」的尺寸表？`)) return;
-  delete sizeGuideData[brand];
-  _saveSizeGuideToStorage();
-  renderSgList();
-  showToast(`已刪除「${brand}」的尺寸表`);
+  try {
+    await _deleteSizeGuideFromStorage(brand);
+    delete sizeGuideData[brand];
+    renderSgList();
+    showToast(`已刪除「${brand}」的尺寸表`);
+  } catch(e) {
+    showToast('⚠️ 刪除失敗：' + (e.message||e), 4000);
+  }
+}
+
+// ═══════════════════════════════
+//  SIZE GUIDE SEED DATA
+// ═══════════════════════════════
+const SEED_SIZE_GUIDES = {
+  'Amber': {
+    headers: ['尺寸', '適合身高'],
+    rows: [
+      ['S',   '90–100cm'],
+      ['M',   '100–105cm'],
+      ['L',   '100–110cm'],
+      ['XL',  '120cm'],
+      ['XXL', '110–130cm'],
+    ]
+  },
+  'Poisson': {
+    headers: ['尺寸', '身高', '體重', '年齡'],
+    rows: [
+      ['S',  '90–100cm',  '12–15kg', '3–4歲'],
+      ['M',  '100–107cm', '15–18kg', '4–5歲'],
+      ['L',  '107–112cm', '18–20kg', '5–6歲'],
+      ['XL', '112–117cm', '20–23kg', '6–7歲'],
+      ['JS', '117–123cm', '23–25kg', '7–8歲'],
+      ['JM', '123–133cm', '25–30kg', '9–10歲'],
+      ['JL', '132–142cm', '30–35kg', '10–11歲'],
+    ]
+  },
+  'Bebeholic': {
+    headers: ['尺寸', '月齡'],
+    rows: [
+      ['S', '3–6M'],
+      ['M', '6–12M'],
+      ['L', '12–18M'],
+    ]
+  },
+  'Black Bean': {
+    headers: ['尺寸', '適合'],
+    rows: [
+      ['S Baby',  '~6M'],
+      ['M Baby',  '~12M'],
+      ['S Kid',   '84–93cm'],
+      ['M Kid',   '93–102cm'],
+      ['L Kid',   '102–111cm'],
+      ['XL Kid',  '111–120cm'],
+    ]
+  },
+  'Mini Robe': {
+    headers: ['尺寸', '月齡'],
+    rows: [
+      ['S',  '3–9m'],
+      ['M',  '10–18m'],
+      ['L',  '18–24m'],
+      ['XL', '24–36m'],
+    ]
+  },
+  'Melikey': {
+    headers: ['尺寸', '體重', '身高'],
+    rows: [
+      ['XS', '~10kg',   '~80cm'],
+      ['S',  '10–15kg', '85–95cm'],
+      ['M',  '15–17kg', '95–105cm'],
+      ['L',  '17–20kg', '105–115cm'],
+      ['XL', '20–25kg', '115–125cm'],
+      ['JS', '25–30kg', '125–135cm'],
+      ['JM', '30–35kg', '135–140cm'],
+    ]
+  },
+  'Lalaland': {
+    headers: ['尺寸', '適合'],
+    rows: [
+      ['6M Baby',  ''],
+      ['12M Baby', ''],
+      ['18M Baby', ''],
+      ['XS',  '1–2歲'],
+      ['S',   '2–3歲'],
+      ['M',   '3–4歲'],
+      ['L',   '5–6歲'],
+      ['XL',  '6–7歲'],
+      ['XXL', '7–8歲'],
+    ]
+  },
+  'Nunubiel': {
+    headers: ['尺寸', '適合'],
+    rows: [
+      ['BS', '6M'],
+      ['BM', '12M'],
+      ['BL', '18M'],
+      ['XS', '1–2歲'],
+      ['S',  '2–3歲'],
+      ['M',  '3–5歲'],
+      ['L',  '5–6歲'],
+      ['XL', '6–7歲'],
+    ]
+  },
+  'Mimico': {
+    headers: ['尺寸', '年齡'],
+    rows: [
+      ['XS',  '3歲'],
+      ['S',   '5歲'],
+      ['M',   '7歲'],
+      ['L',   '9歲'],
+      ['XL',  '11歲'],
+      ['XXL', '13歲 +NT$60'],
+    ]
+  },
+};
+
+async function _seedSizeGuides() {
+  if (!sb) return;
+  // 強制 upsert 所有品牌（確保資料與程式碼同步）
+  const rows = Object.entries(SEED_SIZE_GUIDES).map(([brand, guide]) => ({
+    brand,
+    headers: guide.headers,
+    rows:    guide.rows,
+    updated_at: Date.now()
+  }));
+  const { error } = await sb.from('size_guides').upsert(rows);
+  if (error) { console.error('[seedSizeGuides]', error); return; }
+  Object.entries(SEED_SIZE_GUIDES).forEach(([brand, guide]) => {
+    sizeGuideData[brand] = guide;
+  });
 }
 
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
 (async function init() {
-  _loadSizeGuide();
   _loadOrders();
   renderProducts([]);
   setupDragDrop();
   await loadProducts();
+  await _loadSizeGuide();
+  // 預設尺寸表資料（若 Supabase 尚無資料則自動寫入）
+  await _seedSizeGuides();
   renderBrandTabs();
   applyFilters();
-  // 自動偵測網址中的 ?c= 訂單 token，自動展開查詢結果
   const urlToken = new URLSearchParams(location.search).get('c');
   if (urlToken) {
     await showOrderByToken(urlToken);
