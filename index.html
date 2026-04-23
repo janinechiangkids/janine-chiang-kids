@@ -570,7 +570,7 @@ const SIZE_GROUPS = [
 
 // ── 修正 2：品項 & 顏色清單 ──────────────────────
 const CATEGORY_LIST = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭'];
-const COLOR_LIST    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫'];
+const COLOR_LIST    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫','粉','棕','素色','花花','圖案'];
 
 const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect fill%3D%22%23EDE3D5%22 width%3D%22200%22 height%3D%22200%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2255%25%22 text-anchor%3D%22middle%22 fill%3D%22%23B09880%22 font-size%3D%2230%22%3E%F0%9F%91%97%3C%2Ftext%3E%3C%2Fsvg%3E';
 
@@ -735,7 +735,7 @@ function renderProducts(list) {
           ${p.category ? `<span class="product-category-tag">${esc(p.category)}</span>` : ''}
         </div>
         <div class="product-meta-row">
-          <span class="product-size">${sz ? '📐 '+esc(sz) : ''}</span>
+          <span class="product-size">${sz ? esc(sz) : ''}</span>
           <span class="product-price">${p.price ? 'NT$ '+esc(p.price) : ''}</span>
         </div>
         <button class="order-btn" onclick="event.stopPropagation();openLb('${p.id}')">📸 點我選規格並截圖</button>
