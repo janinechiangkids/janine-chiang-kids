@@ -322,17 +322,17 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 /* ── Line 傳送提示 Modal ── */
 .line-send-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.88); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
 .line-send-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
-.line-send-box { background: var(--white); border-radius: var(--radius); max-width: 400px; width: 100%; padding: 24px 20px 20px; animation: scaleIn 0.25s ease; }
+.line-send-box { background: var(--white); border-radius: var(--radius); max-width: 400px; width: 100%; padding: 24px 20px 20px; animation: scaleIn 0.25s ease; max-height: 90vh; overflow-y: auto; }
 .line-send-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--dark-brown); text-align: center; margin-bottom: 6px; letter-spacing: 0.06em; }
 .line-send-hint { font-size: 0.78rem; color: var(--text-soft); text-align: center; margin-bottom: 14px; line-height: 1.7; }
 .line-send-msg { background: var(--cream-dark); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.78rem; color: var(--text-main); line-height: 1.9; white-space: pre-wrap; word-break: break-all; margin-bottom: 14px; border: 1px solid var(--cream-mid); max-height: 200px; overflow-y: auto; user-select: all; }
 .line-send-copy-btn { display: block; width: 100%; background: var(--cream-dark); color: var(--warm-brown); border: 1.5px solid var(--blush); border-radius: 24px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; margin-bottom: 8px; transition: background 0.2s; }
 .line-send-copy-btn:hover { background: var(--blush-light); }
 .line-send-copy-btn.copied { background: var(--blush-light); color: var(--soft-brown); }
-.line-send-go-btn { display: block; width: 100%; background: #06C755; color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; }
+.line-send-go-btn { display: block; width: 100%; background: #06C755; color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; text-align: center; text-decoration: none; box-sizing: border-box; }
 .line-send-go-btn:hover { opacity: 0.88; }
-.line-send-close { display: block; text-align: center; font-size: 0.78rem; color: var(--text-light); cursor: pointer; padding: 4px; letter-spacing: 0.06em; } */
-.order-query-wrap { background: var(--white); border-top: 1px solid var(--cream-mid); padding: 20px 20px 24px; }
+.line-send-close { display: block; text-align: center; font-size: 0.78rem; color: var(--text-light); cursor: pointer; padding: 4px; letter-spacing: 0.06em; }
+/* ── 訂單查詢（前台） ── */
 .order-query-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: var(--dark-brown); letter-spacing: 0.08em; margin-bottom: 10px; text-align: center; }
 .order-query-row { display: flex; gap: 8px; }
 .order-query-result { margin-top: 14px; display: none; }
@@ -687,17 +687,14 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
     <div class="cart-footer" id="cartFooter"></div>
   </div>
 </div>
-<!-- ORDER QUERY（前台查詢貨況） -->
-<div class="order-query-wrap">
-  <div class="order-query-title">查詢訂單貨況</div>
-  <div class="order-query-row">
-    <input class="field-input" type="text" id="oqInput" placeholder="輸入訂單編號" style="flex:1;"
-      onkeydown="if(event.key==='Enter')queryOrder()">
-    <button class="bulk-apply-btn" style="padding:0 18px;" onclick="queryOrder()">查詢</button>
-  </div>
-  <div class="order-query-result" id="oqResult"></div>
-</div>
 <!-- LINE SEND MODAL -->
+<!-- 訂單查詢結果（只在 ?c= 連結時顯示） -->
+<div id="oqResult" style="display:none;position:fixed;inset:0;background:rgba(30,18,8,0.88);z-index:400;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:var(--white);border-radius:var(--radius);max-width:420px;width:100%;padding:20px;position:relative;max-height:90vh;overflow-y:auto;animation:scaleIn 0.25s ease;">
+    <button onclick="document.getElementById('oqResult').style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text-light);">✕</button>
+    <div id="oqResultInner"></div>
+  </div>
+</div>
 <div class="line-send-overlay" id="lineSendOverlay">
   <div class="line-send-box">
     <div class="line-send-title">傳送清單至官方 Line</div>
@@ -2272,39 +2269,38 @@ async function queryOrder() {
   await showOrderByToken(val);
 }
 async function showOrderByToken(token) {
-  const res = document.getElementById('oqResult');
-  if (!res) return;
-  res.className = 'order-query-result show';
-  res.innerHTML = `<div class="oq-card"><div style="color:var(--text-light);font-size:0.85rem;">查詢中…</div></div>`;
-  if (!sb) { res.innerHTML = `<div class="oq-card"><div style="color:var(--red);font-size:0.85rem;">系統錯誤，請稍後再試。</div></div>`; return; }
+  const overlay = document.getElementById('oqResult');
+  const inner   = document.getElementById('oqResultInner');
+  if (!overlay || !inner) return;
+  overlay.style.display = 'flex';
+  inner.innerHTML = `<div style="color:var(--text-light);font-size:0.85rem;text-align:center;padding:20px;">查詢中…</div>`;
+  if (!sb) { inner.innerHTML = `<div style="color:var(--red);font-size:0.85rem;">系統錯誤，請稍後再試。</div>`; return; }
   const { data, error } = await sb.from('customer_orders').select('*').eq('token', token).single();
   if (error || !data) {
-    res.innerHTML = `<div class="oq-card"><div style="color:var(--red);font-size:0.85rem;">找不到此訂單，請確認連結或編號是否正確。</div></div>`;
+    inner.innerHTML = `<div style="color:var(--red);font-size:0.85rem;">找不到此訂單，請確認連結是否正確。</div>`;
     return;
   }
   const items = Array.isArray(data.items) ? data.items : [];
   const total = items.reduce((s, item) => s + (Number(item.price)||0), 0);
   const statusLabels = ['待確認','備貨中','已出貨','已取消'];
   const statusClass  = ['s0','s1','s2','s3'];
-  res.innerHTML = `<div class="oq-card">
-    <div class="oq-no">訂單編號：${esc(token)}</div>
-    <div class="oq-name">${esc(data.customer_name)}</div>
-    <div><span class="oq-status ${statusClass[data.status]||'s0'}">${statusLabels[data.status]||'待確認'}</span></div>
-    <div style="margin:10px 0;display:flex;flex-direction:column;gap:10px;">
+  inner.innerHTML = `
+    <div class="oq-name" style="margin-bottom:6px;">${esc(data.customer_name)} 的清單</div>
+    <div style="margin-bottom:12px;"><span class="oq-status ${statusClass[data.status]||'s0'}">${statusLabels[data.status]||'待確認'}</span></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
       ${items.map(item => `
-        <div style="display:flex;gap:10px;align-items:center;">
-          <img src="${esc(item.url)}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--cream-dark);" onerror="this.onerror=null;this.style.display='none'">
-          <div style="font-size:0.78rem;color:var(--text-soft);line-height:1.8;">
+        <div style="display:flex;gap:10px;align-items:center;background:var(--cream-dark);border-radius:8px;padding:8px 10px;">
+          <img src="${esc(item.url||'')}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--cream-mid);" onerror="this.style.display='none'">
+          <div style="font-size:0.8rem;color:var(--text-soft);line-height:1.8;">
             <div style="font-weight:500;color:var(--text-main);">${esc(item.brand||'')}${item.category?' · '+esc(item.category):''}</div>
             ${item.size  ? '尺寸：'+esc(item.size)+'<br>' : ''}
             ${item.color ? '顏色：'+esc(item.color)+'<br>' : ''}
-            ${item.price ? '<span style="color:var(--warm-brown);font-family:Cormorant Garamond,serif;font-size:1rem;">NT$ '+esc(item.price)+'</span>' : ''}
+            ${item.price ? `<span style="color:var(--warm-brown);font-family:'Cormorant Garamond',serif;font-size:1.05rem;">NT$ ${esc(item.price)}</span>` : ''}
           </div>
         </div>`).join('')}
     </div>
-    ${data.note ? `<div style="font-size:0.78rem;color:var(--text-soft);background:var(--cream-dark);padding:8px 10px;border-radius:6px;margin-bottom:8px;">備註：${esc(data.note)}</div>` : ''}
-    <div class="oq-total">合計 NT$ ${total.toLocaleString()}</div>
-  </div>`;
+    ${data.note ? `<div style="font-size:0.78rem;color:var(--text-soft);background:var(--cream-dark);padding:8px 10px;border-radius:6px;margin-bottom:10px;">備註：${esc(data.note)}</div>` : ''}
+    <div class="oq-total">合計 NT$ ${total.toLocaleString()}</div>`;
 }
 
 // ═══════════════════════════════
@@ -2422,8 +2418,6 @@ function deleteSgBrandDirect(brand) {
   // 自動偵測網址中的 ?c= 訂單 token，自動展開查詢結果
   const urlToken = new URLSearchParams(location.search).get('c');
   if (urlToken) {
-    document.getElementById('oqInput').value = urlToken;
-    document.querySelector('.order-query-wrap')?.scrollIntoView({ behavior:'smooth', block:'start' });
     await showOrderByToken(urlToken);
   }
 })();
