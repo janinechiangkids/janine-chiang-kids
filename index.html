@@ -297,6 +297,51 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .cart-fab.visible { display: flex; animation: fadeUp 0.3s ease; }
 .cart-fab:hover { transform: translateY(-2px); }
 .cart-fab-count { background: var(--white); color: var(--warm-brown); border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+/* ── 手機版響應式 ── */
+@media (max-width: 768px) {
+  .site-header { padding: 12px 14px; }
+  .site-title { font-size: 1.05rem; }
+  .site-subtitle { font-size: 0.6rem; }
+  .header-actions { gap: 6px; }
+  .line-btn, .admin-btn { padding: 6px 10px; font-size: 0.7rem; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 10px 10px; }
+  .brand-tab { font-size: 0.7rem; padding: 5px 9px; }
+  .lb-box { max-width: 96vw; }
+  .lb-img { max-height: 42vh; }
+  .lb-chip { padding: 4px 9px; font-size: 0.72rem; }
+  .lb-btns { flex-direction: column; gap: 8px; }
+  .lb-cart-btn, .lb-my-cart-btn { width: 100%; text-align: center; padding: 12px; }
+  .admin-modal-box { width: 97vw; max-height: 93vh; padding: 14px; border-radius: 16px; }
+  .admin-tab { font-size: 0.68rem; padding: 7px 8px; }
+  .bm-edit-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .edit-cards { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .batch-action-bar { flex-wrap: wrap; gap: 6px; padding: 8px; }
+  .batch-btn { font-size: 0.68rem; padding: 5px 9px; }
+  .batch-brand-chip { font-size: 0.65rem; padding: 3px 7px; }
+  .batch-modify-panel { padding: 10px; }
+  .bulk-bar { padding: 8px 10px; }
+  .option-chip { font-size: 0.65rem; padding: 2px 7px; }
+  .order-card { padding: 10px 12px; }
+  .order-card-head { flex-direction: column; gap: 6px; }
+  .order-item-row { flex-wrap: wrap; gap: 4px; }
+  .order-action-row { flex-wrap: wrap; gap: 4px; }
+  .order-total-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .new-order-fields { grid-template-columns: 1fr; }
+  .new-order-item-row { flex-wrap: wrap; gap: 4px; }
+  .cart-fab { right: 12px; bottom: 14px; font-size: 0.8rem; padding: 10px 14px; }
+  .float-save-btn { right: 12px; bottom: 70px; font-size: 0.8rem; padding: 10px 14px; }
+  .size-chip { padding: 3px 6px; font-size: 0.65rem; }
+  .group-price-input { width: 56px; font-size: 0.65rem; }
+  .ep { flex-wrap: wrap; }
+  .ep img { width: 52px; height: 52px; }
+}
+@media (max-width: 480px) {
+  .product-grid { gap: 8px; padding: 0 8px 8px; }
+  .admin-tab { font-size: 0.62rem; padding: 6px 6px; }
+  .lb-info { padding: 10px 12px; }
+  .lb-chip { padding: 3px 7px; font-size: 0.68rem; }
+}
 /* ── 購物清單 Modal ── */
 .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.82); z-index: 350; align-items: flex-end; justify-content: center; }
 .cart-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
@@ -1092,16 +1137,22 @@ function openLb(id) {
     <div class="lb-size-guide" id="lbSizeGuide" style="margin-bottom:8px;"></div>`;
   }
 
-  // 尺寸按鈕
+  // 尺寸按鈕 — 按群組分行
   if ((p.sizes||[]).length) {
-    const chips = p.sizes.map(s =>
-      `<div class="lb-chip" onclick="toggleLbChip(this);_updateLbPriceFromChips('${p.id}')">${esc(s)}</div>`
+    const sizeSet = new Set(p.sizes);
+    const groupRows = SIZE_GROUPS
+      .map(g => ({ label: g.label, sizes: g.sizes.filter(s => sizeSet.has(s)) }))
+      .filter(g => g.sizes.length > 0);
+    const chipsHTML = groupRows.map(g =>
+      `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;">
+        ${g.sizes.map(s =>
+          `<div class="lb-chip" onclick="toggleLbChip(this);_updateLbPriceFromChips('${p.id}')">${esc(s)}</div>`
+        ).join('')}
+      </div>`
     ).join('');
     html += `<div class="lb-attr-row" style="align-items:flex-start;">
       <span class="lb-attr-label" style="padding-top:5px;">尺寸</span>
-      <div style="flex:1;">
-        <div class="lb-chips">${chips}</div>
-      </div>
+      <div style="flex:1;">${chipsHTML}</div>
     </div>`;
   }
 
@@ -1965,7 +2016,7 @@ function renderManage() {
         <button class="add-item-btn" onclick="applyBmToSelected('category')" style="font-size:0.72rem;">套用品項至勾選</button>
         <button class="add-item-btn" onclick="applyBmToSelected('sizes')" style="font-size:0.72rem;">套用尺寸至勾選</button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;" class="bm-edit-grid">
       ${products.filter(p => batchSelected.has(p.id)).map(p => {
         const d = batchEditItems.find(d => d.id === p.id);
         if (!d) return '';
