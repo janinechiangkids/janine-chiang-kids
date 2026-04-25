@@ -183,6 +183,25 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .bulk-apply-btn:hover { opacity: 0.88; }
 .bulk-apply-btn.full { width: 100%; padding: 11px 18px; margin-top: 10px; }
 .bulk-size-wrap { background: var(--white); border-radius: var(--radius-sm); padding: 2px; }
+
+/* 批量編輯：基準組差價橫條（小童 300 / 大童 360 用） */
+.bm-bulk-diff { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; background: linear-gradient(135deg, #fff8e8, #fef0d4); border: 1px solid #e8c87a; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; }
+.bm-bulk-diff-icon { font-size: 1rem; }
+.bm-bulk-diff-label { font-size: 0.74rem; color: #8a6a1a; letter-spacing: 0.04em; font-weight: 500; }
+.bm-bulk-diff-arrow { font-size: 0.72rem; color: #8a6a1a; opacity: 0.75; }
+.bm-bulk-diff-select { padding: 4px 6px; border: 1px solid #d4a050; border-radius: 5px; background: var(--white); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; color: #8a6a1a; cursor: pointer; outline: none; }
+.bm-bulk-diff-input { padding: 4px 7px; border: 1px solid #d4a050; border-radius: 5px; background: var(--white); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; color: var(--text-main); outline: none; text-align: center; }
+.bm-bulk-diff-input:focus { border-color: #b88410; }
+.bm-bulk-diff .bulk-apply-btn { background: linear-gradient(135deg, #d4a050, #b88410); padding: 5px 14px; font-size: 0.74rem; }
+.bm-bulk-diff .bulk-apply-btn:hover { background: linear-gradient(135deg, #b88410, #8a6a1a); opacity: 1; }
+
+@media (max-width: 768px) {
+  .bm-bulk-diff { gap: 8px; padding: 10px 12px; }
+  .bm-bulk-diff-label, .bm-bulk-diff-arrow { font-size: 0.85rem; }
+  .bm-bulk-diff-select, .bm-bulk-diff-input { font-size: 16px; padding: 7px 9px; }  /* 16px 避免 iOS 自動放大 */
+  .bm-bulk-diff .bulk-apply-btn { font-size: 0.85rem; padding: 7px 16px; }
+}
+
 /* EDIT CARDS */
 .edit-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 @media (max-width: 1200px) { .edit-cards { grid-template-columns: repeat(4, 1fr); } }
@@ -505,6 +524,21 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .pcard-top-alert strong { color: var(--red); font-weight: 500; }
 .pcard-top-alert-icon { font-size: 0.95rem; flex-shrink: 0; }
 .pcard-top-alert.ok { background: #e8f1e0; border-bottom-color: #c5d8b0; color: #4a6a30; }
+.pcard-top-alert.done-btn { width: 100%; border: none; cursor: pointer; font-family: 'Noto Serif TC', serif; transition: all 0.2s; text-align: center; justify-content: center; padding: 11px 12px; font-size: 0.82rem; flex-wrap: wrap; }
+.pcard-top-alert.done-btn:hover { background: linear-gradient(90deg, #c5d8b0, #b3cf95); color: #2f4a18; }
+.pcard-top-alert.done-btn .done-btn-line1 { font-weight: 500; }
+.pcard-top-alert.done-btn .done-btn-line2 { font-weight: 600; }
+.pcard-top-alert.done-btn .done-btn-line1::after { content: ' · '; opacity: 0.6; }
+@media (max-width: 480px) {
+  .pcard-top-alert.done-btn { flex-direction: column; gap: 4px; }
+  .pcard-top-alert.done-btn .done-btn-line1::after { content: ''; }
+}
+
+/* 已選尺寸組底色加深 */
+.pcard-size-group.has-selected { background: #f4ebd9; }
+/* 此尺寸組未填價格時提醒 */
+.pcard-price-row.need-price .pcard-price-input { border-color: var(--red); background: #fff3eb; }
+.pcard-price-row.need-price .pcard-price-input::placeholder { color: var(--red); font-style: italic; }
 
 /* 已填寫欄位摺疊區 */
 .pcard-filled-section { margin-top: 4px; border-top: 1px dashed var(--cream-mid); padding-top: 6px; }
@@ -553,6 +587,104 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 
 /* 空狀態 */
 .no-results { text-align: center; padding: 50px 20px; color: var(--text-light); font-size: 0.9rem; line-height: 1.9; }
+
+/* 全部分頁 → 個別編輯介面：顏色 chip */
+.ep-color-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.ep-color-chip { font-size: 0.72rem; padding: 3px 9px; border-radius: 12px; border: 1px solid var(--cream-mid); background: var(--white); color: var(--text-soft); cursor: pointer; user-select: none; transition: all 0.15s; font-family: 'Noto Serif TC', serif; }
+.ep-color-chip:hover { background: var(--blush-light); }
+.ep-color-chip.on { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border-color: transparent; }
+
+/* ═══════════════════════════════════════
+   手機優化（≤ 768px / ≤ 480px）
+   針對「待完成」分頁與個別編輯介面
+   ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* 子分頁（待完成 / 全部）：改成可點滑的小膠囊 */
+  .manage-subtabs { gap: 6px; padding-bottom: 10px; margin-bottom: 12px; }
+  .manage-subtab { font-size: 0.82rem; padding: 9px 10px; gap: 5px; }
+  .msub-icon { font-size: 0.9rem; }
+  .msub-badge, .msub-count { font-size: 0.68rem; padding: 1px 7px; min-width: 18px; }
+
+  /* 提示橫幅 */
+  .pending-hint { font-size: 0.78rem; padding: 9px 12px; line-height: 1.65; }
+
+  /* 品牌分組標題 */
+  .pending-brand-name { font-size: 1rem; }
+  .pending-brand-count { font-size: 0.7rem; padding: 2px 9px; }
+
+  /* 卡片：手機加大字體與點擊區 */
+  .pending-card { border-width: 1px; }
+  .pcard-body { padding: 12px 12px 14px; gap: 10px; }
+  .pcard-field { gap: 5px; }
+  .pcard-field-label { font-size: 0.78rem; }  /* 從 0.65rem 加大 */
+  .pcard-input, .pcard-select { padding: 10px 10px; font-size: 16px; border-radius: 8px; }  /* 16px 避免 iOS 自動放大頁面 */
+
+  /* 顏色 chip：加大讓手指好點 */
+  .pcard-color-chips { gap: 5px; margin-bottom: 6px; }
+  .pcard-chip { font-size: 0.78rem; padding: 6px 12px; border-radius: 14px; }
+
+  /* 尺寸群組 */
+  .pcard-size-group { padding: 8px 10px; margin-bottom: 6px; }
+  .pcard-size-group-row { gap: 5px; margin-bottom: 6px; }
+  .pcard-size-label { font-size: 0.7rem; padding: 2px 4px; }
+  .pcard-size-chip { font-size: 0.78rem; padding: 6px 11px; border-radius: 10px; }
+  .pcard-price-row { padding: 4px 0; }
+  .pcard-price-row .nt { font-size: 0.78rem; }
+  .pcard-price-input { padding: 9px 10px; font-size: 16px; border-radius: 8px; }
+
+  /* 缺項提醒列：加大 */
+  .pcard-top-alert { font-size: 0.85rem; padding: 10px 14px; gap: 8px; line-height: 1.5; }
+  .pcard-top-alert-icon { font-size: 1.05rem; }
+  .pcard-top-alert.done-btn { padding: 14px 12px; font-size: 0.88rem; }
+
+  /* 摺疊區 */
+  .pcard-filled-toggle { font-size: 0.82rem; padding: 9px 4px; }
+
+  /* 同圖再加一件 */
+  .pcard-add-sibling { font-size: 0.78rem; padding: 6px 14px; bottom: 8px; }
+
+  /* 缺 N 項徽章 */
+  .pcard-missing-badge { font-size: 0.72rem; padding: 4px 10px; top: 8px; right: 8px; }
+  .pcard-saved-flash { font-size: 0.72rem; padding: 4px 10px; }
+
+  /* 卡片底部刪除按鈕加大 */
+  .pcard-footer { padding: 10px 12px; }
+  .pcard-status { font-size: 0.7rem !important; }
+  .pcard-del-btn { font-size: 1.05rem; padding: 6px 10px; }
+
+  /* 全部分頁的個別編輯介面：顏色 chip 加大 */
+  .ep-color-chips { gap: 6px; margin-bottom: 8px; }
+  .ep-color-chip { font-size: 0.85rem; padding: 7px 13px; border-radius: 14px; }
+
+  /* 燈箱多商品切換器：手機加大 */
+  .lb-multi-tab { font-size: 0.85rem; padding: 9px 12px; }
+  .lb-multi-hint { font-size: 0.78rem; padding: 8px 12px; }
+}
+
+@media (max-width: 480px) {
+  /* 卡片改 1 欄、邊距小一點 */
+  .pending-card { border-radius: 10px; }
+  .pcard-body { padding: 14px 14px 16px; }
+
+  /* 子分頁文字稍微縮小避免擠 */
+  .manage-subtab { font-size: 0.78rem; padding: 9px 8px; }
+
+  /* 同圖再加一件按鈕在窄螢幕縮短 */
+  .pcard-add-sibling { font-size: 0.74rem; padding: 6px 12px; }
+
+  /* 完成按鈕在窄螢幕字數可能太多 → 縮排排版 */
+  .pcard-top-alert.done-btn { font-size: 0.82rem; line-height: 1.5; padding: 13px 10px; }
+}
+
+/* 觸控裝置：去除 hover 效果（避免「點完還是反白」），改用 :active 即時回饋 */
+@media (hover: none) {
+  .pcard-chip:hover, .pcard-size-chip:hover, .ep-color-chip:hover { background: var(--white); color: var(--text-soft); }
+  .pcard-chip.on:hover, .pcard-size-chip.on:hover, .ep-color-chip.on:hover { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
+  .pcard-chip:active, .pcard-size-chip:active, .ep-color-chip:active { transform: scale(0.95); }
+  .pcard-add-sibling:active { background: var(--warm-brown); color: var(--white); }
+  .pcard-top-alert.done-btn:active { background: linear-gradient(90deg, #c5d8b0, #b3cf95); }
+  .manage-subtab:active { background: var(--blush); }
+}
 
 /* Footer */
 .site-footer { background: var(--dark-brown); color: var(--blush); text-align: center; padding: 30px 20px; font-size: 0.78rem; letter-spacing: 0.1em; line-height: 2; }
@@ -2165,30 +2297,69 @@ function importData(event) {
 // ═══════════════════════════════
 let _manageSubMode = 'pending';   // 'pending' | 'all'
 const _pendingSaveTimers = {};    // 每個商品的 debounce 計時器
+// 追蹤每個商品「最近活躍的欄位」，讓使用者編輯中的欄位不要被搬到摺疊區
+// 結構：{ [productId]: { field: 'color', expireAt: 1234567890 } }
+const _pcardActiveField = {};
+const ACTIVE_FIELD_KEEP_MS = 8000;  // 點過某欄位後 8 秒內視為仍在編輯
+
+function _markFieldActive(id, field) {
+  _pcardActiveField[id] = { field, expireAt: Date.now() + ACTIVE_FIELD_KEEP_MS };
+}
+function _isFieldActive(id, field) {
+  const a = _pcardActiveField[id];
+  if (!a) return false;
+  if (Date.now() > a.expireAt) { delete _pcardActiveField[id]; return false; }
+  return a.field === field;
+}
+function _clearFieldActive(id) { delete _pcardActiveField[id]; }
 
 // 判斷一個商品是否「待完成」
 function _isPending(p) {
+  // 但若使用者已按過「移到全部」按鈕（_userConfirmedDone 為 true），就不再算 pending
+  if (_userConfirmedDone[p.id]) return false;
   if (!p.brand || !p.brand.trim()) return true;
   if (!p.category || !p.category.trim()) return true;
   if (!p.color || !p.color.trim()) return true;
   if (!p.sizes || !p.sizes.length) return true;
-  // 價格：sizePrices 至少要有一個有值，或 legacy price 有值
   const hasGroupPrice = p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim());
   if (!hasGroupPrice && !(p.price && String(p.price).trim())) return true;
   return false;
 }
 
-// 列出某商品缺哪些欄位
+// 已選了尺寸但未填價格時，算「價格未填」
+function _hasSomePrice(p) {
+  if (p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim())) return true;
+  if (p.price && String(p.price).trim()) return true;
+  return false;
+}
+function _hasAllSelectedSizesPriced(p) {
+  if (!p.sizes || !p.sizes.length) return false;
+  if (!p.sizePrices) return !!(p.price && String(p.price).trim());
+  // 每個已選尺寸都要有對應的價格（或 legacy price）
+  return p.sizes.every(s => {
+    if (p.sizePrices[s] && String(p.sizePrices[s]).trim()) return true;
+    if (p.price && String(p.price).trim()) return true;
+    return false;
+  });
+}
+
+// 列出某商品缺哪些欄位（拆分尺寸與價格）
 function _missingFields(p) {
   const miss = [];
   if (!p.brand    || !p.brand.trim())    miss.push('品牌');
   if (!p.category || !p.category.trim()) miss.push('品項');
   if (!p.color    || !p.color.trim())    miss.push('顏色');
-  if (!p.sizes    || !p.sizes.length)    miss.push('尺寸');
-  const hasGroupPrice = p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim());
-  if (!hasGroupPrice && !(p.price && String(p.price).trim())) miss.push('價格');
+  const hasSize  = !!(p.sizes && p.sizes.length);
+  const hasPrice = _hasSomePrice(p);
+  if (!hasSize && !hasPrice) miss.push('尺寸與價格');
+  else if (!hasSize)         miss.push('尺寸');
+  else if (!hasPrice)        miss.push('價格');
+  else if (!_hasAllSelectedSizesPriced(p)) miss.push('部分尺寸的價格');
   return miss;
 }
+
+// 使用者已手動確認「移到全部」的商品 ID 集合
+const _userConfirmedDone = {};
 
 // 切換子分頁
 function switchManageSub(mode) {
@@ -2263,20 +2434,34 @@ function renderPending() {
 
 // 渲染單張待完成卡片
 function _renderPendingCard(p) {
-  const miss = _missingFields(p);
-  const missCls = miss.length >= 3 ? '' : 'few';
   const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);
   const sizes = p.sizes || [];
   const sp = p.sizePrices || {};
 
-  // 哪些欄位「缺」？以欄位 key 標記
+  // 智慧拆分：「尺寸」與「價格」是兩件事
+  const hasBrand    = !!(p.brand    && p.brand.trim());
+  const hasCategory = !!(p.category && p.category.trim());
+  const hasColor    = !!(p.color    && p.color.trim());
+  const hasSize     = sizes.length > 0;
+  const hasPrice    = _hasSomePrice(p);
+  const allSizesPriced = _hasAllSelectedSizesPriced(p);
+
+  // 缺項判定（給「顯示在上方」用，已選尺寸但有部分缺價格也算缺）
   const missingMap = {
-    brand:    !p.brand    || !p.brand.trim(),
-    category: !p.category || !p.category.trim(),
-    color:    !p.color    || !p.color.trim(),
-    sizes:    !(sizes.length && Object.values(sp).some(v => v && String(v).trim())),
+    brand:    !hasBrand,
+    category: !hasCategory,
+    color:    !hasColor,
+    sizes:    !hasSize || !hasPrice || !allSizesPriced,
   };
-  const filledKeys = Object.keys(missingMap).filter(k => !missingMap[k]);
+  // 「即使已填、但仍視為要顯示在上方」的欄位
+  // = 真的缺 OR 最近 8 秒內正在編輯
+  const showOnTopMap = {
+    brand:    missingMap.brand    || _isFieldActive(p.id, 'brand'),
+    category: missingMap.category || _isFieldActive(p.id, 'category'),
+    color:    missingMap.color    || _isFieldActive(p.id, 'color'),
+    sizes:    missingMap.sizes    || _isFieldActive(p.id, 'sizes'),
+  };
+  const filledKeys = Object.keys(showOnTopMap).filter(k => !showOnTopMap[k]);
   const missingCount = Object.values(missingMap).filter(Boolean).length;
 
   const colorChips = COLOR_LIST.map(c => {
@@ -2288,6 +2473,7 @@ function _renderPendingCard(p) {
     .concat(CATEGORY_LIST.map(c => `<option value="${esc(c)}"${(p.category===c)?' selected':''}>${esc(c)}</option>`))
     .join('');
 
+  // 尺寸群組：永遠顯示，不會因為「已填」就隱藏
   const sizeGroupsHtml = SIZE_GROUPS.map((g, gi) => {
     const chips = g.sizes.map(s => {
       const on = sizes.includes(s);
@@ -2295,24 +2481,27 @@ function _renderPendingCard(p) {
     }).join('');
     const groupPrice = g.sizes.map(s => sp[s]).find(v => v && String(v).trim()) || '';
     const hasAnyOn = g.sizes.some(s => sizes.includes(s));
+    // 該組內已選但無價格的尺寸（用於警示）
+    const unpricedInGroup = g.sizes.filter(s => sizes.includes(s) && !(sp[s] && String(sp[s]).trim()));
+    const groupNeedsPrice = hasAnyOn && (!groupPrice || unpricedInGroup.length);
     return `
-      <div class="pcard-size-group">
+      <div class="pcard-size-group${hasAnyOn ? ' has-selected' : ''}">
         <div class="pcard-size-group-row">
           <span class="pcard-size-label">${g.label}</span>
           ${chips}
         </div>
         ${hasAnyOn ? `
-          <div class="pcard-price-row">
+          <div class="pcard-price-row${groupNeedsPrice ? ' need-price' : ''}">
             <span class="nt">NT$</span>
-            <input type="number" class="pcard-price-input${groupPrice?'':' empty'}"
+            <input type="number" inputmode="numeric" pattern="[0-9]*" class="pcard-price-input${groupPrice?'':' empty'}"
               value="${esc(groupPrice)}"
-              placeholder="此尺寸組的價格"
+              placeholder="${groupNeedsPrice ? '⚠ 此尺寸組未填價格' : '此尺寸組的價格'}"
               onchange="pcardSetGroupPrice('${esc(p.id)}',${gi},this.value)">
           </div>` : ''}
       </div>`;
   }).join('');
 
-  // 各欄位 HTML（用 key 區分）
+  // 各欄位 HTML
   const fieldsHtml = {
     brand: `
       <div class="pcard-field" data-field="brand">
@@ -2347,33 +2536,43 @@ function _renderPendingCard(p) {
       </div>`,
   };
 
-  // 缺的欄位優先顯示
-  const missingFieldsHtml = Object.keys(missingMap).filter(k => missingMap[k]).map(k => fieldsHtml[k]).join('');
-  // 已填的欄位放摺疊區
+  const missingFieldsHtml = Object.keys(showOnTopMap).filter(k => showOnTopMap[k]).map(k => fieldsHtml[k]).join('');
   const filledFieldsHtml = filledKeys.map(k => fieldsHtml[k]).join('');
 
-  // 缺項顯示中文標籤
-  const missLabelMap = { brand: '品牌', category: '品項', color: '顏色', sizes: '尺寸+價格' };
-  const missLabels = Object.keys(missingMap).filter(k => missingMap[k]).map(k => missLabelMap[k]);
+  // 頂部提醒：細分尺寸/價格
+  const missLabels = [];
+  if (missingMap.brand)    missLabels.push('品牌');
+  if (missingMap.category) missLabels.push('品項');
+  if (missingMap.color)    missLabels.push('顏色');
+  if (missingMap.sizes) {
+    if (!hasSize && !hasPrice) missLabels.push('尺寸與價格');
+    else if (!hasSize)         missLabels.push('尺寸');
+    else if (!hasPrice)        missLabels.push('價格');
+    else if (!allSizesPriced)  missLabels.push('部分尺寸的價格');
+  }
+
+  // 頂部橫條：缺項時是橘色提醒；全部完成時是綠色「移到全部」按鈕
+  const topBar = missLabels.length ? `
+    <div class="pcard-top-alert">
+      <span class="pcard-top-alert-icon">⚠</span>
+      <span>還缺：<strong>${missLabels.join('、')}</strong></span>
+    </div>` : `
+    <button class="pcard-top-alert ok done-btn" onclick="pcardConfirmDone('${esc(p.id)}')">
+      <span class="done-btn-line1">✓ 已完成全部欄位</span>
+      <span class="done-btn-line2">點此移到全部商品 →</span>
+    </button>`;
 
   return `
     <div class="pending-card" id="pcard_${esc(p.id)}">
       <div class="pcard-img-wrap">
         <img class="pcard-img" src="${esc(p.url||'')}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
-        ${missingCount ? `<span class="pcard-missing-badge ${missCls}">缺 ${missingCount} 項</span>` : ''}
+        ${missingCount ? `<span class="pcard-missing-badge ${missingCount >= 3 ? '' : 'few'}">缺 ${missingCount} 項</span>` : ''}
         <span class="pcard-saved-flash" id="pcard_flash_${esc(p.id)}">✓ 已儲存</span>
         <button class="pcard-add-sibling" onclick="pcardAddSibling('${esc(p.id)}')" title="這張照片還有其他商品（例如上衣+褲子）">
           ➕ 同圖再加一件
         </button>
       </div>
-      ${missLabels.length ? `
-        <div class="pcard-top-alert">
-          <span class="pcard-top-alert-icon">⚠</span>
-          <span>還缺：<strong>${missLabels.join('、')}</strong></span>
-        </div>` : `
-        <div class="pcard-top-alert ok">
-          <span>✓ 已完成</span>
-        </div>`}
+      ${topBar}
       <div class="pcard-body">
         ${missingFieldsHtml}
         ${filledKeys.length ? `
@@ -2388,10 +2587,25 @@ function _renderPendingCard(p) {
           </div>` : ''}
       </div>
       <div class="pcard-footer">
-        <div class="pcard-status" id="pcard_status_${esc(p.id)}" style="opacity:0.6;font-size:0.65rem;">自動儲存中</div>
+        <div class="pcard-status" id="pcard_status_${esc(p.id)}" style="opacity:0.5;font-size:0.65rem;">填完欄位會自動儲存</div>
         <button class="pcard-del-btn" onclick="pcardDelete('${esc(p.id)}')" title="刪除">🗑</button>
       </div>
     </div>`;
+}
+
+// 使用者按下「移到全部」按鈕
+function pcardConfirmDone(id) {
+  _userConfirmedDone[id] = true;
+  _clearFieldActive(id);
+  const card = document.getElementById('pcard_' + id);
+  if (card) {
+    card.classList.add('complete');
+    setTimeout(() => {
+      renderPending();
+      applyFilters();
+      showToast('✓ 已移到全部商品');
+    }, 600);
+  }
 }
 
 // 摺疊/展開「已填寫欄位」
@@ -2408,6 +2622,7 @@ function pcardToggleFilled(id, btn) {
 function pcardToggleColor(id, color, el) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  _markFieldActive(id, 'color');
   const arr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);
   const i = arr.indexOf(color);
   if (i >= 0) arr.splice(i, 1); else arr.push(color);
@@ -2419,10 +2634,9 @@ function pcardToggleColor(id, color, el) {
 function pcardSetColorManual(id, val) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  _markFieldActive(id, 'color');
   const arr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);
-  // 保留已選的「預設色」
   const kept = arr.filter(c => COLOR_LIST.includes(c));
-  // 加上手動輸入的
   const manual = (val||'').split('/').map(s => s.trim()).filter(Boolean);
   const merged = [...new Set([...kept, ...manual])];
   p.color = merged.join('/');
@@ -2432,11 +2646,11 @@ function pcardSetColorManual(id, val) {
 function pcardToggleSize(id, size, gi, el) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  _markFieldActive(id, 'sizes');
   if (!p.sizes) p.sizes = [];
   const i = p.sizes.indexOf(size);
   if (i >= 0) {
     p.sizes.splice(i, 1);
-    // 移除該尺寸的價格
     if (p.sizePrices) delete p.sizePrices[size];
   } else {
     p.sizes.push(size);
@@ -2448,13 +2662,12 @@ function pcardToggleSize(id, size, gi, el) {
 function pcardSetGroupPrice(id, gi, val) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  _markFieldActive(id, 'sizes');
   if (!p.sizePrices) p.sizePrices = {};
   const g = SIZE_GROUPS[gi];
-  // 套用到該組所有已選的尺寸
   g.sizes.forEach(s => {
     if ((p.sizes||[]).includes(s)) p.sizePrices[s] = val;
   });
-  // 同步 legacy price
   const firstPrice = (p.sizes||[]).map(s => p.sizePrices[s]).find(v => v && String(v).trim());
   if (firstPrice) p.price = firstPrice;
   _pcardScheduleSave(id, { price_groups: p.sizePrices, price: p.price || '' });
@@ -2463,6 +2676,7 @@ function pcardSetGroupPrice(id, gi, val) {
 function pcardSetField(id, field, val) {
   const p = products.find(x => x.id === id);
   if (!p) return;
+  _markFieldActive(id, field);
   p[field] = (val||'').trim();
   const patch = { [field]: p[field] };
   _pcardScheduleSave(id, patch);
@@ -2473,15 +2687,19 @@ async function pcardAddSibling(id) {
   if (!src) return;
   if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
   const newId = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  // 複製尺寸與群組價格（顏色與品項保持空白，因為通常不一樣）
+  const copiedSizes  = Array.isArray(src.sizes) ? [...src.sizes] : [];
+  const copiedPrices = (src.sizePrices && typeof src.sizePrices === 'object') ? {...src.sizePrices} : {};
+  const copiedPrice  = src.price || '';
   const newRow = {
     id:           newId,
     url:          src.url,
     brand:        src.brand || '',
     category:     '',
     color:        '',
-    sizes:        [],
-    price:        '',
-    price_groups: {},
+    sizes:        copiedSizes,
+    price:        copiedPrice,
+    price_groups: copiedPrices,
     created_at:   Date.now()
   };
   const { error } = await sb.from(SUPABASE_TABLE).insert([newRow]);
@@ -2492,9 +2710,9 @@ async function pcardAddSibling(id) {
     brand:      src.brand || '',
     category:   '',
     color:      '',
-    sizes:      [],
-    price:      '',
-    sizePrices: {},
+    sizes:      copiedSizes,
+    price:      copiedPrice,
+    sizePrices: copiedPrices,
     createdAt:  newRow.created_at
   };
   const srcIdx = products.findIndex(x => x.id === id);
@@ -2503,7 +2721,7 @@ async function pcardAddSibling(id) {
   renderBrandTabs();
   applyFilters();
   renderPending();
-  showToast('✓ 已新增同圖商品，請填寫資訊');
+  showToast('✓ 已新增同圖商品（已複製品牌與尺寸，請填寫品項與顏色）');
   setTimeout(() => {
     const card = document.getElementById('pcard_' + newId);
     if (card) {
@@ -2560,48 +2778,27 @@ async function _pcardCommitSave(id, patch, rerender) {
     flashEl.classList.add('show');
     setTimeout(() => flashEl.classList.remove('show'), 1200);
   }
-  const miss = _missingFields(p);
-  // 全部填完 → 1 秒後從清單移除
-  if (!miss.length) {
-    const card = document.getElementById('pcard_' + id);
-    if (card) {
-      card.classList.add('complete');
-      setTimeout(() => { renderPending(); applyFilters(); }, 1200);
-    }
-  } else {
-    // 仍有缺項 → 即時重繪「該張卡片」（更新頂部提醒、把已填的搬到摺疊區）
-    const card = document.getElementById('pcard_' + id);
-    if (card) {
-      // 保留「已展開」狀態
-      const wasOpen = card.querySelector('.pcard-filled-fields')?.style.display === 'block';
-      const newHtml = _renderPendingCard(p);
-      const wrap = document.createElement('div');
-      wrap.innerHTML = newHtml.trim();
-      card.replaceWith(wrap.firstChild);
-      if (wasOpen) {
-        const newCard = document.getElementById('pcard_' + id);
-        const btn = newCard?.querySelector('.pcard-filled-toggle');
-        if (btn) pcardToggleFilled(id, btn);
-      }
-    }
-  }
+  // 不再自動消失！只重繪卡片，全部填完時頂部會出現「移到全部」綠色按鈕
+  _rerenderSinglePcard(id);
   applyFilters();
   _updatePendingBadge();
-  if (rerender) {
-    // 顏色 chip 切換、尺寸 chip 切換等需要重繪該卡（價格輸入框可能要顯示/隱藏）
-    const card = document.getElementById('pcard_' + id);
-    if (card && miss.length) {
-      const wasOpen = card.querySelector('.pcard-filled-fields')?.style.display === 'block';
-      const newHtml = _renderPendingCard(p);
-      const wrap = document.createElement('div');
-      wrap.innerHTML = newHtml.trim();
-      card.replaceWith(wrap.firstChild);
-      if (wasOpen) {
-        const newCard = document.getElementById('pcard_' + id);
-        const btn = newCard?.querySelector('.pcard-filled-toggle');
-        if (btn) pcardToggleFilled(id, btn);
-      }
-    }
+}
+
+// 工具：重繪單一卡片，保留「已展開」狀態
+function _rerenderSinglePcard(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const card = document.getElementById('pcard_' + id);
+  if (!card) return;
+  const wasOpen = card.querySelector('.pcard-filled-fields')?.style.display === 'block';
+  const newHtml = _renderPendingCard(p);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = newHtml.trim();
+  card.replaceWith(wrap.firstChild);
+  if (wasOpen) {
+    const newCard = document.getElementById('pcard_' + id);
+    const btn = newCard?.querySelector('.pcard-filled-toggle');
+    if (btn) pcardToggleFilled(id, btn);
   }
 }
 
@@ -2766,11 +2963,31 @@ function renderBatchModifyPanel() {
     <div class="bulk-bar" style="margin-bottom:8px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div class="bulk-bar-title" style="margin-bottom:0;">📐 尺寸</div>
-        <div style="display:flex;gap:6px;">
-          <input type="number" id="bmUnifiedPrice" class="field-input" placeholder="統一價格" style="width:90px;font-size:0.78rem;padding:4px 8px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="number" inputmode="numeric" id="bmUnifiedPrice" class="field-input" placeholder="統一價格" style="width:90px;font-size:0.78rem;padding:4px 8px;">
           <button class="bulk-apply-btn" onclick="applyBmUnifiedPrice()">統一套用</button>
           <button class="bulk-apply-btn" onclick="applyBmToSelected('sizes')">套用至勾選</button>
         </div>
+      </div>
+      <!-- 基準組差價：用於小童 300 / 大童 360 這類情境 -->
+      <div class="bm-bulk-diff" id="bmBulkDiff">
+        <span class="bm-bulk-diff-icon">⚡</span>
+        <span class="bm-bulk-diff-label">基準組</span>
+        <select id="bmBaseGroup" class="bm-bulk-diff-select">
+          ${SIZE_GROUPS.map((g, gi) => `<option value="${gi}"${gi === 2 ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
+        </select>
+        <input type="number" inputmode="numeric" id="bmBasePrice" class="bm-bulk-diff-input" placeholder="基準價" style="width:75px;">
+        <span class="bm-bulk-diff-arrow">→ 其他組</span>
+        <select id="bmDiffSign" class="bm-bulk-diff-select" style="width:50px;">
+          <option value="+">+</option>
+          <option value="-">−</option>
+        </select>
+        <input type="number" inputmode="numeric" id="bmDiffAmt" class="bm-bulk-diff-input" placeholder="差額" style="width:65px;">
+        <span style="font-size:0.7rem;color:var(--soft-brown);">元</span>
+        <button class="bulk-apply-btn" onclick="applyBmDiffPrice()" style="margin-left:auto;">✓ 差價套用</button>
+      </div>
+      <div style="font-size:0.62rem;color:var(--text-light);line-height:1.5;margin-bottom:6px;letter-spacing:0.04em;">
+        ↑ 例：基準組 = 小童、基準價 = 300、+ 60 → 小童填 300，其他組（Baby/大童/cm）填 360
       </div>
       <!-- 群組快選 -->
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
@@ -2893,6 +3110,45 @@ function applyBmUnifiedPrice() {
   showToast(`✓ 已套用統一價格 NT$${price}`);
 }
 
+// 基準組差價套用：基準組 = 基準價，其他組 = 基準價 ± 差額
+function applyBmDiffPrice() {
+  const baseGroupIdx = parseInt(document.getElementById('bmBaseGroup')?.value || '2');
+  const baseRaw      = (document.getElementById('bmBasePrice')?.value || '').trim();
+  const sign         = document.getElementById('bmDiffSign')?.value || '+';
+  const diffRaw      = (document.getElementById('bmDiffAmt')?.value || '').trim();
+  if (!baseRaw)  { showToast('請先輸入基準價'); return; }
+  if (!diffRaw)  { showToast('請輸入差額金額'); return; }
+  const basePrice = parseFloat(baseRaw);
+  const diff      = parseFloat(diffRaw);
+  if (isNaN(basePrice) || isNaN(diff)) { showToast('價格與差額需為數字'); return; }
+  const otherPrice = sign === '+' ? basePrice + diff : basePrice - diff;
+  if (otherPrice < 0) { showToast('⚠ 計算結果為負數'); return; }
+  const baseGroup = SIZE_GROUPS[baseGroupIdx];
+  if (!baseGroup) { showToast('⚠ 無效的基準組'); return; }
+  let appliedItems = 0;
+  let appliedSizes = 0;
+  batchEditItems.forEach(d => {
+    if (!d.sizes || !d.sizes.length) return;
+    const sp = d.sizePrices || {};
+    let touched = false;
+    d.sizes.forEach(s => {
+      // 該尺寸屬於基準組 → 用基準價；否則 → 用 otherPrice
+      const inBaseGroup = baseGroup.sizes.includes(s);
+      sp[s] = String(inBaseGroup ? basePrice : otherPrice);
+      appliedSizes++;
+      touched = true;
+    });
+    if (touched) {
+      d.sizePrices = sp;
+      d.price = sp[d.sizes[0]];
+      appliedItems++;
+    }
+  });
+  if (!appliedItems) { showToast('沒有可套用的商品（請先選尺寸）'); return; }
+  _refreshBmProductRows();
+  showToast(`✓ 已套用差價（基準 ${basePrice} / 其他 ${otherPrice}）共 ${appliedItems} 件商品`);
+}
+
 // 重新渲染商品列中的價格輸入
 function _renderBmPriceInputs(idx, d) {
   if (!d.sizes || !d.sizes.length) return `<span style="font-size:0.72rem;color:var(--text-light);">請先在上方選擇尺寸</span>`;
@@ -2993,6 +3249,14 @@ function applyBmSizeGroups() {
   showToast(`✓ 已套用尺寸：${sizes.join(' / ')}`);
 }
 function renderEditingProd(p) {
+  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);
+  const colorChips = COLOR_LIST.map(c => {
+    const on = colorArr.includes(c);
+    return `<span class="ep-color-chip${on?' on':''}" onclick="epToggleEditColor('${p.id}','${esc(c)}',this)">${esc(c)}</span>`;
+  }).join('');
+  const catOptions = ['<option value="">— 選擇品項 —</option>']
+    .concat(CATEGORY_LIST.map(c => `<option value="${esc(c)}"${(p.category===c)?' selected':''}>${esc(c)}</option>`))
+    .join('');
   return `<div class="ep-editing">
     <div class="ep-editing-header">
       <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
@@ -3009,6 +3273,19 @@ function renderEditingProd(p) {
         </div>
       </div>
       <div class="edit-field">
+        <label>📦 品項</label>
+        <select class="field-input" id="ecat_${p.id}">
+          ${catOptions}
+        </select>
+      </div>
+      <div class="edit-field">
+        <label>🎨 顏色（可複選）</label>
+        <div class="ep-color-chips" id="ecolchips_${p.id}">${colorChips}</div>
+        <input class="field-input" type="text" id="ecol_${p.id}"
+          value="${esc(p.color||'')}"
+          placeholder="例：白/藍/粉（用 / 分隔）">
+      </div>
+      <div class="edit-field">
         <label>📐 尺寸 ＋ 💰 價格</label>
         ${sizePicker('edit_' + p.id, 0, editingSizes, p._editSizePrices || p.sizePrices || {})}
       </div>
@@ -3018,6 +3295,17 @@ function renderEditingProd(p) {
       </div>
     </div>
   </div>`;
+}
+
+// 個別編輯介面：顏色 chip 點擊
+function epToggleEditColor(pid, color, el) {
+  const inp = document.getElementById('ecol_' + pid);
+  if (!inp) return;
+  const arr = (inp.value||'').split('/').map(s => s.trim()).filter(Boolean);
+  const i = arr.indexOf(color);
+  if (i >= 0) arr.splice(i, 1); else arr.push(color);
+  inp.value = arr.join('/');
+  el.classList.toggle('on');
 }
 function startEditProd(id) {
   const p = products.find(x => x.id === id);
@@ -4120,18 +4408,31 @@ const SEED_SIZE_GUIDES = {
 
 async function _seedSizeGuides() {
   if (!sb) return;
-  // 強制 upsert 所有品牌（確保資料與程式碼同步）
-  const rows = Object.entries(SEED_SIZE_GUIDES).map(([brand, guide]) => ({
-    brand,
-    headers: guide.headers,
-    rows:    guide.rows,
-    updated_at: Date.now()
-  }));
-  const { error } = await sb.from('size_guides').upsert(rows);
-  if (error) { console.error('[seedSizeGuides]', error); return; }
-  Object.entries(SEED_SIZE_GUIDES).forEach(([brand, guide]) => {
-    sizeGuideData[brand] = guide;
+  // 1. 必須是已登入的管理員才執行（避免訪客觸發 RLS 錯誤）
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+  } catch (e) { return; }
+  // 2. 只插入「資料庫尚未存在」的品牌，絕不覆蓋已存在的（避免蓋掉手動修改）
+  const { data: existing, error: qErr } = await sb.from('size_guides').select('brand');
+  if (qErr) { console.error('[seedSizeGuides] query', qErr); return; }
+  const existingSet = new Set((existing||[]).map(r => r.brand));
+  const rowsToInsert = Object.entries(SEED_SIZE_GUIDES)
+    .filter(([brand]) => !existingSet.has(brand))
+    .map(([brand, guide]) => ({
+      brand,
+      headers: guide.headers,
+      rows:    guide.rows,
+      updated_at: Date.now()
+    }));
+  if (!rowsToInsert.length) return;  // 全部品牌都已存在，不做任何事
+  const { error } = await sb.from('size_guides').insert(rowsToInsert);
+  if (error) { console.error('[seedSizeGuides] insert', error); return; }
+  // 同步本地快取（只更新新插入的）
+  rowsToInsert.forEach(r => {
+    sizeGuideData[r.brand] = { headers: r.headers, rows: r.rows };
   });
+  console.log('[seedSizeGuides] inserted', rowsToInsert.length, 'new brands');
 }
 
 // ═══════════════════════════════
