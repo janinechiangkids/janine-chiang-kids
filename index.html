@@ -18,6 +18,10 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var(--text-main); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+/* 移除所有 number input 上下箭頭（避免誤觸） */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 /* HEADER */
 .site-header { background: var(--white); border-bottom: 1px solid var(--cream-mid); position: sticky; top: 0; z-index: 100; padding: 0 16px; }
 .header-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 10px; }
@@ -69,6 +73,8 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .product-meta-row .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 600; color: var(--warm-brown); flex-shrink: 0; letter-spacing: 0.02em; }
 .order-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); border: none; border-radius: 20px; padding: 8px 0; font-size: 0.72rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-top: auto; }
 .order-btn:hover { opacity: 0.88; transform: scale(0.98); }
+.order-btn.preorder-closed { background: var(--cream-mid); color: var(--text-light); cursor: not-allowed; }
+.order-btn.preorder-closed:hover { opacity: 1; transform: none; }
 .empty-state { text-align: center; padding: 60px 30px; color: var(--text-light); grid-column: 1 / -1; }
 .empty-state .big-icon { font-size: 3rem; margin-bottom: 14px; }
 .empty-state p { font-size: 0.9rem; line-height: 1.8; }
@@ -693,6 +699,27 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 .site-footer .social a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--cream); color: var(--cream); transition: all 0.25s ease; text-decoration: none; }
 .site-footer .social a:hover { background: var(--cream); color: var(--dark-brown); transform: translateY(-2px); }
 .site-footer .social svg { width: 18px; height: 18px; }
+/* ── 商品圖卡編輯器 ── */
+.card-editor-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.88); z-index: 400; align-items: center; justify-content: center; padding: 16px; }
+.card-editor-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+.card-editor-inner { background: var(--white); border-radius: var(--radius); width: 100%; max-width: 460px; max-height: 94vh; overflow-y: auto; padding: 18px 18px 16px; position: relative; animation: scaleIn 0.22s ease; }
+.card-editor-close { position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; border: none; background: var(--cream-dark); color: var(--text-soft); border-radius: 50%; cursor: pointer; font-size: 0.9rem; line-height: 30px; }
+.card-editor-title { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: var(--dark-brown); letter-spacing: 0.08em; text-align: center; margin-bottom: 4px; }
+.card-editor-hint { font-size: 0.72rem; color: var(--text-light); text-align: center; letter-spacing: 0.04em; margin-bottom: 12px; line-height: 1.6; }
+.card-editor-stage { background: var(--cream-dark); border-radius: var(--radius-sm); padding: 8px; margin-bottom: 14px; display: flex; justify-content: center; }
+#cardEditorCanvas { width: 100%; max-width: 360px; height: auto; display: block; cursor: grab; touch-action: none; border-radius: 4px; box-shadow: 0 2px 10px rgba(60,35,15,0.12); }
+#cardEditorCanvas:active { cursor: grabbing; }
+.card-editor-controls { padding: 0 4px; }
+.ce-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ce-row label { font-size: 0.78rem; color: var(--text-soft); letter-spacing: 0.06em; flex-shrink: 0; min-width: 60px; }
+.ce-row input[type="range"] { flex: 1; accent-color: var(--warm-brown); }
+.ce-row .ce-val { font-size: 0.74rem; color: var(--warm-brown); font-family: 'Cormorant Garamond', serif; min-width: 44px; text-align: right; flex-shrink: 0; }
+.ce-btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.ce-btn { flex: 1; padding: 10px 0; border: none; border-radius: 22px; font-family: 'Noto Serif TC', serif; font-size: 0.82rem; letter-spacing: 0.06em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+.ce-btn-reset { background: var(--cream-dark); color: var(--text-soft); }
+.ce-btn-cancel { background: var(--cream-mid); color: var(--text-soft); }
+.ce-btn-download { background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); }
+.ce-btn:hover { opacity: 0.88; transform: scale(0.98); }
 /* Toast */
 .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark-brown); color: var(--cream); padding: 10px 22px; border-radius: 20px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -746,6 +773,34 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
   </div>
   <div style="margin-top:8px;opacity:0.5;">© 2021 Janine Chiang Kids. All rights reserved.</div>
 </footer>
+<!-- 商品圖卡編輯器 -->
+<div class="card-editor-overlay" id="cardEditorOverlay" onclick="ceOutside(event)">
+  <div class="card-editor-inner">
+    <button class="card-editor-close" onclick="closeCardEditor()">✕</button>
+    <div class="card-editor-title">商品圖卡編輯</div>
+    <div class="card-editor-hint">直接在預覽圖上拖曳調整圖片位置，下方滑桿可縮放</div>
+    <div class="card-editor-stage">
+      <canvas id="cardEditorCanvas"></canvas>
+    </div>
+    <div class="card-editor-controls">
+      <div class="ce-row">
+        <label>圖片縮放</label>
+        <input type="range" id="ceZoom" min="50" max="200" value="100" step="1">
+        <span class="ce-val" id="ceZoomVal">100%</span>
+      </div>
+      <div class="ce-row">
+        <label>文字位置</label>
+        <input type="range" id="ceTextOffset" min="-40" max="120" value="40" step="1">
+        <span class="ce-val" id="ceTextOffsetVal">40</span>
+      </div>
+      <div class="ce-btn-row">
+        <button class="ce-btn ce-btn-reset" onclick="ceReset()">重置</button>
+        <button class="ce-btn ce-btn-cancel" onclick="closeCardEditor()">取消</button>
+        <button class="ce-btn ce-btn-download" onclick="ceDownload()">下載圖卡</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="lbOutside(event)">
   <div class="lightbox-inner">
@@ -961,6 +1016,22 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
         <div class="tab-pane" id="tab-orders">
           <div class="admin-section">
             <div class="admin-section-title" style="margin-bottom:4px;">訂單管理</div>
+            <!-- 預購開關 -->
+            <div style="background:var(--cream);border:1.5px solid var(--cream-mid);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:0.85rem;font-weight:500;color:var(--text-main);margin-bottom:3px;">預購開放狀態</div>
+                <div style="font-size:0.72rem;color:var(--text-soft);line-height:1.6;">開啟時顧客可加入清單下單；關閉時商品仍顯示但無法下單</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                <span id="preorderStatusLabel" style="font-size:0.78rem;font-weight:600;color:var(--warm-brown);">載入中…</span>
+                <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer;">
+                  <input type="checkbox" id="preorderToggle" onchange="setPreorderOpen(this.checked)" style="opacity:0;width:0;height:0;position:absolute;">
+                  <span id="preorderSlider" style="position:absolute;inset:0;background:var(--cream-mid);border-radius:28px;transition:background 0.2s;">
+                    <span style="position:absolute;left:3px;top:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:transform 0.2s;display:block;" id="preorderKnob"></span>
+                  </span>
+                </label>
+              </div>
+            </div>
             <!-- 新增訂單 -->
             <div class="new-order-form">
               <div class="new-order-form-title">➕ 新增訂單</div>
@@ -1065,6 +1136,69 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <script>
+// ═══════════════════════════════
+//  PREORDER STATE
+// ═══════════════════════════════
+const SK_PREORDER = 'jck_preorder_open_v1';
+let _preorderOpen = true; // 預設開放
+
+function _loadPreorderState() {
+  try {
+    const v = localStorage.getItem(SK_PREORDER);
+    _preorderOpen = v === null ? true : v === 'true';
+  } catch(e) { _preorderOpen = true; }
+  _applyPreorderState();
+}
+
+function _applyPreorderState() {
+  // 更新後台開關 UI
+  const toggle = document.getElementById('preorderToggle');
+  const label  = document.getElementById('preorderStatusLabel');
+  const slider = document.getElementById('preorderSlider');
+  const knob   = document.getElementById('preorderKnob');
+  if (toggle) toggle.checked = _preorderOpen;
+  if (label)  { label.textContent = _preorderOpen ? '✅ 預購開放中' : '🔒 預購已關閉'; label.style.color = _preorderOpen ? 'var(--warm-brown)' : 'var(--text-light)'; }
+  if (slider) slider.style.background = _preorderOpen ? 'var(--warm-brown)' : 'var(--cream-mid)';
+  if (knob)   knob.style.transform = _preorderOpen ? 'translateX(24px)' : 'translateX(0)';
+  // 更新前台所有商品卡按鈕
+  document.querySelectorAll('.order-btn').forEach(btn => {
+    if (_preorderOpen) {
+      btn.classList.remove('preorder-closed');
+      btn.disabled = false;
+      if (btn.textContent.includes('預購未開放')) {
+        btn.textContent = btn.dataset.originalText || '點我選規格';
+      }
+    } else {
+      if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
+      btn.classList.add('preorder-closed');
+      btn.disabled = true;
+      btn.textContent = '預購未開放';
+    }
+  });
+  // 更新燈箱內按鈕
+  const lbCartBtn = document.getElementById('lbCartBtn');
+  if (lbCartBtn) {
+    if (_preorderOpen) {
+      lbCartBtn.disabled = false;
+      lbCartBtn.style.opacity = '1';
+      lbCartBtn.style.cursor = 'pointer';
+      if (lbCartBtn.textContent === '預購未開放') lbCartBtn.textContent = '＋ 加入清單';
+    } else {
+      lbCartBtn.disabled = true;
+      lbCartBtn.style.opacity = '0.5';
+      lbCartBtn.style.cursor = 'not-allowed';
+      lbCartBtn.textContent = '預購未開放';
+    }
+  }
+}
+
+function setPreorderOpen(val) {
+  _preorderOpen = val;
+  localStorage.setItem(SK_PREORDER, String(val));
+  _applyPreorderState();
+  showToast(val ? '✅ 預購已開放，顧客可以下單' : '🔒 預購已關閉，顧客無法下單');
+}
+
 // ═══════════════════════════════
 //  CONFIG
 // ═══════════════════════════════
@@ -1366,7 +1500,7 @@ function renderProducts(list) {
           <span class="product-size">${sz ? esc(sz) : ''}</span>
           <span class="product-price">${isMulti ? `<span style="font-size:0.8rem;color:var(--soft-brown);">${priceDisplay}</span>` : priceDisplay}</span>
         </div>
-        <button class="order-btn" onclick="event.stopPropagation();openLb('${p.id}')">${isMulti ? '查看商品' : '點我選規格'}</button>
+        <button class="order-btn${_preorderOpen ? '' : ' preorder-closed'}" ${_preorderOpen ? '' : 'disabled'} onclick="event.stopPropagation();${_preorderOpen ? `openLb('${p.id}')` : ''}" data-original-text="${isMulti ? '查看商品' : '點我選規格'}">${_preorderOpen ? (isMulti ? '查看商品' : '點我選規格') : '預購未開放'}</button>
       </div>
     </div>`;
   }).join('');
@@ -1477,6 +1611,7 @@ function openLb(id) {
 
   attrsEl.innerHTML = html;
   document.getElementById('lightbox').classList.add('active');
+  _applyPreorderState();
   lock();
 }
 
@@ -2900,6 +3035,7 @@ function renderManage() {
           <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
         </div>
         <button class="edit-btn-sm" onclick="startEditProd('${p.id}')" title="編輯">✏️</button>
+        <button class="edit-btn-sm" onclick="downloadCard('${p.id}')" title="下載圖卡" style="color:var(--warm-brown);">⬇️</button>
         <button class="del-btn" onclick="delProd('${p.id}')" title="刪除">🗑</button>
       </div>`;
   }).join('');
@@ -3536,6 +3672,7 @@ function updateCartFab() {
   else             { fab.classList.remove('visible'); }
 }
 function addToCart() {
+  if (!_preorderOpen) { showToast('⚠️ 目前預購未開放，無法加入清單'); return; }
   const p = products.find(x => x.id === currentLbId);
   if (!p) return;
 
@@ -4441,6 +4578,7 @@ async function _seedSizeGuides() {
 (async function init() {
   _loadUsage();
   _loadOrders();
+  _loadPreorderState();
   renderProducts([]);
   setupDragDrop();
   await loadProducts();
@@ -4450,11 +4588,255 @@ async function _seedSizeGuides() {
   renderBrandTabs();
   applyFilters();
   _updatePendingBadge();   // 初始化時更新待完成徽章
+  _applyPreorderState();   // 套用預購狀態到所有按鈕
   const urlToken = new URLSearchParams(location.search).get('c');
   if (urlToken) {
     await showOrderByToken(urlToken);
   }
 })();
+
+// ══════════════════════════════════════
+//  DOWNLOAD PRODUCT CARD（拱形商品圖卡）
+//  僅限已登入管理員使用
+//  v2：開啟可視編輯器，可拖曳/縮放/調整文字位置
+// ══════════════════════════════════════
+const _ceState = {
+  product: null,
+  photoImg: null,        // 已載入的商品圖
+  priceStr: '',
+  sizeStr: '',
+  // 可調整的參數
+  imgScale: 1,           // 圖片縮放（1 = fit cover）
+  imgOffsetX: 0,         // 圖片平移 X（畫布座標 px）
+  imgOffsetY: 0,         // 圖片平移 Y
+  textOffset: 40,        // 文字整體下移（px，預設 40 比舊版下移 40）
+  // 拖曳狀態
+  dragging: false,
+  dragStartX: 0, dragStartY: 0,
+  dragOrigX: 0, dragOrigY: 0,
+  // canvas 與內容尺寸（固定）
+  W: 1080, H: 1350,
+  archX: 100, archW: 880, archTop: 96, archBottom: 1000
+};
+
+async function downloadCard(id) {
+  if (!sb) { showToast('⚠️ 系統錯誤'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.user) {
+    showToast('⚠️ 請先登入後台才能下載圖卡');
+    return;
+  }
+  const p = products.find(x => x.id === id);
+  if (!p) { showToast('找不到商品'); return; }
+
+  const sp = p.sizePrices || {};
+  const prices = [...new Set(Object.values(sp).filter(Boolean).map(Number))].sort((a,b)=>a-b);
+  const priceStr = prices.length === 0
+    ? (p.price ? 'NT$ ' + Number(p.price).toLocaleString() : '')
+    : prices.length === 1
+      ? 'NT$ ' + prices[0].toLocaleString()
+      : 'NT$ ' + prices[0].toLocaleString() + ' 起';
+  const sizeStr = (p.sizes || []).join(' / ');
+
+  // 重置狀態
+  _ceState.product = p;
+  _ceState.priceStr = priceStr;
+  _ceState.sizeStr = sizeStr;
+  _ceState.imgScale = 1;
+  _ceState.imgOffsetX = 0;
+  _ceState.imgOffsetY = 0;
+  _ceState.textOffset = 40;
+  _ceState.photoImg = null;
+
+  // 重置滑桿
+  const zoom = document.getElementById('ceZoom');
+  const off = document.getElementById('ceTextOffset');
+  if (zoom) { zoom.value = 100; document.getElementById('ceZoomVal').textContent = '100%'; }
+  if (off)  { off.value = 40;   document.getElementById('ceTextOffsetVal').textContent = '40'; }
+
+  // 開啟 modal
+  document.getElementById('cardEditorOverlay').classList.add('active');
+
+  // 載入圖片後渲染
+  if (p.url) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { _ceState.photoImg = img; ceRender(); };
+    img.onerror = () => { showToast('⚠ 圖片載入失敗，將顯示無圖版'); ceRender(); };
+    img.src = p.url;
+  } else {
+    ceRender();
+  }
+}
+
+// 在指定 canvas 上繪製圖卡（含當前狀態的所有調整）
+function _drawCardOnCanvas(canvas) {
+  const { W, H, archX, archW, archTop, archBottom, photoImg, priceStr, sizeStr, product, imgScale, imgOffsetX, imgOffsetY, textOffset } = _ceState;
+  const p = product;
+  if (!p) return;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // 底色
+  ctx.fillStyle = '#FAF6F0';
+  ctx.fillRect(0, 0, W, H);
+
+  // 上下金線
+  ctx.strokeStyle = '#C9A87A'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(60,36); ctx.lineTo(W-60,36); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60,H-24); ctx.lineTo(W-60,H-24); ctx.stroke();
+
+  // 上方店名
+  ctx.fillStyle = '#C9A87A';
+  ctx.font = '22px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.globalAlpha = 0.85;
+  ctx.fillText('JANINE CHIANG KIDS', W/2, 68);
+  ctx.globalAlpha = 1;
+
+  // 拱形路徑
+  const radius = archW / 2;
+  const archPath = () => {
+    ctx.beginPath();
+    ctx.moveTo(archX, archBottom);
+    ctx.lineTo(archX, archTop + radius);
+    ctx.arc(archX + radius, archTop + radius, radius, Math.PI, 0, false);
+    ctx.lineTo(archX + archW, archBottom);
+    ctx.closePath();
+  };
+
+  // 拱形底色
+  archPath(); ctx.fillStyle = '#F2EBE0'; ctx.fill();
+
+  // 商品圖（套用 scale + offset）
+  if (photoImg) {
+    ctx.save(); archPath(); ctx.clip();
+    const iW = photoImg.naturalWidth || photoImg.width || 1;
+    const iH = photoImg.naturalHeight || photoImg.height || 1;
+    const archH = archBottom - archTop;
+    // base scale: cover
+    const baseScale = Math.max(archW / iW, archH / iH);
+    const finalScale = baseScale * imgScale;
+    const dW = iW * finalScale, dH = iH * finalScale;
+    const dx = archX + (archW - dW)/2 + imgOffsetX;
+    const dy = archTop + (archH - dH)/2 + imgOffsetY;
+    ctx.drawImage(photoImg, dx, dy, dW, dH);
+    ctx.restore();
+  }
+
+  // 拱形邊框
+  archPath(); ctx.strokeStyle = '#C9A87A'; ctx.lineWidth = 2.5; ctx.stroke();
+
+  // 文字（套用 textOffset）
+  const baseY = archBottom + 72 + textOffset;
+  ctx.fillStyle = '#3D2B1F';
+  ctx.font = 'bold 68px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText((p.brand||'').toUpperCase(), W/2, baseY);
+
+  ctx.strokeStyle = '#C9A87A'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(160, baseY+22); ctx.lineTo(W-160, baseY+22); ctx.stroke();
+
+  if (sizeStr) {
+    ctx.fillStyle = '#A8866A'; ctx.font = '28px Georgia, serif';
+    ctx.fillText(sizeStr, W/2, baseY+70);
+  }
+  if (priceStr) {
+    ctx.fillStyle = '#8B6E52'; ctx.font = 'bold 52px Georgia, serif';
+    ctx.fillText(priceStr, W/2, baseY+136);
+  }
+  // 已移除底部網址
+}
+
+// 渲染預覽 canvas
+function ceRender() {
+  const c = document.getElementById('cardEditorCanvas');
+  if (c) _drawCardOnCanvas(c);
+}
+
+// 滑桿事件綁定（在 DOM 載入後）
+document.addEventListener('DOMContentLoaded', () => {
+  const zoom = document.getElementById('ceZoom');
+  const off  = document.getElementById('ceTextOffset');
+  if (zoom) zoom.addEventListener('input', () => {
+    _ceState.imgScale = Number(zoom.value) / 100;
+    document.getElementById('ceZoomVal').textContent = zoom.value + '%';
+    ceRender();
+  });
+  if (off) off.addEventListener('input', () => {
+    _ceState.textOffset = Number(off.value);
+    document.getElementById('ceTextOffsetVal').textContent = off.value;
+    ceRender();
+  });
+  // 拖曳：把畫面座標轉成 canvas 內部座標
+  const cv = document.getElementById('cardEditorCanvas');
+  if (cv) {
+    const getPt = (e) => {
+      const r = cv.getBoundingClientRect();
+      const t = (e.touches && e.touches[0]) || e;
+      const sx = cv.width / r.width;
+      const sy = cv.height / r.height;
+      return { x: (t.clientX - r.left) * sx, y: (t.clientY - r.top) * sy };
+    };
+    const start = (e) => {
+      e.preventDefault();
+      const pt = getPt(e);
+      _ceState.dragging = true;
+      _ceState.dragStartX = pt.x; _ceState.dragStartY = pt.y;
+      _ceState.dragOrigX = _ceState.imgOffsetX; _ceState.dragOrigY = _ceState.imgOffsetY;
+    };
+    const move = (e) => {
+      if (!_ceState.dragging) return;
+      e.preventDefault();
+      const pt = getPt(e);
+      _ceState.imgOffsetX = _ceState.dragOrigX + (pt.x - _ceState.dragStartX);
+      _ceState.imgOffsetY = _ceState.dragOrigY + (pt.y - _ceState.dragStartY);
+      ceRender();
+    };
+    const end = () => { _ceState.dragging = false; };
+    cv.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    cv.addEventListener('touchstart', start, { passive:false });
+    window.addEventListener('touchmove', move, { passive:false });
+    window.addEventListener('touchend', end);
+  }
+});
+
+function ceReset() {
+  _ceState.imgScale = 1;
+  _ceState.imgOffsetX = 0;
+  _ceState.imgOffsetY = 0;
+  _ceState.textOffset = 40;
+  const zoom = document.getElementById('ceZoom');
+  const off  = document.getElementById('ceTextOffset');
+  if (zoom) { zoom.value = 100; document.getElementById('ceZoomVal').textContent = '100%'; }
+  if (off)  { off.value = 40;   document.getElementById('ceTextOffsetVal').textContent = '40'; }
+  ceRender();
+}
+
+function closeCardEditor() {
+  document.getElementById('cardEditorOverlay').classList.remove('active');
+}
+
+function ceOutside(e) {
+  if (e.target.id === 'cardEditorOverlay') closeCardEditor();
+}
+
+function ceDownload() {
+  const p = _ceState.product;
+  if (!p) return;
+  // 用一個離屏 canvas 輸出（與預覽相同尺寸）
+  const exp = document.createElement('canvas');
+  _drawCardOnCanvas(exp);
+  const safe = s => (s||'').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u4e00-\u9fff]/g,'');
+  const a = document.createElement('a');
+  a.download = safe(p.brand||'product') + '_' + safe(p.category||'card') + '.png';
+  a.href = exp.toDataURL('image/png');
+  a.click();
+  showToast('✓ 圖卡下載中');
+}
+
 </script>
 </body>
 </html>
