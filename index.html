@@ -61,7 +61,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 22px rgba(60,35,15,0.14); }
 .product-img-wrap { position: relative; overflow: hidden; background: var(--cream-dark); aspect-ratio: 1 / 1; }
-.product-img-wrap img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 0.4s ease; }
+.product-img-wrap img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 0.4s ease, opacity 0.35s ease; opacity: 0; }
+.product-img-wrap img.loaded,
+.product-img-wrap img[src*="data:"] { opacity: 1; }
 .product-card:hover .product-img-wrap img { transform: scale(1.04); }
 .multi-badge { position: absolute; top: 8px; left: 8px; background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown)); color: var(--white); font-size: 0.65rem; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.06em; box-shadow: 0 1px 4px rgba(60,35,15,0.18); font-weight: 500; }
 .product-info { padding: 10px 10px 12px; display: flex; flex-direction: column; flex: 1; }
@@ -1216,6 +1218,46 @@ const sb = (window.supabase && window.supabase.createClient)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
 
+// ── 圖片壓縮 helper：把原圖 URL 轉成指定寬度的縮圖 URL ──
+// Supabase Storage 支援 image transform：
+//   原圖：/storage/v1/object/public/<bucket>/<file>
+//   縮圖：/storage/v1/render/image/public/<bucket>/<file>?width=400&quality=75
+// 若 transform 在你的方案中不支援（免費方案），會自動 fallback 回原圖。
+const _imgUrlSupportCache = { tested: false, supported: true }; // 預設嘗試使用，第一次失敗就關掉
+function imgUrl(url, width) {
+  if (!url || !width) return url || '';
+  // 不是 supabase 的圖（例如 fallback、外部 URL、data: URI）→ 直接回原圖
+  if (typeof url !== 'string' || !url.includes('/storage/v1/object/public/')) return url;
+  if (!_imgUrlSupportCache.supported) return url;
+  // 把 /object/public/ 換成 /render/image/public/，並加上 width 參數
+  return url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+    + (url.includes('?') ? '&' : '?') + 'width=' + width + '&quality=75&resize=contain';
+}
+// 偵測 transform 是否能用：列表頁 onerror 會呼叫，第一次失敗就關掉這個功能
+function _imgUrlOnFail(imgEl, originalUrl) {
+  _imgUrlSupportCache.supported = false;
+  if (imgEl && originalUrl) imgEl.src = originalUrl;
+}
+
+// ── 商品資料快取 ──
+const SK_PRODUCTS_CACHE = 'jck_products_cache_v1';
+const PRODUCTS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 天
+function _saveProductsCache(list) {
+  try {
+    localStorage.setItem(SK_PRODUCTS_CACHE, JSON.stringify({ ts: Date.now(), data: list }));
+  } catch (e) { /* quota exceeded 等錯誤靜默忽略 */ }
+}
+function _loadProductsCache() {
+  try {
+    const raw = localStorage.getItem(SK_PRODUCTS_CACHE);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !Array.isArray(obj.data)) return null;
+    if (Date.now() - (obj.ts || 0) > PRODUCTS_CACHE_TTL) return null;
+    return obj.data;
+  } catch (e) { return null; }
+}
+
 // ── 修正 3：尺寸新增「F」──────────────────────────
 const SIZE_GROUPS = [
   { label:'單一尺寸', sizes:['F'] },
@@ -1321,6 +1363,16 @@ let _productsLoading = true;
 
 async function loadProducts() {
   if (!sb) { _productsLoading = false; products = []; return; }
+
+  // ── 快取 first：先用快取資料瞬間顯示，再背景去拿最新的 ──
+  const cached = _loadProductsCache();
+  if (cached && cached.length) {
+    products = cached;
+    rebuildBrandHistory();
+    // 立刻顯示快取資料（讓畫面瞬間不空白）
+    try { renderBrandTabs(); applyFilters(); } catch (e) {}
+  }
+
   for (let attempt = 1; attempt <= 3; attempt++) {
     const { data, error } = await sb
       .from(SUPABASE_TABLE)
@@ -1339,19 +1391,26 @@ async function loadProducts() {
         sizePrices: (row.price_groups && typeof row.price_groups === 'object' && !Array.isArray(row.price_groups)) ? row.price_groups : {},
         createdAt:  Number(row.created_at) || 0
       }));
+      _saveProductsCache(products);
       rebuildBrandHistory();
-      // 如果是重試成功，立刻更新頁面
-      if (attempt > 1) { renderBrandTabs(); applyFilters(); }
+      // 如果是重試成功 或 之前已用快取顯示過，立刻更新頁面
+      if (attempt > 1 || cached) { renderBrandTabs(); applyFilters(); }
       return;
     }
     if (attempt < 3) {
-      const title = document.getElementById('sectionTitle');
-      if (title) title.textContent = `— 連線中，請稍候… —`;
+      // 已有快取的話就不顯示「連線中」字樣（避免閃爍）
+      if (!cached) {
+        const title = document.getElementById('sectionTitle');
+        if (title) title.textContent = `— 連線中，請稍候… —`;
+      }
       await new Promise(r => setTimeout(r, 4000));
     } else {
       _productsLoading = false;
-      products = [];
-      showToast('⚠️ 載入失敗，請重新整理頁面', 5000);
+      // 完全失敗：若已有快取資料就保留，不顯示錯誤
+      if (!cached) {
+        products = [];
+        showToast('⚠️ 載入失敗，請重新整理頁面', 5000);
+      }
     }
   }
   rebuildBrandHistory();
@@ -1488,7 +1547,7 @@ function renderProducts(list) {
     return `
     <div class="product-card" style="animation-delay:${i*0.04}s" onclick="openLb('${p.id}')">
       <div class="product-img-wrap">
-        <img src="${p.url}" alt="${esc(p.brand||'商品')}" loading="lazy" onerror="this.onerror=null;this.src=FALLBACK_IMG">
+        <img src="${imgUrl(p.url, 400)}" data-fullurl="${esc(p.url||'')}" alt="${esc(p.brand||'商品')}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;} this.classList.add('loaded');">
         ${isMulti ? `<span class="multi-badge">✦ ${p._siblings.length} 件可選</span>` : ''}
       </div>
       <div class="product-info">
@@ -1517,7 +1576,15 @@ function openLb(id) {
   currentLbId = id;
   // 暫存 sibling 列表給切換器用
   window._lbSiblings = siblings;
-  document.getElementById('lbImg').src = p.url;
+  const _lbImg = document.getElementById('lbImg');
+  _lbImg.dataset.fullurl = p.url || '';
+  _lbImg.onerror = function() {
+    this.onerror = null;
+    if (this.dataset.fullurl && this.src !== this.dataset.fullurl) {
+      _imgUrlOnFail(this, this.dataset.fullurl);
+    }
+  };
+  _lbImg.src = imgUrl(p.url, 900);
 
   const cartBtn = document.getElementById('lbCartBtn');
   if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
@@ -2700,7 +2767,7 @@ function _renderPendingCard(p) {
   return `
     <div class="pending-card" id="pcard_${esc(p.id)}">
       <div class="pcard-img-wrap">
-        <img class="pcard-img" src="${esc(p.url||'')}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+        <img class="pcard-img" src="${esc(imgUrl(p.url||'', 400))}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
         ${missingCount ? `<span class="pcard-missing-badge ${missingCount >= 3 ? '' : 'few'}">缺 ${missingCount} 項</span>` : ''}
         <span class="pcard-saved-flash" id="pcard_flash_${esc(p.id)}">✓ 已儲存</span>
         <button class="pcard-add-sibling" onclick="pcardAddSibling('${esc(p.id)}')" title="這張照片還有其他商品（例如上衣+褲子）">
@@ -2983,7 +3050,7 @@ function renderManage() {
             onchange="updateBmCardSelectedCount()"
             style="position:absolute;top:6px;left:6px;z-index:2;width:18px;height:18px;accent-color:var(--warm-brown);">
           <div class="edit-card-img-wrap" style="aspect-ratio:1/1;">
-            <img class="edit-card-img" src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+            <img class="edit-card-img" src="${imgUrl(p.url, 300)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
           </div>
           <div class="edit-card-fields" style="padding:8px;gap:5px;">
             <div style="font-size:0.7rem;font-weight:500;color:var(--text-main);">${esc(p.brand||'')}${d.category?' · '+esc(d.category):''}</div>
@@ -3019,7 +3086,7 @@ function renderManage() {
       return `
         <div class="ep batch-row ${selected?'selected':''}" onclick="toggleBatchSelect('${p.id}')">
           <input type="checkbox" class="ep-checkbox" ${selected?'checked':''}>
-          <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+          <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
           <div class="ep-info">
             <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}</div>
             <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
@@ -3029,7 +3096,7 @@ function renderManage() {
     }
     return `
       <div class="ep">
-        <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+        <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
         <div class="ep-info">
           <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}</div>
           <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
@@ -3395,7 +3462,7 @@ function renderEditingProd(p) {
     .join('');
   return `<div class="ep-editing">
     <div class="ep-editing-header">
-      <img src="${p.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+      <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
       <div class="ep-editing-title">編輯商品</div>
     </div>
     <div class="ep-editing-body">
@@ -3741,7 +3808,7 @@ function renderCartPanel() {
   }
   itemsEl.innerHTML = cart.map((item, i) => `
     <div class="cart-item">
-      <img class="cart-item-img" src="${item.url}" onerror="this.onerror=null;this.src=FALLBACK_IMG" alt="">
+      <img class="cart-item-img" src="${imgUrl(item.url, 150)}" data-fullurl="${esc(item.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
       <div class="cart-item-info">
         <div class="cart-item-brand">${esc(item.brand)}${item.category?' · '+esc(item.category):''}</div>
         <div class="cart-item-specs">
@@ -4032,7 +4099,7 @@ async function renderOrders() {
       </button>`;
       return `<div class="order-item-row">
         <div class="order-item-label ${labelClass}">
-          ${item.url?`<img src="${esc(item.url)}" style="width:26px;height:26px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`:''}
+          ${item.url?`<img src="${esc(imgUrl(item.url, 100))}" style="width:26px;height:26px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`:''}
           <strong>${esc(item.brand||item.desc||'')}</strong>${item.category?' · '+esc(item.category):''}
           ${item.size?' ／'+esc(item.size):''}${item.color?' ／'+esc(item.color):''}
           ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''}
@@ -4309,7 +4376,7 @@ async function showOrderByToken(token) {
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
       ${items.map(item => `
         <div style="display:flex;gap:10px;align-items:center;background:var(--cream-dark);border-radius:8px;padding:8px 10px;">
-          <img src="${esc(item.url||'')}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--cream-mid);" onerror="this.style.display='none'">
+          <img src="${esc(imgUrl(item.url||'', 150))}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--cream-mid);" onerror="this.style.display='none'">
           <div style="font-size:0.8rem;color:var(--text-soft);line-height:1.8;">
             <div style="font-weight:500;color:var(--text-main);">${esc(item.brand||'')}${item.category?' · '+esc(item.category):''}</div>
             ${item.size  ? '尺寸：'+esc(item.size)+'<br>' : ''}
@@ -4823,17 +4890,40 @@ function ceOutside(e) {
   if (e.target.id === 'cardEditorOverlay') closeCardEditor();
 }
 
-function ceDownload() {
+async function ceDownload() {
   const p = _ceState.product;
   if (!p) return;
   // 用一個離屏 canvas 輸出（與預覽相同尺寸）
   const exp = document.createElement('canvas');
   _drawCardOnCanvas(exp);
   const safe = s => (s||'').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_\u4e00-\u9fff]/g,'');
+  const filename = safe(p.brand||'product') + '_' + safe(p.category||'card') + '.png';
+
+  // 轉成 Blob
+  const blob = await new Promise(res => exp.toBlob(b => res(b), 'image/png'));
+  if (!blob) { showToast('⚠ 圖片產生失敗'); return; }
+
+  // 嘗試用 Web Share API 分享檔案（iPhone Safari 可在分享選單選「儲存影像」進相簿）
+  try {
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: p.brand || '商品圖卡' });
+      showToast('✓ 已開啟分享選單');
+      return;
+    }
+  } catch (err) {
+    // 使用者按「取消」會丟 AbortError，不算錯誤
+    if (err && err.name === 'AbortError') return;
+    // 其他錯誤 → 走 fallback 直接下載
+  }
+
+  // Fallback：傳統下載（桌機、不支援 share API 的瀏覽器）
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.download = safe(p.brand||'product') + '_' + safe(p.category||'card') + '.png';
-  a.href = exp.toDataURL('image/png');
+  a.download = filename;
+  a.href = url;
   a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
   showToast('✓ 圖卡下載中');
 }
 
