@@ -1474,9 +1474,10 @@ function renderBrandTabs() {
   const tabs   = document.getElementById('brandTabs');
   if (!brands.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  tabs.innerHTML = ['全部', ...brands].map(b => {
-    const key = b === '全部' ? 'all' : b;
-    return `<div class="brand-tab ${brandFilter===key?'active':''}" onclick="setBrand('${esc(key)}')">${esc(b)}</div>`;
+  // 若目前選中的品牌不在清單中（例如初始的 'all' 或被刪除的品牌），自動切到最新品牌（清單第一個）
+  if (!brands.includes(brandFilter)) brandFilter = brands[0];
+  tabs.innerHTML = brands.map(b => {
+    return `<div class="brand-tab ${brandFilter===b?'active':''}" onclick="setBrand('${esc(b)}')">${esc(b)}</div>`;
   }).join('');
 }
 function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); }
@@ -1487,7 +1488,8 @@ function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); }
 function applyFilters() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  if (brandFilter !== 'all') list = list.filter(p => (p.brand||'').trim() === brandFilter);
+  // brandFilter 為 'all' 表示「品牌清單尚未渲染」，此時不過濾以免畫面空白
+  if (brandFilter && brandFilter !== 'all') list = list.filter(p => (p.brand||'').trim() === brandFilter);
   if (q) list = list.filter(p =>
     (p.brand||'').toLowerCase().includes(q) ||
     (p.sizes||[]).join(' ').toLowerCase().includes(q) ||
