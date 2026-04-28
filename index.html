@@ -4162,6 +4162,8 @@ async function renderOrders() {
           <button class="ep-btn ep-save-btn" style="flex:1;padding:8px;" onclick="saveOrderEdit('${o.id}')">💾 儲存</button>
           <button class="ep-btn ep-cancel-btn" style="flex:1;padding:8px;" onclick="toggleOrderEdit('${o.id}')">取消</button>
         </div>
+        <button class="ep-btn" style="width:100%;padding:8px;margin-top:6px;background:var(--blush-light);color:var(--soft-brown);border:1px solid var(--blush);" onclick="restoreOrderImages('${o.id}')">🔧 從商品庫還原圖片</button>
+        <button class="ep-btn" style="width:100%;padding:8px;margin-top:6px;background:var(--blush-light);color:var(--soft-brown);border:1px solid var(--blush);" onclick="addImageToOrderItem('${o.id}')">📷 為某商品加圖（上傳）</button>
       </div>
     </div>`;
   }).join('');
@@ -4177,13 +4179,43 @@ async function saveOrderEdit(id) {
   const name   = document.getElementById('oe_name_' + id)?.value.trim();
   const lineId = document.getElementById('oe_line_' + id)?.value.trim();
   const rawItems = document.getElementById('oe_items_' + id)?.value.trim();
-  const items = rawItems.split('\n').map(line => {
+  // 先讀取原 items，編輯時要繼承每一筆的 url（圖片）與 category（品項）
+  const { data: origRow } = await sb.from('customer_orders').select('items').eq('id', id).single();
+  const origItems = Array.isArray(origRow?.items) ? origRow.items : [];
+  // 用「品牌+尺寸+顏色」當 key 建立查詢表（同一組合可能有多筆，所以存陣列以便消耗）
+  const keyOf = (b, s, c) => `${(b||'').trim()}|${(s||'').trim()}|${(c||'').trim()}`;
+  const origMap = new Map();
+  origItems.forEach(it => {
+    const k = keyOf(it.brand || it.desc, it.size, it.color);
+    if (!origMap.has(k)) origMap.set(k, []);
+    origMap.get(k).push(it);
+  });
+  const items = rawItems.split('\n').map((line, idx) => {
     const parts = line.split('，').map(s => s.trim());
+    const brand = parts[0] || '';
+    const size  = parts[1] || '';
+    const color = parts[2] || '';
+    const price = (parts[3] || '').replace(/NT\$|,/g, '');
+    // 嘗試從原 items 找同樣 brand+size+color 的那一筆，繼承 url / category
+    let inherited = { url: '', category: '' };
+    const k = keyOf(brand, size, color);
+    const bucket = origMap.get(k);
+    if (bucket && bucket.length) {
+      const m = bucket.shift();  // 取走一筆，避免同組合被多次繼承
+      inherited.url      = m.url || '';
+      inherited.category = m.category || '';
+    } else if (origItems[idx]) {
+      // 找不到對應 → 退而求其次：照行號繼承同位置的 url（使用者只是改文字，沒改順序）
+      inherited.url      = origItems[idx].url || '';
+      inherited.category = origItems[idx].category || '';
+    }
     return {
-      brand: parts[0] || '', category: '', url: '',
-      size:  parts[1] || '',
-      color: parts[2] || '',
-      price: (parts[3] || '').replace(/NT\$|,/g, '')
+      brand,
+      category: inherited.category,
+      url:      inherited.url,
+      size,
+      color,
+      price
     };
   }).filter(it => it.brand);
   const { error } = await sb.from('customer_orders')
@@ -4191,6 +4223,153 @@ async function saveOrderEdit(id) {
   if (error) { showToast('⚠️ 儲存失敗'); return; }
   showToast('✓ 訂單已更新');
   await renderOrders();
+}
+
+// 從商品庫（products）找回訂單裡每件商品的圖片網址（給「圖片被清空」的舊訂單用）
+// 匹配策略：品牌必須相同；color、category、size 為加分項，分數最高者勝出
+async function restoreOrderImages(id) {
+  if (!sb) return;
+  // 確保 products 已經載入過
+  if (!products || !products.length) {
+    showToast('⚠️ 商品庫尚未載入，請先切到「上架商品」分頁再回來試一次', 4000);
+    return;
+  }
+  // 讀取現有訂單
+  const { data: row, error: e1 } = await sb.from('customer_orders').select('items').eq('id', id).single();
+  if (e1 || !row) { showToast('⚠️ 讀取訂單失敗'); return; }
+  const items = Array.isArray(row.items) ? [...row.items] : [];
+  if (!items.length) { showToast('此訂單沒有商品'); return; }
+
+  // 為每筆 item 找最佳匹配
+  const norm = s => (s||'').trim().toLowerCase();
+  let restored = 0;
+  let unmatched = [];
+  const newItems = items.map(it => {
+    if (it.url) return it;  // 已經有圖片就跳過
+    const itBrand = norm(it.brand || it.desc);
+    const itColor = norm(it.color);
+    const itCategory = norm(it.category);
+    const itSize  = norm(it.size);
+    if (!itBrand) { unmatched.push(it.brand || it.desc || '(空)'); return it; }
+    // 候選：品牌相同的所有商品
+    const candidates = products.filter(p => norm(p.brand) === itBrand && p.url);
+    if (!candidates.length) {
+      unmatched.push(it.brand || it.desc || '');
+      return it;
+    }
+    // 算分挑最佳
+    let best = null, bestScore = -1;
+    candidates.forEach(p => {
+      let score = 0;
+      if (itColor    && norm(p.color)    === itColor)    score += 3;
+      if (itCategory && norm(p.category) === itCategory) score += 2;
+      if (itSize && Array.isArray(p.sizes) && p.sizes.map(norm).includes(itSize)) score += 1;
+      if (score > bestScore) { best = p; bestScore = score; }
+    });
+    if (best && best.url) {
+      restored++;
+      return { ...it, url: best.url, category: it.category || best.category || '' };
+    }
+    unmatched.push(it.brand || it.desc || '');
+    return it;
+  });
+
+  if (restored === 0) {
+    showToast(`⚠️ 沒有找到可還原的圖片（${unmatched.length} 件無法匹配）`, 4000);
+    return;
+  }
+  // 寫回資料庫
+  const { error: e2 } = await sb.from('customer_orders').update({ items: newItems }).eq('id', id);
+  if (e2) { showToast('⚠️ 寫入失敗：' + e2.message, 4000); return; }
+  if (unmatched.length) {
+    showToast(`✓ 已還原 ${restored} 件圖片，${unmatched.length} 件找不到對應`, 4000);
+  } else {
+    showToast(`✓ 已還原 ${restored} 件商品圖片`);
+  }
+  await renderOrders();
+}
+
+// 為某筆訂單的某一行商品上傳/更換圖片（適用：手動加的商品不在商品庫中）
+// 流程：在編輯面板下方展開「選擇行」清單 → 點選某行 → 觸發檔案選擇 → 上傳 → 寫回 url
+function addImageToOrderItem(id) {
+  const panel = document.getElementById('oedit_' + id);
+  if (!panel) return;
+  // 如果已經展開過了，再按一次就收起
+  const existing = panel.querySelector('.oe-img-picker');
+  if (existing) { existing.remove(); return; }
+
+  // 從 textarea 抓出目前每一行的內容當顯示用（若使用者剛改過、還沒儲存，也能即時看到）
+  const ta = document.getElementById('oe_items_' + id);
+  const lines = (ta?.value || '').split('\n').map(s => s.trim()).filter(Boolean);
+  if (!lines.length) { showToast('此訂單沒有商品行可加圖'); return; }
+
+  // 同時讀取資料庫的 items（為了知道每行是否已有圖）
+  (async () => {
+    let hasImg = [];
+    try {
+      const { data } = await sb.from('customer_orders').select('items').eq('id', id).single();
+      const items = Array.isArray(data?.items) ? data.items : [];
+      hasImg = items.map(it => !!it.url);
+    } catch (e) {}
+
+    // 建立選擇 UI
+    const picker = document.createElement('div');
+    picker.className = 'oe-img-picker';
+    picker.style.cssText = 'background:var(--cream);border:1px solid var(--cream-mid);border-radius:var(--radius-sm);padding:10px;margin-top:8px;';
+    picker.innerHTML = `
+      <div style="font-size:0.78rem;color:var(--text-soft);margin-bottom:8px;font-weight:500;">📷 選擇要加圖的商品行：</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        ${lines.map((line, i) => `
+          <button type="button" class="oe-pick-row" data-idx="${i}"
+            style="text-align:left;padding:8px 10px;background:var(--white);border:1.5px solid var(--cream-mid);border-radius:var(--radius-sm);font-family:'Noto Serif TC',serif;font-size:0.8rem;color:var(--text-main);cursor:pointer;">
+            <span style="color:var(--text-light);font-size:0.72rem;">第 ${i+1} 行</span>　${esc(line)}
+            ${hasImg[i] ? '<span style="color:#7ba872;font-size:0.7rem;margin-left:6px;">（已有圖，將覆蓋）</span>' : ''}
+          </button>
+        `).join('')}
+      </div>
+      <button type="button" style="width:100%;margin-top:8px;padding:7px;background:none;border:1px solid var(--cream-mid);border-radius:var(--radius-sm);color:var(--text-light);font-family:'Noto Serif TC',serif;font-size:0.78rem;cursor:pointer;" onclick="this.parentElement.remove()">取消</button>
+    `;
+    panel.appendChild(picker);
+
+    // 綁定每一行的點擊事件 → 觸發檔案選擇
+    picker.querySelectorAll('.oe-pick-row').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.idx);
+        // 動態生成一個 file input，點選圖片後立即上傳
+        const fi = document.createElement('input');
+        fi.type = 'file';
+        fi.accept = 'image/*';
+        fi.style.display = 'none';
+        fi.onchange = async (ev) => {
+          const file = ev.target.files?.[0];
+          if (!file) return;
+          showToast('上傳中…', 8000);
+          try {
+            const { url } = await uploadOne(file);
+            // 寫回該行的 url
+            const { data: row } = await sb.from('customer_orders').select('items').eq('id', id).single();
+            const items = Array.isArray(row?.items) ? [...row.items] : [];
+            if (!items[idx]) {
+              showToast('⚠️ 找不到該行（請先儲存訂單後再試）', 4000);
+              return;
+            }
+            items[idx] = { ...items[idx], url };
+            const { error } = await sb.from('customer_orders').update({ items }).eq('id', id);
+            if (error) { showToast('⚠️ 寫入失敗：' + error.message, 4000); return; }
+            showToast(`✓ 已為第 ${idx+1} 行加上圖片`);
+            picker.remove();
+            await renderOrders();
+          } catch (err) {
+            showToast('⚠️ 上傳失敗：' + (err?.message || err), 4000);
+          }
+        };
+        document.body.appendChild(fi);
+        fi.click();
+        // 用完後清掉 input element
+        setTimeout(() => fi.remove(), 60000);
+      });
+    });
+  })();
 }
 
 async function toggleItemStatus(id, idx, checked) {
