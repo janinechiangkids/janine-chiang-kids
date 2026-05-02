@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Janine Chiang Kids｜精品童裝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
@@ -26,7 +26,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .site-header { background: var(--white); border-bottom: 1px solid var(--cream-mid); position: sticky; top: 0; z-index: 100; padding: 0 16px; }
 .header-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 10px; }
 .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--dark-brown); letter-spacing: 0.04em; line-height: 1.2; }
-.logo span { display: block; font-size: 0.62rem; font-weight: 300; letter-spacing: 0.22em; color: var(--text-light); text-transform: uppercase; font-family: 'Noto Serif TC', serif; }
+.logo > span:not([class]) { display: block; font-size: 0.62rem; font-weight: 300; letter-spacing: 0.22em; color: var(--text-light); text-transform: uppercase; font-family: 'Noto Serif TC', serif; }
 .header-btns { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .line-btn { background: #06C755; color: #fff; font-size: 0.72rem; padding: 6px 12px; border-radius: 20px; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
 .line-btn:hover { opacity: 0.85; }
@@ -48,6 +48,40 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .hero-manifesto { position: relative; max-width: 340px; margin: 0 auto; }
 .hero-manifesto p { font-size: 0.82rem; color: var(--text-soft); letter-spacing: 0.05em; line-height: 2; font-weight: 300; }
 .hero-divider { height: 1px; background: var(--cream-mid); margin: 14px auto; width: 60px; }
+/* ── 可愛模式（二手衣分頁專用） ── */
+body.cute-mode .logo { font-family: 'Fredoka', sans-serif !important; font-size: 1.35rem; font-weight: 600; letter-spacing: 0.01em; line-height: 1.1; }
+body.cute-mode .logo .l1 { color: #A8C5D6; }
+body.cute-mode .logo .l2 { color: #D9A5B3; }
+body.cute-mode .logo .l3 { color: #B8C9A8; }
+body.cute-mode .logo .l4 { color: #C4B89E; }
+body.cute-mode .logo span { font-family: 'Fredoka', sans-serif; color: #C4B89E; font-weight: 500; letter-spacing: 0.12em; }
+body.cute-mode .hero { background: linear-gradient(135deg, #F5E8E4 0%, #EAE3D9 50%, #DEE9DC 100%); padding-top: 56px; }
+body.cute-mode .hero h1 { font-size: 2.05rem; line-height: 1.55; margin-top: 18px; margin-bottom: 12px; }
+body.cute-mode .hero-eyebrow { margin-bottom: 0; }
+body.cute-mode .hero-manifesto { margin-top: 12px; }
+body.cute-mode .hero::before { background: #D9A5B3; opacity: 0.22; }
+body.cute-mode .hero::after { background: #A8C5D6; opacity: 0.22; }
+body.cute-mode .hero-deco span { background: #D9A5B3; }
+body.cute-mode .hero-deco i { color: #B8C9A8; font-style: normal; }
+body.cute-mode .hero-divider { background: #D9A5B3; opacity: 0.5; }
+body.cute-mode .section-title { color: #B89B7C; }
+body.cute-mode .brand-tab.active { color: #D9A5B3; border-bottom-color: #D9A5B3; }
+/* 二手衣分頁標籤本身（永遠在右邊，特殊樣式） */
+.brand-tab.secondhand-tab { font-family: 'Fredoka', sans-serif; font-weight: 600; color: #B89B7C; position: relative; }
+.brand-tab.secondhand-tab.active { color: #D9A5B3; border-bottom-color: #D9A5B3; }
+/* 可愛模式版面樣式 */
+.reloved-lead { font-size: 1rem !important; line-height: 2.2 !important; color: var(--text-soft) !important; letter-spacing: 0.08em !important; margin-bottom: 8px !important; }
+.reloved-body { font-size: 0.95rem !important; line-height: 2.2 !important; color: var(--text-soft) !important; letter-spacing: 0.06em !important; margin-top: 0 !important; }
+.reloved-cta { display: block; margin: 24px auto 4px; background: var(--white); color: #8A7560; border: 1.5px solid #D9A5B3; padding: 11px 32px; border-radius: 30px; font-family: 'Noto Serif TC', serif; font-size: 0.85rem; letter-spacing: 0.15em; cursor: pointer; transition: all 0.25s; box-shadow: 0 2px 10px rgba(217,165,179,0.15); }
+.reloved-cta:hover { background: #D9A5B3; color: var(--white); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(217,165,179,0.3); }
+.cute-only { display: none; }
+body.cute-mode .normal-only { display: none; }
+body.cute-mode .cute-only { display: block; }
+.cute-only-inline { display: none; }
+body.cute-mode .normal-only-inline { display: none; }
+body.cute-mode .cute-only-inline { display: inline; }
+body.cute-mode .logo .earth-blue { color: #7BC4E8; }
+body.cute-mode .logo .earth-green { color: #8FCB7A; }
 /* BRAND TABS */
 .brand-tabs-wrap { background: var(--white); border-bottom: 1px solid var(--cream-mid); padding: 0 12px; overflow-x: auto; scrollbar-width: none; }
 .brand-tabs-wrap::-webkit-scrollbar { display: none; }
@@ -378,6 +412,35 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 }
 /* ── 購物清單 Modal ── */
 .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(30,18,8,0.82); z-index: 350; align-items: flex-end; justify-content: center; }
+/* RE-LOVED MODAL */
+.reloved-overlay { display: none; position: fixed; inset: 0; background: rgba(60,45,40,0.75); z-index: 360; align-items: flex-end; justify-content: center; }
+.reloved-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+.reloved-panel { background: linear-gradient(180deg, #FAF4EF 0%, var(--white) 25%); border-radius: 24px 24px 0 0; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 0 0 32px; animation: slideUp 0.32s ease; }
+.reloved-handle { width: 44px; height: 4px; background: #E5D6CB; border-radius: 2px; margin: 14px auto 0; }
+.reloved-modal-header { padding: 20px 24px 18px; border-bottom: 1px dashed #E8DCD0; text-align: center; position: relative; }
+.reloved-modal-eyebrow { font-family: 'Fredoka', sans-serif; font-size: 0.72rem; letter-spacing: 0.18em; color: #B89B7C; margin-bottom: 6px; font-weight: 500; }
+.reloved-modal-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 400; color: #6B5645; letter-spacing: 0.08em; }
+.reloved-close { position: absolute; top: 18px; right: 20px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
+.reloved-modal-body { padding: 22px 24px 8px; }
+.reloved-intro { text-align: center; font-family: 'Noto Serif TC', serif; font-size: 0.92rem; color: #8A7560; line-height: 2; letter-spacing: 0.08em; margin-bottom: 22px; }
+.reloved-section-title { text-align: center; margin: 20px 0 18px; position: relative; display: flex; align-items: center; gap: 12px; }
+.reloved-section-title::before, .reloved-section-title::after { content: ''; flex: 1; height: 1px; background: #E5D6CB; }
+.reloved-section-title span { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 400; color: #B89B7C; letter-spacing: 0.18em; padding: 0 6px; }
+.reloved-step { display: flex; gap: 14px; padding: 14px 14px; margin-bottom: 10px; background: #FAF4EF; border-radius: 14px; border: 1px solid #F0E5DA; }
+.reloved-step-num { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; font-weight: 600; color: #D9A5B3; line-height: 1; flex-shrink: 0; min-width: 36px; }
+.reloved-step-content { flex: 1; min-width: 0; }
+.reloved-step-title { font-family: 'Noto Serif TC', serif; font-size: 0.95rem; font-weight: 500; color: #6B5645; margin-bottom: 6px; letter-spacing: 0.08em; }
+.reloved-step-desc { font-size: 0.84rem; color: #8A7560; line-height: 1.85; letter-spacing: 0.04em; }
+.reloved-step-note { margin-top: 8px; padding: 8px 10px; background: #FFF8F2; border-left: 2px solid #D9A5B3; font-size: 0.78rem; color: #8A7560; line-height: 1.7; border-radius: 4px; }
+.reloved-step-note strong { color: #B89B7C; }
+.reloved-faq { padding: 14px 16px; background: #F4ECE3; border-radius: 14px; margin-bottom: 18px; }
+.reloved-faq-q { font-family: 'Noto Serif TC', serif; font-size: 0.9rem; font-weight: 500; color: #6B5645; margin-bottom: 8px; letter-spacing: 0.05em; }
+.reloved-faq-a { font-size: 0.82rem; color: #8A7560; line-height: 1.9; letter-spacing: 0.04em; }
+.reloved-faq-a strong { color: #B89B7C; }
+.reloved-modal-footer { margin-top: 20px; padding-top: 18px; border-top: 1px dashed #E8DCD0; text-align: center; }
+.reloved-apply-btn { display: inline-block; background: linear-gradient(135deg, #D9A5B3 0%, #C48FA0 100%); color: var(--white); padding: 13px 36px; border-radius: 30px; font-family: 'Noto Serif TC', serif; font-size: 0.9rem; letter-spacing: 0.12em; text-decoration: none; box-shadow: 0 3px 14px rgba(217,165,179,0.35); transition: transform 0.2s, box-shadow 0.2s; }
+.reloved-apply-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(217,165,179,0.45); }
+.reloved-footer-note { font-size: 0.72rem; color: var(--text-light); margin-top: 12px; line-height: 1.6; letter-spacing: 0.04em; }
 .cart-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
 .cart-panel { background: var(--white); border-radius: 20px 20px 0 0; width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto; padding: 0 0 32px; animation: slideUp 0.3s ease; }
 .cart-handle { width: 40px; height: 4px; background: var(--cream-mid); border-radius: 2px; margin: 14px auto 0; }
@@ -731,7 +794,11 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 <!-- HEADER -->
 <header class="site-header">
   <div class="header-top">
-    <div class="logo">Janine Chiang Kids<span>韓國童裝選品</span></div>
+    <div class="logo">
+      <span class="normal-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="l4">K</span><span class="l2">i</span><span class="l1">d</span><span class="l3">s</span></span>
+      <span class="cute-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="earth-blue">R</span><span class="earth-blue">e</span><span class="earth-green">-</span><span class="earth-green">l</span><span class="earth-green">o</span><span class="earth-green">v</span><span class="earth-green">e</span><span class="earth-green">d</span></span>
+      <span>韓國童裝選品</span>
+    </div>
     <div class="header-btns">
       <a class="line-btn" href="https://lin.ee/rCNd7ai" target="_blank">💬 官方Line</a>
       <button class="admin-btn" onclick="openAdmin()">🔑 後台</button>
@@ -744,13 +811,25 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 </header>
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-eyebrow">Janine Chiang Kids｜美學宣言</div>
-  <h1>讓美好的質地，<br>成為成長中溫暖的底色。</h1>
-  <div class="hero-deco"><span></span><i>✦</i><span></span></div>
-  <div class="hero-manifesto">
-    <p>我們相信，童裝不只是布料的裁切，<br>而是孩子觸摸世界的第一種方式，<br>也是父母記錄時光的一種溫柔。</p>
-    <div class="hero-divider"></div>
-    <p>每一件衣服都承載著流動的愛。<br>我們推崇「美好的延續」，<br>讓那些裝滿回憶的衣裳，透過分享與循環，<br>在不同的孩子身上，編織出新的故事。</p>
+  <div class="normal-only">
+    <div class="hero-eyebrow">Janine Chiang Kids｜美學宣言</div>
+    <h1>讓美好的質地<br>成為成長中溫暖的底色</h1>
+    <div class="hero-deco"><span></span><i>✦</i><span></span></div>
+    <div class="hero-manifesto">
+      <p>我們相信，童裝不只是布料的裁切，<br>而是孩子觸摸世界的第一種方式，<br>也是父母記錄時光的一種溫柔。</p>
+      <div class="hero-divider"></div>
+      <p>每一件衣服都承載著流動的愛。<br>我們推崇「美好的延續」，<br>讓那些裝滿回憶的衣裳，透過分享與循環，<br>在不同的孩子身上，編織出新的故事。</p>
+    </div>
+  </div>
+  <div class="cute-only">
+    <div class="hero-eyebrow">Janine Chiang Re-loved｜循環計畫</div>
+    <h1>成長很快<br>但愛可以留得更久</h1>
+    <div class="hero-deco"><span></span><i>♡</i><span></span></div>
+    <div class="hero-manifesto">
+      <p class="reloved-lead">寶貝長大的速度，<br>趕不上衣服汰換的速度。</p>
+      <p class="reloved-body">加入 <strong style="color:#A8C5D6;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">Re</strong><strong style="color:#B8C9A8;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">-loved</strong> 循環計畫，<br>將那些承載美好回憶的衣物，<br>化作下一份禮物。</p>
+      <button class="reloved-cta" onclick="openRelovedGuide()">申請回收</button>
+    </div>
   </div>
 </section>
 <!-- BRAND TABS -->
@@ -887,6 +966,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
           <div class="admin-tab" onclick="switchTab('manage')">📋 管理商品</div>
           <div class="admin-tab" onclick="switchTab('brands')">📐 品牌尺寸表</div>
           <div class="admin-tab" onclick="switchTab('orders')">🧾 訂單管理</div>
+          <div class="admin-tab" onclick="switchTab('completed')">✅ 已完成</div>
         </div>
         <!-- UPLOAD -->
         <div class="tab-pane active" id="tab-upload">
@@ -1093,6 +1173,16 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
             <div id="orderList"></div>
           </div>
         </div>
+        <!-- ───── 已完成訂單分頁 ───── -->
+        <div class="tab-pane" id="tab-completed">
+          <div class="admin-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+              <div class="admin-section-title" style="margin-bottom:0;">已完成訂單（<span id="completedCount">0</span> 筆）</div>
+              <input type="text" id="completedSearch" class="field-input" placeholder="🔍 搜尋顧客姓名 / 訂單編號" style="font-size:0.78rem;width:220px;" oninput="renderCompletedOrders()">
+            </div>
+            <div id="completedList"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1101,6 +1191,75 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 <button class="float-save-btn" id="floatSaveBtn" onclick="saveBatchEditAll()" style="bottom:80px;">
   💾 儲存變更
 </button>
+<!-- RE-LOVED 回收說明 MODAL -->
+<div class="reloved-overlay" id="relovedOverlay" onclick="relovedOutside(event)">
+  <div class="reloved-panel">
+    <div class="reloved-handle"></div>
+    <div class="reloved-modal-header">
+      <div class="reloved-modal-eyebrow">Janine Chiang Re-loved</div>
+      <h3>循環計畫・回收申請</h3>
+      <button class="reloved-close" onclick="closeRelovedGuide()">✕</button>
+    </div>
+    <div class="reloved-modal-body">
+      <p class="reloved-intro">當寶貝長大、衣物還很美好，<br>讓我們一起延續這份溫柔。</p>
+
+      <div class="reloved-section-title"><span>回收流程</span></div>
+
+      <div class="reloved-step">
+        <div class="reloved-step-num">01</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">線上申請</div>
+          <div class="reloved-step-desc">透過官網 LINE「二手回收申請」，上傳衣物照片。</div>
+          <div class="reloved-step-note"><strong>回收標準</strong>：9 成新，無嚴重污漬、無破損、扣子配件齊全。</div>
+        </div>
+      </div>
+
+      <div class="reloved-step">
+        <div class="reloved-step-num">02</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">寄回審核</div>
+          <div class="reloved-step-desc">商品寄回後會審核後即可上架。<br>（若審核過程中實品有明顯瑕疵，將不予上架。）</div>
+        </div>
+      </div>
+
+      <div class="reloved-step">
+        <div class="reloved-step-num">03</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">定價</div>
+          <div class="reloved-step-desc">申請時由您定價，但二手價不可等於或高於售價（包含全新品）。</div>
+        </div>
+      </div>
+
+      <div class="reloved-step">
+        <div class="reloved-step-num">04</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">代售期限</div>
+          <div class="reloved-step-desc">代售期為一季（三個月）。期滿未售出，我們會將衣服寄回給您（運費自理），或您可選擇放棄寄回，由我們後續處理。</div>
+        </div>
+      </div>
+
+      <div class="reloved-step">
+        <div class="reloved-step-num">05</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">代售手續費及購物金</div>
+          <div class="reloved-step-desc">每件商品包材、拍照、上架、出貨等成本，將收取 <strong>30 元手續費</strong>。商品售出 10 天後，扣除手續費的金額將轉入您的<strong>儲值金</strong>，下次消費可折抵使用。</div>
+        </div>
+      </div>
+
+      <div class="reloved-section-title"><span>常見問題</span></div>
+
+      <div class="reloved-faq">
+        <div class="reloved-faq-q">Q. 哪些衣服可以參加回收？</div>
+        <div class="reloved-faq-a">凡於<strong>本官網購買</strong>的童裝品項皆可申請回收。<br>（基於衛生考量，貼身衣物內衣褲、襪子<strong>不參與</strong>回收。）</div>
+      </div>
+
+      <div class="reloved-modal-footer">
+        <a class="reloved-apply-btn" href="https://lin.ee/rCNd7ai" target="_blank" rel="noopener noreferrer">透過官方 Line 申請回收</a>
+        <div class="reloved-footer-note">點擊後將開啟官方 Line，請傳送「我要申請回收」開始流程。</div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- CART FAB -->
 <button class="cart-fab" id="cartFab" onclick="openCart()">
   我的清單 <span class="cart-fab-count" id="cartFabCount">0</span>
@@ -1468,19 +1627,31 @@ function _displayPrice(p) {
 function uniqueBrands() {
   return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];
 }
+// 愛循環二手專區的固定品牌名稱
+const SECONDHAND_BRAND = '愛循環・二手專區';
 function renderBrandTabs() {
-  const brands = uniqueBrands();
+  let brands = uniqueBrands();
+  // 二手衣抽出來放最右邊（如果存在的話）
+  const hasSecondhand = brands.includes(SECONDHAND_BRAND);
+  if (hasSecondhand) brands = brands.filter(b => b !== SECONDHAND_BRAND);
   const wrap   = document.getElementById('brandTabsWrap');
   const tabs   = document.getElementById('brandTabs');
-  if (!brands.length) { wrap.style.display = 'none'; return; }
+  if (!brands.length && !hasSecondhand) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
   // 若目前選中的品牌不在清單中（例如初始的 'all' 或被刪除的品牌），自動切到最新品牌（清單第一個）
-  if (!brands.includes(brandFilter)) brandFilter = brands[0];
-  tabs.innerHTML = brands.map(b => {
-    return `<div class="brand-tab ${brandFilter===b?'active':''}" onclick="setBrand('${esc(b)}')">${esc(b)}</div>`;
-  }).join('');
+  const allBrands = hasSecondhand ? [...brands, SECONDHAND_BRAND] : brands;
+  if (!allBrands.includes(brandFilter)) brandFilter = allBrands[0];
+  let html = brands.map(b =>
+    `<div class="brand-tab ${brandFilter===b?'active':''}" onclick="setBrand('${esc(b)}')">${esc(b)}</div>`
+  ).join('');
+  if (hasSecondhand) {
+    html += `<div class="brand-tab secondhand-tab ${brandFilter===SECONDHAND_BRAND?'active':''}" onclick="setBrand('${esc(SECONDHAND_BRAND)}')">${esc(SECONDHAND_BRAND)}</div>`;
+  }
+  tabs.innerHTML = html;
+  // 切換可愛模式
+  document.body.classList.toggle('cute-mode', brandFilter === SECONDHAND_BRAND);
 }
-function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); }
+function setBrand(b) { brandFilter = b; renderBrandTabs(); applyFilters(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 // ═══════════════════════════════
 //  FILTER + RENDER
@@ -1489,7 +1660,12 @@ function applyFilters() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   // brandFilter 為 'all' 表示「品牌清單尚未渲染」，此時不過濾以免畫面空白
-  if (brandFilter && brandFilter !== 'all') list = list.filter(p => (p.brand||'').trim() === brandFilter);
+  if (brandFilter && brandFilter !== 'all') {
+    list = list.filter(p => (p.brand||'').trim() === brandFilter);
+  } else {
+    // 「全部／最新」分頁：排除二手衣商品（不在首頁出現）
+    list = list.filter(p => (p.brand||'').trim() !== SECONDHAND_BRAND);
+  }
   if (q) list = list.filter(p =>
     (p.brand||'').toLowerCase().includes(q) ||
     (p.sizes||[]).join(' ').toLowerCase().includes(q) ||
@@ -1532,7 +1708,11 @@ function renderProducts(list) {
     grid.innerHTML = `<div class="empty-state"><div class="big-icon">${filt?'🔍':'👗'}</div><p>${filt?'找不到符合的商品<br>試試其他條件？':'後台還沒有上架商品喔～<br>點右上角後台按鈕新增商品'}</p></div>`;
     return;
   }
-  title.textContent = `— 共 ${list.length} 件商品 —`;
+  if (brandFilter === SECONDHAND_BRAND) {
+    title.textContent = `— Re-loved 選物 ${list.length} 件 —`;
+  } else {
+    title.textContent = `— 共 ${list.length} 件商品 —`;
+  }
   // 修正 6：grid layout 已在 CSS 設定，card 結構統一
   grid.innerHTML = list.map((p,i) => {
     const isMulti = Array.isArray(p._siblings) && p._siblings.length > 1;
@@ -1834,13 +2014,14 @@ async function adminLogout() {
 }
 function switchTab(tab) {
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active',
-    (i===0&&tab==='upload')||(i===1&&tab==='manage')||(i===2&&tab==='brands')||(i===3&&tab==='orders')));
+    (i===0&&tab==='upload')||(i===1&&tab==='manage')||(i===2&&tab==='brands')||(i===3&&tab==='orders')||(i===4&&tab==='completed')));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   if (tab === 'manage') { editingProdId = null; renderManage(); switchManageSub(_manageSubMode); }
   if (tab === 'upload') { batchMode = false; _resetBatchState(); }
   if (tab === 'brands') { renderSgList(); }
   if (tab === 'orders') { renderOrders(); }
+  if (tab === 'completed') { renderCompletedOrders(); }
 }
 
 // ═══════════════════════════════
@@ -3800,6 +3981,15 @@ function closeCart() {
   unlock();
 }
 function cartOutside(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }
+function openRelovedGuide() {
+  document.getElementById('relovedOverlay').classList.add('active');
+  lock();
+}
+function closeRelovedGuide() {
+  document.getElementById('relovedOverlay').classList.remove('active');
+  unlock();
+}
+function relovedOutside(e) { if (e.target === document.getElementById('relovedOverlay')) closeRelovedGuide(); }
 function renderCartPanel() {
   const itemsEl  = document.getElementById('cartItems');
   const footerEl = document.getElementById('cartFooter');
@@ -3965,8 +4155,9 @@ function toggleOrderBatch() {
 }
 // 4: 叫貨與到貨獨立 — 叫貨用 'ordered' 狀態，可切換
 async function toggleItemOrdered(orderId, idx, currentSt) {
-  // 叫貨狀態：若目前是 ordered 則取消，否則設為 ordered（不影響 arrived/oos）
-  const newSt = (currentSt === 'ordered') ? '' : 'ordered';
+  // 叫貨狀態：若目前是已叫貨(ordered/phase_1/phase_2) 則取消（清空），否則設為 ordered（不影響 arrived/oos）
+  const isOrdered = (currentSt === 'ordered' || currentSt === 'phase_1' || currentSt === 'phase_2');
+  const newSt = isOrdered ? '' : 'ordered';
   await setItemStatus(orderId, idx, newSt);
 }
 
@@ -4060,10 +4251,19 @@ async function renderOrders() {
   el.innerHTML = `<div class="no-results">載入中…</div>`;
   if (!sb) { el.innerHTML = `<div class="no-results">Supabase 未連線</div>`; return; }
   const filter = document.getElementById('orderFilterStatus')?.value;
-  let query = sb.from('customer_orders').select('*').order('created_at', { ascending: false });
+  // 先嘗試用 completed_at 欄位過濾；若資料庫還沒這個欄位就退回查全部，並在 client 端過濾
+  let query = sb.from('customer_orders').select('*').is('completed_at', null).order('created_at', { ascending: false });
   if (filter !== '' && filter !== undefined) query = query.eq('status', Number(filter));
-  const { data, error } = await query;
-  if (error) { el.innerHTML = `<div class="no-results">載入失敗</div>`; return; }
+  let { data, error } = await query;
+  if (error) {
+    // 推測是 completed_at 欄位不存在，改用不過濾的查詢
+    let q2 = sb.from('customer_orders').select('*').order('created_at', { ascending: false });
+    if (filter !== '' && filter !== undefined) q2 = q2.eq('status', Number(filter));
+    const r2 = await q2;
+    if (r2.error) { el.innerHTML = `<div class="no-results">載入失敗</div>`; return; }
+    // client 端過濾掉已完成（如果有 completed_at 欄位才會過濾，沒有就全顯示）
+    data = (r2.data || []).filter(o => !o.completed_at);
+  }
   const list = data || [];
   if (cnt) cnt.textContent = list.length;
   if (!list.length) { el.innerHTML = `<div class="no-results">尚無訂單紀錄</div>`; return; }
@@ -4083,10 +4283,24 @@ async function renderOrders() {
     const itemsHTML = items.map((item, i) => {
       const st = itemStatus[i] || '';
       const labelClass = st === 'arrived' ? 'arrived' : st === 'oos' ? 'oos' : '';
-      const orderedBtn = `<button class="order-ordered-btn ${st==='ordered'?'on':''}"
+      // 判斷下拉選單目前的值：phase_1/phase_2 顯示對應；ordered 或空值都視為訂購中(phase_0)
+      const phaseVal = (st === 'phase_1' || st === 'phase_2') ? st : 'phase_0';
+      // 若已到貨或斷貨，下拉選單失去意義（按鈕已決定狀態），顯示為灰階提示
+      const phaseDisabled = (st === 'arrived' || st === 'oos');
+      const phaseSelect = `<select class="order-status-select" style="font-size:0.72rem;${phaseDisabled?'opacity:0.45;':''}"
+        title="${phaseDisabled?'此商品已到貨或斷貨，階段不適用':'單品階段'}"
+        onclick="event.stopPropagation()"
+        onchange="event.stopPropagation();setItemStatus('${o.id}',${i},this.value==='phase_0'?'':this.value)">
+        <option value="phase_0" ${phaseVal==='phase_0'?'selected':''}>訂購中</option>
+        <option value="phase_1" ${phaseVal==='phase_1'?'selected':''}>待回台</option>
+        <option value="phase_2" ${phaseVal==='phase_2'?'selected':''}>在台打包</option>
+      </select>`;
+      // 叫貨：ordered 或進入後續階段(phase_1/phase_2) 都視為已叫貨
+      const isOrdered = (st === 'ordered' || st === 'phase_1' || st === 'phase_2');
+      const orderedBtn = `<button class="order-ordered-btn ${isOrdered?'on':''}"
         onclick="event.stopPropagation();toggleItemOrdered('${o.id}',${i},'${st}')"
         style="font-size:0.72rem;padding:3px 10px;">
-        ${st==='ordered'?'✓ 叫貨':'叫貨'}
+        ${isOrdered?'✓ 叫貨':'叫貨'}
       </button>`;
       // 到貨：按鈕切換，斷貨：按鈕切換
       const arrivedBtn = `<button class="order-ordered-btn ${st==='arrived'?'on':''}"
@@ -4107,9 +4321,7 @@ async function renderOrders() {
           ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''}
         </div>
         ${orderedBtn}
-        <select class="order-status-select" style="font-size:0.72rem;" onclick="event.stopPropagation()" onchange="updateOrderStatus('${o.id}',this.value)">
-          ${ORDER_STATUS.map((s,idx)=>`<option value="${idx}" ${o.status===idx?'selected':''}>${s}</option>`).join('')}
-        </select>
+        ${phaseSelect}
         ${arrivedBtn}${oosBtn}
       </div>`;
     }).join('');
@@ -4145,6 +4357,7 @@ async function renderOrders() {
             ${o.ordered?'✓ 已叫貨':'叫貨'}
           </button>
           <button class="order-checkout-btn" onclick="exportCheckout('${o.id}')">結帳單</button>
+          <button class="order-checkout-btn" style="background:#D4EDDA;color:#155724;border-color:#A8D8B5;" onclick="completeOrder('${o.id}')">✓ 完成訂單</button>
           <button class="order-edit-btn" onclick="toggleOrderEdit('${o.id}')">✏️ 編輯</button>
           <button class="order-del-btn" onclick="deleteOrder('${o.id}')">🗑</button>
         </div>
@@ -4517,7 +4730,9 @@ async function showUnordered() {
     const items      = Array.isArray(o.items) ? o.items : [];
     const itemStatus = o.item_status || {};
     items.forEach((item, i) => {
-      if (itemStatus[i] !== 'arrived' && itemStatus[i] !== 'oos') {
+      // 未叫貨：item_status 為空（未設定）。ordered/phase_1/phase_2 都視為已叫貨；arrived/oos 已結束
+      const s = itemStatus[i];
+      if (!s) {
         unorderedItems.push({ orderId: o.id, idx: i, customerName: o.customer_name, item });
       }
     });
@@ -4540,7 +4755,7 @@ async function showUnordered() {
 async function markItemOrderedFromList(btn) {
   const orderId = btn.dataset.oid;
   const idx     = Number(btn.dataset.idx);
-  await setItemStatus(orderId, idx, 'arrived');
+  await setItemStatus(orderId, idx, 'ordered');
   btn.closest('div[style]').remove();
   showToast('✓ 已標記叫貨');
   await renderOrders();
@@ -4556,11 +4771,109 @@ async function updateOrderStatus(id, val) {
   if (error) { showToast('⚠️ 更新失敗'); return; }
   showToast(`✓ 已更新為「${ORDER_STATUS[Number(val)]}」`);
 }
+
+// ─── 完成訂單／取消完成／已完成列表 ───
+async function completeOrder(id) {
+  if (!confirm('確定將此訂單標記為已完成？\n（會從「訂單管理」移到「已完成」分頁）')) return;
+  if (!sb) { showToast('⚠️ Supabase 未連線'); return; }
+  const { error } = await sb.from('customer_orders').update({ completed_at: Date.now() }).eq('id', id);
+  if (error) { showToast('⚠️ 更新失敗（請確認資料庫已新增 completed_at 欄位）'); return; }
+  showToast('✓ 訂單已完成');
+  await renderOrders();
+}
+
+async function reopenOrder(id) {
+  if (!confirm('確定要將此訂單還原回訂單管理？')) return;
+  if (!sb) return;
+  const { error } = await sb.from('customer_orders').update({ completed_at: null }).eq('id', id);
+  if (error) { showToast('⚠️ 還原失敗'); return; }
+  showToast('✓ 已還原至訂單管理');
+  await renderCompletedOrders();
+}
+
+async function renderCompletedOrders() {
+  const el  = document.getElementById('completedList');
+  const cnt = document.getElementById('completedCount');
+  if (!el) return;
+  el.innerHTML = `<div class="no-results">載入中…</div>`;
+  if (!sb) { el.innerHTML = `<div class="no-results">Supabase 未連線</div>`; return; }
+  const { data, error } = await sb.from('customer_orders')
+    .select('*').not('completed_at', 'is', null)
+    .order('completed_at', { ascending: false });
+  if (error) {
+    el.innerHTML = `<div class="no-results" style="color:var(--red);">尚未啟用此功能<br><span style="font-size:0.7rem;color:var(--text-light);">請到 Supabase 為 customer_orders 表新增 completed_at 欄位（int8, nullable）</span></div>`;
+    if (cnt) cnt.textContent = '0';
+    return;
+  }
+  let list = data || [];
+  // 搜尋過濾
+  const kw = (document.getElementById('completedSearch')?.value || '').trim().toLowerCase();
+  if (kw) {
+    list = list.filter(o =>
+      (o.customer_name || '').toLowerCase().includes(kw) ||
+      (o.token || '').toLowerCase().includes(kw)
+    );
+  }
+  if (cnt) cnt.textContent = list.length;
+  if (!list.length) { el.innerHTML = `<div class="no-results">${kw?'查無符合的訂單':'尚無已完成訂單'}</div>`; return; }
+
+  el.innerHTML = list.map(o => {
+    const items      = Array.isArray(o.items) ? o.items : [];
+    const itemStatus = (o.item_status && typeof o.item_status === 'object') ? o.item_status : {};
+    const total = items.reduce((s, item, i) =>
+      itemStatus[i] === 'oos' ? s : s + (Number(item.price)||0), 0);
+    const completedDate = o.completed_at
+      ? new Date(Number(o.completed_at)).toLocaleString('zh-TW', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : '—';
+    const itemsHTML = items.map((item, i) => {
+      const st = itemStatus[i] || '';
+      const tag = st === 'arrived' ? '<span style="color:#155724;font-size:0.7rem;">✓到貨</span>'
+                : st === 'oos'     ? '<span style="color:var(--red);font-size:0.7rem;">斷貨</span>'
+                : '';
+      return `<div class="order-item-row" style="padding:4px 0;">
+        <div class="order-item-label" style="flex:1;">
+          ${item.url?`<img src="${esc(imgUrl(item.url, 100))}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`:''}
+          <strong>${esc(item.brand||item.desc||'')}</strong>${item.size?' ／'+esc(item.size):''}${item.color?' ／'+esc(item.color):''}
+          ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''} ${tag}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="order-card" data-id="${o.id}" style="opacity:0.92;">
+      <div class="order-card-head">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <div class="order-no">${esc(o.token)}</div>
+            <span class="order-merged-tag" style="background:#D4EDDA;color:#155724;">✓ 已完成</span>
+          </div>
+          <div class="order-customer">${esc(o.customer_name||'')}</div>
+          <div class="order-contact">${o.line_id?'Line: '+esc(o.line_id):''}</div>
+          <div style="font-size:0.68rem;margin-top:2px;color:var(--text-light);">
+            完成時間：${completedDate}
+          </div>
+        </div>
+      </div>
+      <div class="order-items-list">${itemsHTML}</div>
+      <div class="order-total-row">
+        <div><span class="order-total-amt">NT$ ${total.toLocaleString()}</span></div>
+        <div class="order-action-row">
+          <button class="order-edit-btn" onclick="reopenOrder('${o.id}')">↩ 還原</button>
+          <button class="order-del-btn" onclick="deleteOrder('${o.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 async function deleteOrder(id) {
   if (!confirm('確定要刪除此訂單？')) return;
   if (!sb) return;
   await sb.from('customer_orders').delete().eq('id', id);
-  await renderOrders();
+  // 依當前分頁更新對應列表
+  if (document.getElementById('tab-completed')?.classList.contains('active')) {
+    await renderCompletedOrders();
+  } else {
+    await renderOrders();
+  }
   showToast('已刪除訂單');
 }
 // 前台查詢（輸入訂單編號或 token）
