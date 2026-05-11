@@ -480,6 +480,9 @@ body.cute-mode .logo .earth-green { color: #8FCB7A; }
 .line-send-copy-btn { display: block; width: 100%; background: var(--cream-dark); color: var(--warm-brown); border: 1.5px solid var(--blush); border-radius: 24px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; margin-bottom: 8px; transition: background 0.2s; }
 .line-send-copy-btn:hover { background: var(--blush-light); }
 .line-send-copy-btn.copied { background: var(--blush-light); color: var(--soft-brown); }
+.line-send-bank-btn { display: block; width: 100%; background: #FFD54F; color: #5D4037; border: 1.5px solid #FFC107; border-radius: 24px; padding: 11px; font-size: 0.85rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.06em; cursor: pointer; margin-bottom: 8px; transition: background 0.2s; font-weight: 500; }
+.line-send-bank-btn:hover { background: #FFEB3B; }
+.line-send-bank-btn.copied { background: #C8E6C9; color: #2E7D32; border-color: #81C784; }
 .line-send-go-btn { display: block; width: 100%; background: #06C755; color: var(--white); border: none; border-radius: 24px; padding: 13px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.08em; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; text-align: center; text-decoration: none; box-sizing: border-box; }
 .line-send-go-btn:hover { opacity: 0.88; }
 .line-send-close { display: block; text-align: center; font-size: 0.78rem; color: var(--text-light); cursor: pointer; padding: 4px; letter-spacing: 0.06em; }
@@ -1373,6 +1376,11 @@ const SUPABASE_TABLE  = 'products';
 const IMG_MAX_WIDTH   = 1200;
 const IMG_QUALITY     = 0.8;
 const IMG_TARGET_SIZE = 200 * 1024;
+
+// 下單連結設定
+const ORDER_LINK_NORMAL = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/020000000000000000dfefca';  // 未滿1500的下單連結
+const ORDER_LINK_FREE_SHIPPING = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/69fbe5aa23741c5f80c90cb0';  // 滿1500免運的下單連結
+
 const sb = (window.supabase && window.supabase.createClient)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
@@ -4106,13 +4114,23 @@ async function submitCartToSupabase() {
 //  LINE SEND MODAL
 // ═══════════════════════════════
 let _lineMsgText = '';
+let _isCheckoutModal = false; // 標記是否為結帳單彈窗
 function showLineSendModal(msg, title) {
   _lineMsgText = msg;
+  _isCheckoutModal = title && title.includes('結帳單確認');
+  
   document.getElementById('lineSendMsg').textContent = msg;
   document.getElementById('lineGoBtn').href = LINE_URL;
   document.getElementById('lineCopyBtn').textContent = '複製訊息';
   document.getElementById('lineCopyBtn').classList.remove('copied');
   document.querySelector('.line-send-title').textContent = title || '傳送清單至官方 Line';
+  
+  // 移除：不再顯示複製帳號按鈕
+  // const bankCopyBtn = document.getElementById('lineBankCopyBtn');
+  // if (bankCopyBtn) {
+  //   bankCopyBtn.style.display = _isCheckoutModal ? 'block' : 'none';
+  // }
+  
   document.getElementById('lineSendOverlay').classList.add('active');
   lock();
 }
@@ -4134,6 +4152,23 @@ async function copyLineMsg() {
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
     showToast('請長按選取後複製');
+  }
+}
+
+// 複製銀行帳號
+async function copyBankAccountInModal() {
+  const btn = document.getElementById('lineBankCopyBtn');
+  const accountNumber = '00461168148604';
+  try {
+    await navigator.clipboard.writeText(accountNumber);
+    btn.textContent = '✓ 帳號已複製！';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 複製匯款帳號';
+      btn.classList.remove('copied');
+    }, 2000);
+  } catch(e) {
+    showToast('⚠️ 複製失敗，請手動複製');
   }
 }
 
@@ -4304,16 +4339,19 @@ async function renderOrders() {
       </button>`;
       // 到貨：按鈕切換，斷貨：按鈕切換
       const arrivedBtn = `<button class="order-ordered-btn ${st==='arrived'?'on':''}"
-        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},this.classList.contains('on')?'':'arrived')"
+        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},'${st}'==='arrived'?'':'arrived')"
         style="font-size:0.72rem;padding:3px 10px;${st==='arrived'?'':'background:transparent;border:1.5px solid var(--cream-mid);color:var(--text-soft);'}">
         ${st==='arrived'?'✓ 到貨':'到貨'}
       </button>`;
       const oosBtn = `<button class="order-ordered-btn ${st==='oos'?'on':''}"
-        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},this.classList.contains('on')?'':'oos')"
+        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},'${st}'==='oos'?'':'oos')"
         style="font-size:0.72rem;padding:3px 10px;${st==='oos'?'background:var(--red);border-color:var(--red);':'background:transparent;border:1.5px solid var(--cream-mid);color:var(--text-soft);'}">
         ${st==='oos'?'✓ 斷貨':'斷貨'}
       </button>`;
-      return `<div class="order-item-row">
+      return `<div class="order-item-row" data-item-index="${i}" data-order-id="${o.id}">
+        <input type="checkbox" class="order-item-checkbox" id="itemCheckbox_${o.id}_${i}" 
+               onchange="updateItemBulkActions('${o.id}')" 
+               style="width:18px;height:18px;cursor:pointer;accent-color:var(--warm-brown);margin-right:8px;flex-shrink:0;">
         <div class="order-item-label ${labelClass}">
           ${item.url?`<img src="${esc(imgUrl(item.url, 100))}" style="width:26px;height:26px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`:''}
           <strong>${esc(item.brand||item.desc||'')}</strong>${item.category?' · '+esc(item.category):''}
@@ -4346,6 +4384,26 @@ async function renderOrders() {
           </div>
         </div>
       </div>
+      
+      <!-- 批量操作工具列 -->
+      <div class="bulk-actions-bar" id="bulkBar_${o.id}" style="display:none;background:var(--warm-brown);color:var(--white);padding:12px 14px;border-radius:var(--radius-sm);margin:10px 0;align-items:center;justify-content:space-between;gap:10px;">
+        <div>已選擇 <strong><span id="selectedCount_${o.id}">0</span></strong> 件商品</div>
+        <div style="display:flex;gap:8px;">
+          <button class="bulk-btn" onclick="deselectAllItems('${o.id}')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:var(--white);padding:6px 14px;border-radius:16px;font-size:0.75rem;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.2s;">取消</button>
+          <button class="bulk-btn danger" onclick="bulkDeleteItems('${o.id}')" style="background:var(--red);border-color:var(--red);color:var(--white);padding:6px 14px;border-radius:16px;font-size:0.75rem;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.2s;">刪除選中</button>
+        </div>
+      </div>
+      
+      ${items.length > 1 ? `
+      <!-- 全選按鈕 -->
+      <div class="select-all-row" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cream-mid);border-radius:var(--radius-sm);margin:8px 0;font-size:0.8rem;">
+        <input type="checkbox" id="selectAll_${o.id}" 
+               onchange="toggleSelectAllItems('${o.id}', this.checked)"
+               style="width:18px;height:18px;cursor:pointer;accent-color:var(--warm-brown);">
+        <label for="selectAll_${o.id}" style="cursor:pointer;user-select:none;">全選 (${items.length} 件)</label>
+      </div>
+      ` : ''}
+      
       <div class="order-items-list">${itemsHTML}</div>
       <div class="order-total-row">
         <div>
@@ -4626,12 +4684,36 @@ async function exportCheckout(id) {
   const arrivedItems = items.map((item, i) => ({ ...item, _i: i }))
     .filter(item => itemStatus[item._i] === 'arrived');
   if (!arrivedItems.length) { showToast('尚無已到貨商品'); return; }
-  const subtotal = arrivedItems.reduce((s, it) => s + (Number(it.price)||0), 0);
-  const credit   = Number(data.stored_credit) || 0;
-  // 儲值金扣抵：實際支付不會是負數；如果儲值金 > 小計，剩下的金額就是「餘額」
-  const credUsed = Math.min(credit, subtotal);
-  const payable  = Math.max(0, subtotal - credit);
-  const credLeft = Math.max(0, credit - subtotal);
+  
+  // 計算原價小計
+  const originalSubtotal = arrivedItems.reduce((s, it) => s + (Number(it.price)||0), 0);
+  const credit = Number(data.stored_credit) || 0;
+  
+  // 判斷是否有不打折的商品（限特、團購、二手衣分頁）
+  const hasNonDiscountItems = arrivedItems.some(item => {
+    const category = (item.category || '').toLowerCase();
+    const brand = (item.brand || '').toLowerCase();
+    return category.includes('限特') || category.includes('團購') || 
+           category.includes('二手衣') || brand.includes('限特') || 
+           brand.includes('團購') || brand.includes('二手衣');
+  });
+  
+  // 如果有儲值金餘額 且 沒有不打折商品，打 88 折
+  const hasDiscount = credit > 0 && !hasNonDiscountItems;
+  const discountRate = hasDiscount ? 0.88 : 1;
+  const subtotalAfterDiscount = Math.round(originalSubtotal * discountRate);
+  
+  // 好賣家下單費用（固定 60 元）
+  const platformFee = 60;
+  
+  // 商品實際金額（扣除好賣家費用）
+  const itemTotal = subtotalAfterDiscount - platformFee;
+  
+  // 儲值金餘額計算：原儲值金 - 折扣後商品金額 + 60 元好賣家費用
+  const adjustedCredit = hasDiscount ? credit - subtotalAfterDiscount + platformFee : credit;
+  
+  // 實際支付金額
+  const payable = itemTotal;
 
   // 寫入結帳日期
   const checkoutTs = Date.now();
@@ -4645,36 +4727,58 @@ async function exportCheckout(id) {
     line_id: data.line_id, items: arrivedItems.map(({_i,...item}) => item),
     status: 2, ordered: true, item_status: {}, merged_into: id, merged_orders: [],
     note: '結帳單', created_at: Date.now(),
-    stored_credit: credLeft,    // 結帳單複本記錄「結帳後餘額」，方便顧客看連結
+    stored_credit: credit,
     checkout_at: checkoutTs
   }]);
   if (error) { showToast('⚠️ 建立失敗'); return; }
 
   const orderUrl = `${location.origin}${location.pathname}?c=${token}`;
 
-  // 日期格式化
-  const fmtDate = ts => ts ? new Date(Number(ts)).toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+  // 日期格式化（只要日期，不要時間）
+  const fmtDateOnly = ts => ts ? new Date(Number(ts)).toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}) : '—';
 
   // 組結帳訊息
   let msg = `【Janine Chiang Kids 到貨結帳通知】\n\n`
-    + `Hi ${data.customer_name}，以下商品已到貨請準備付款：\n\n`
     + arrivedItems.map((item, i) =>
         `${i+1}. ${item.brand||''}${item.category?' '+item.category:''}${item.size?' ／'+item.size:''}${item.color?' ／'+item.color:''} NT$${item.price||0}`
-      ).join('\n')
-    + `\n\n────────────────`
-    + `\n商品總計：NT$ ${subtotal.toLocaleString()}`;
-  if (credit > 0) {
-    msg += `\n儲值金折抵：- NT$ ${credUsed.toLocaleString()}`;
-    msg += `\n────────────────`;
-    msg += `\n實際支付：NT$ ${payable.toLocaleString()}`;
-    if (credLeft > 0) msg += `\n（儲值金餘額：NT$ ${credLeft.toLocaleString()}）`;
+      ).join('\n');
+  
+  // 顯示價格明細
+  msg += `\n\n────────────────`;
+  
+  if (hasDiscount) {
+    msg += `\n訂單總金額：NT$ ${originalSubtotal.toLocaleString()}`
+        + `\n88折後：NT$ ${subtotalAfterDiscount.toLocaleString()}`;
   } else {
-    msg += `\n────────────────`;
-    msg += `\n實際支付：NT$ ${payable.toLocaleString()}`;
+    msg += `\n商品小計：NT$ ${originalSubtotal.toLocaleString()}`;
   }
-  msg += `\n\n📅 訂購日期：${fmtDate(data.created_at)}`
-       + `\n🧾 結帳日期：${fmtDate(checkoutTs)}`
-       + `\n\n查看結帳清單：\n${orderUrl}`;
+  
+  msg += `\n好賣家下單費：- NT$ ${platformFee}`
+      + `\n────────────────`
+      + `\n實際匯款金額：NT$ ${payable.toLocaleString()}`;
+  
+  // 如果有儲值金，顯示調整後的餘額
+  if (hasDiscount) {
+    msg += `\n（儲值金餘額：NT$ ${adjustedCredit.toLocaleString()}）`;
+  }
+  
+  // 下單說明
+  msg += `\n\n📋 下單說明：`
+      + `\n1. 請先匯款 NT$ ${payable.toLocaleString()}`
+      + `\n2. 匯款後請點擊下方連結至「好賣家」下單一個`
+      + `\n3. 商品金額已扣除 NT$60 好賣家費用`;
+  
+  // 匯款資訊連結（使用特殊參數 bank=token）
+  const bankUrl = `${location.origin}${location.pathname}?bank=${token}`;
+  msg += `\n\n💳 點此複製匯款帳號：\n${bankUrl}`;
+  
+  // 下單連結（滿1500免運，未滿顯示一般連結）
+  const freeShippingThreshold = 1500;
+  if (payable >= freeShippingThreshold) {
+    msg += `\n\n📦 好賣家下單連結（免運）：\n${ORDER_LINK_FREE_SHIPPING}`;
+  } else {
+    msg += `\n\n📦 好賣家下單連結：\n${ORDER_LINK_NORMAL}`;
+  }
 
   // 跳出確認視窗（沿用 lineSendModal）
   showLineSendModal(msg, '結帳單確認 → 傳送至 Line');
@@ -4900,9 +5004,28 @@ async function showOrderByToken(token) {
   const total = items.reduce((s, item) => s + (Number(item.price)||0), 0);
   const statusLabels = ['訂購中','待回台','在台打包','斷貨'];
   const statusClass  = ['s0','s1','s2','s3'];
+  
+  // 檢查是否為結帳單（包含「結帳單」字樣）
+  const isCheckout = (data.customer_name || '').includes('結帳單');
+  
   inner.innerHTML = `
     <div class="oq-name" style="margin-bottom:6px;">${esc(data.customer_name)} 的清單</div>
     <div style="margin-bottom:12px;"><span class="oq-status ${statusClass[data.status]||'s0'}">${statusLabels[data.status]||'待確認'}</span></div>
+    
+    ${isCheckout ? `
+    <!-- 匯款資訊區塊（僅結帳單顯示） -->
+    <div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:0.9rem;font-weight:500;color:#F57C00;margin-bottom:8px;">💳 匯款資訊</div>
+      <div style="font-size:0.85rem;color:#5D4037;line-height:1.6;">
+        銀行：富邦銀行 (012)<br>
+        帳號：<strong>00461168148604</strong>
+      </div>
+      <button onclick="copyBankAccount()" style="margin-top:10px;width:100%;background:var(--warm-brown);color:white;border:none;padding:10px;border-radius:6px;font-size:0.85rem;cursor:pointer;font-family:'Noto Serif TC',serif;">
+        📋 複製帳號
+      </button>
+    </div>
+    ` : ''}
+    
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
       ${items.map(item => `
         <div style="display:flex;gap:10px;align-items:center;background:var(--cream-dark);border-radius:8px;padding:8px 10px;">
@@ -4917,6 +5040,71 @@ async function showOrderByToken(token) {
     </div>
     ${data.note ? `<div style="font-size:0.78rem;color:var(--text-soft);background:var(--cream-dark);padding:8px 10px;border-radius:6px;margin-bottom:10px;">備註：${esc(data.note)}</div>` : ''}
     <div class="oq-total">合計 NT$ ${total.toLocaleString()}</div>`;
+}
+
+// 顯示匯款資訊彈窗（用於 ?bank=xxx 連結）
+function showBankInfoModal() {
+  const overlay = document.getElementById('oqResult');
+  const inner   = document.getElementById('oqResultInner');
+  if (!overlay || !inner) return;
+  overlay.style.display = 'flex';
+  
+  inner.innerHTML = `
+    <div class="oq-name" style="margin-bottom:16px;">💳 匯款資訊</div>
+    
+    <div style="background:#FFF8E1;border:2px solid #FFD54F;border-radius:12px;padding:20px;margin-bottom:16px;text-align:center;">
+      <div style="font-size:1rem;color:#5D4037;margin-bottom:12px;">
+        <strong>富邦銀行</strong><br>
+        <span style="font-size:0.85rem;color:#8D6E63;">銀行代碼：012</span>
+      </div>
+      <div style="font-size:1.3rem;font-weight:600;color:#F57C00;letter-spacing:0.1em;margin-bottom:16px;">
+        00461168148604
+      </div>
+      <button onclick="copyBankAccount()" id="bankCopyBtn" style="width:100%;background:var(--warm-brown);color:white;border:none;padding:12px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-family:'Noto Serif TC',serif;font-weight:500;">
+        📋 複製帳號
+      </button>
+    </div>
+    
+    <div style="font-size:0.75rem;color:var(--text-light);text-align:center;line-height:1.6;">
+      匯款後請回到結帳訊息<br>
+      點擊「好賣家下單連結」完成下單
+    </div>
+  `;
+}
+
+// 複製銀行帳號功能
+function copyBankAccount() {
+  const accountNumber = '00461168148604';
+  
+  // 使用 Clipboard API 複製
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(accountNumber).then(() => {
+      showToast('✓ 帳號已複製');
+    }).catch(() => {
+      // Fallback 方法
+      fallbackCopy(accountNumber);
+    });
+  } else {
+    // Fallback 方法
+    fallbackCopy(accountNumber);
+  }
+}
+
+// Fallback 複製方法（適用於舊版瀏覽器）
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    showToast('✓ 帳號已複製');
+  } catch (err) {
+    showToast('⚠️ 複製失敗，請手動複製');
+  }
+  document.body.removeChild(textarea);
 }
 
 // ═══════════════════════════════
@@ -5186,9 +5374,16 @@ async function _seedSizeGuides() {
   applyFilters();
   _updatePendingBadge();   // 初始化時更新待完成徽章
   _applyPreorderState();   // 套用預購狀態到所有按鈕
-  const urlToken = new URLSearchParams(location.search).get('c');
+  
+  // 檢查 URL 參數
+  const urlParams = new URLSearchParams(location.search);
+  const urlToken = urlParams.get('c');
+  const bankToken = urlParams.get('bank');
+  
   if (urlToken) {
     await showOrderByToken(urlToken);
+  } else if (bankToken) {
+    showBankInfoModal();
   }
 })();
 
@@ -5457,6 +5652,150 @@ async function ceDownload() {
   showToast('✓ 圖卡下載中');
 }
 
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 批量刪除和滾動位置保持功能
+// ═══════════════════════════════════════════════════════════
+
+// 更新批量操作工具列
+window.updateItemBulkActions = function(orderId) {
+  const checkboxes = document.querySelectorAll(
+    `.order-item-row[data-order-id="${orderId}"] .order-item-checkbox`
+  );
+  const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+  
+  const bulkBar = document.getElementById(`bulkBar_${orderId}`);
+  const selectedCountSpan = document.getElementById(`selectedCount_${orderId}`);
+  const selectAllCheckbox = document.getElementById(`selectAll_${orderId}`);
+  
+  if (selectedCountSpan) selectedCountSpan.textContent = checkedCount;
+  if (bulkBar) bulkBar.style.display = checkedCount > 0 ? 'flex' : 'none';
+  
+  if (selectAllCheckbox) {
+    selectAllCheckbox.checked = checkedCount === checkboxes.length && checkedCount > 0;
+    selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+  }
+  
+  // 高亮選中的商品行
+  checkboxes.forEach(cb => {
+    const row = cb.closest('.order-item-row');
+    if (row) {
+      if (cb.checked) {
+        row.style.background = 'var(--blush-light)';
+        row.style.borderRadius = '4px';
+      } else {
+        row.style.background = '';
+        row.style.borderRadius = '';
+      }
+    }
+  });
+};
+
+// 全選/取消全選
+window.toggleSelectAllItems = function(orderId, checked) {
+  document.querySelectorAll(
+    `.order-item-row[data-order-id="${orderId}"] .order-item-checkbox`
+  ).forEach(cb => {
+    cb.checked = checked;
+  });
+  updateItemBulkActions(orderId);
+};
+
+// 取消選取
+window.deselectAllItems = function(orderId) {
+  document.querySelectorAll(
+    `.order-item-row[data-order-id="${orderId}"] .order-item-checkbox`
+  ).forEach(cb => {
+    cb.checked = false;
+  });
+  updateItemBulkActions(orderId);
+};
+
+// 批量刪除
+window.bulkDeleteItems = async function(orderId) {
+  const checkboxes = document.querySelectorAll(
+    `.order-item-row[data-order-id="${orderId}"] .order-item-checkbox:checked`
+  );
+  
+  if (checkboxes.length === 0) return;
+  if (!confirm(`確定要刪除選中的 ${checkboxes.length} 件商品嗎？`)) return;
+  if (!window.sb) { showToast('⚠️ Supabase 未連線'); return; }
+  
+  const { data: order } = await window.sb
+    .from('customer_orders')
+    .select('*')
+    .eq('id', orderId)
+    .single();
+  
+  if (!order) return;
+  
+  const indicesToDelete = Array.from(checkboxes)
+    .map(cb => parseInt(cb.closest('.order-item-row').dataset.itemIndex))
+    .sort((a, b) => b - a);
+  
+  let updatedItems = [...(order.items || [])];
+  let updatedStatus = {...(order.item_status || {})};
+  
+  // 刪除商品
+  indicesToDelete.forEach(index => {
+    updatedItems.splice(index, 1);
+  });
+  
+  // 重新索引 item_status
+  const reindexedStatus = {};
+  updatedItems.forEach((item, newIndex) => {
+    const originalItems = order.items || [];
+    let originalIndex = -1;
+    for (let i = 0; i < originalItems.length; i++) {
+      if (indicesToDelete.includes(i)) continue;
+      if (JSON.stringify(originalItems[i]) === JSON.stringify(item)) {
+        originalIndex = i;
+        break;
+      }
+    }
+    
+    if (originalIndex >= 0 && updatedStatus[originalIndex]) {
+      reindexedStatus[newIndex] = updatedStatus[originalIndex];
+    }
+  });
+  
+  // 如果所有商品都被刪除，刪除整筆訂單
+  if (updatedItems.length === 0) {
+    if (window.deleteOrder) {
+      await window.deleteOrder(orderId);
+    }
+    return;
+  }
+  
+  const { error } = await window.sb
+    .from('customer_orders')
+    .update({ 
+      items: updatedItems,
+      item_status: reindexedStatus
+    })
+    .eq('id', orderId);
+  
+  if (error) {
+    console.error('批量刪除失敗:', error);
+    showToast('⚠️ 批量刪除失敗');
+    return;
+  }
+  
+  showToast(`✓ 已刪除 ${checkboxes.length} 件商品`);
+  await window.renderOrders();
+};
+
+// 保持滾動位置的 setItemStatus
+const originalSetItemStatus = window.setItemStatus;
+window.setItemStatus = async function(orderId, idx, status) {
+  const scrollPos = window.scrollY || document.documentElement.scrollTop;
+  await originalSetItemStatus(orderId, idx, status);
+  window.scrollTo(0, scrollPos);
+};
+
+console.log('✅ 批量刪除和滾動位置保持功能已載入');
 </script>
 </body>
 </html>
