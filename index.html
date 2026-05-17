@@ -1180,7 +1180,10 @@ body.cute-mode .logo .earth-green { color: #8FCB7A; }
         <div class="tab-pane" id="tab-completed">
           <div class="admin-section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-              <div class="admin-section-title" style="margin-bottom:0;">已完成訂單（<span id="completedCount">0</span> 筆）</div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="admin-section-title" style="margin-bottom:0;">已完成訂單（<span id="completedCount">0</span> 筆）</div>
+                <button class="add-item-btn" onclick="showSalesReport()" style="background:var(--warm-brown);color:white;padding:6px 14px;font-size:0.78rem;">📊 銷售報表</button>
+              </div>
               <input type="text" id="completedSearch" class="field-input" placeholder="🔍 搜尋顧客姓名 / 訂單編號" style="font-size:0.78rem;width:220px;" oninput="renderCompletedOrders()">
             </div>
             <div id="completedList"></div>
@@ -1297,6 +1300,42 @@ body.cute-mode .logo .earth-green { color: #8FCB7A; }
     <div class="line-send-close" onclick="closeLineSendModal()">關閉</div>
   </div>
 </div>
+
+<!-- 銷售報表彈窗 -->
+<div class="line-send-overlay" id="salesReportOverlay" style="display:none;">
+  <div class="line-send-box" style="max-width:600px;max-height:85vh;overflow-y:auto;">
+    <div class="line-send-title">📊 銷售報表</div>
+    
+    <!-- 時間篩選 -->
+    <div style="background:var(--cream);padding:12px;border-radius:8px;margin-bottom:16px;">
+      <div style="font-size:0.85rem;font-weight:500;margin-bottom:8px;">📅 時間篩選</div>
+      <select id="reportPeriod" onchange="updateSalesReport()" style="width:100%;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">
+        <option value="all">全部時間</option>
+        <option value="thisMonth">本月</option>
+        <option value="lastMonth">上個月</option>
+        <option value="thisQuarter">本季</option>
+        <option value="thisYear">本年度</option>
+        <option value="custom">自訂區間</option>
+      </select>
+      <div id="customDateRange" style="display:none;margin-top:8px;display:flex;gap:8px;">
+        <input type="date" id="reportStartDate" onchange="updateSalesReport()" style="flex:1;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">
+        <input type="date" id="reportEndDate" onchange="updateSalesReport()" style="flex:1;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">
+      </div>
+    </div>
+    
+    <!-- 基本統計 -->
+    <div id="salesReportStats"></div>
+    
+    <!-- 客戶消費排行 -->
+    <div id="customerRanking"></div>
+    
+    <!-- 匯出按鈕 -->
+    <button class="line-send-copy-btn" onclick="exportSalesReport()" style="margin-top:16px;">📥 匯出 Excel</button>
+    
+    <div class="line-send-close" onclick="closeSalesReport()">關閉</div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <script>
@@ -4698,22 +4737,53 @@ async function exportCheckout(id) {
            brand.includes('團購') || brand.includes('二手衣');
   });
   
-  // 如果有儲值金餘額 且 沒有不打折商品，打 88 折
-  const hasDiscount = credit > 0 && !hasNonDiscountItems;
-  const discountRate = hasDiscount ? 0.88 : 1;
-  const subtotalAfterDiscount = Math.round(originalSubtotal * discountRate);
-  
   // 好賣家下單費用（固定 60 元）
   const platformFee = 60;
+  
+  let discountedAmount = 0;  // 打折部分的金額
+  let originalAmount = 0;    // 原價部分的金額
+  let usedCredit = 0;        // 實際使用的儲值金
+  let adjustedCredit = credit; // 剩餘儲值金
+  
+  if (credit > 0 && !hasNonDiscountItems) {
+    // 有儲值金且沒有不打折商品
+    
+    // 計算儲值金能折抵多少原價商品
+    const maxDiscountableOriginalPrice = credit / 0.88;
+    
+    if (maxDiscountableOriginalPrice >= originalSubtotal) {
+      // 儲值金足夠，全部商品都打 88 折
+      discountedAmount = Math.round(originalSubtotal * 0.88);
+      originalAmount = 0;
+      usedCredit = discountedAmount;
+      adjustedCredit = credit - usedCredit + platformFee;
+    } else {
+      // 儲值金不足，部分商品打 88 折，剩下原價
+      const discountableOriginalPrice = Math.floor(maxDiscountableOriginalPrice);
+      discountedAmount = Math.round(discountableOriginalPrice * 0.88);
+      originalAmount = originalSubtotal - discountableOriginalPrice;
+      usedCredit = discountedAmount;
+      adjustedCredit = credit - usedCredit + platformFee;
+    }
+  } else {
+    // 沒有儲值金或有不打折商品，全部原價
+    originalAmount = originalSubtotal;
+    discountedAmount = 0;
+    usedCredit = 0;
+    adjustedCredit = credit;
+  }
+  
+  // 總金額
+  const subtotalAfterDiscount = discountedAmount + originalAmount;
   
   // 商品實際金額（扣除好賣家費用）
   const itemTotal = subtotalAfterDiscount - platformFee;
   
-  // 儲值金餘額計算：原儲值金 - 折扣後商品金額 + 60 元好賣家費用
-  const adjustedCredit = hasDiscount ? credit - subtotalAfterDiscount + platformFee : credit;
-  
   // 實際支付金額
   const payable = itemTotal;
+  
+  // 是否有使用折扣
+  const hasDiscount = discountedAmount > 0;
 
   // 寫入結帳日期
   const checkoutTs = Date.now();
@@ -4747,8 +4817,19 @@ async function exportCheckout(id) {
   msg += `\n\n────────────────`;
   
   if (hasDiscount) {
-    msg += `\n訂單總金額：NT$ ${originalSubtotal.toLocaleString()}`
-        + `\n88折後：NT$ ${subtotalAfterDiscount.toLocaleString()}`;
+    // 計算可打折的原價金額
+    const discountableOriginalPrice = Math.floor(usedCredit / 0.88);
+    
+    if (originalAmount > 0) {
+      // 部分打折，部分原價
+      msg += `\n訂單總金額：NT$ ${originalSubtotal.toLocaleString()}`
+          + `\n　├ 88折商品（NT$ ${discountableOriginalPrice.toLocaleString()}）：NT$ ${discountedAmount.toLocaleString()}`
+          + `\n　└ 原價商品（NT$ ${originalAmount.toLocaleString()}）：NT$ ${originalAmount.toLocaleString()}`;
+    } else {
+      // 全部打折
+      msg += `\n訂單總金額：NT$ ${originalSubtotal.toLocaleString()}`
+          + `\n88折後：NT$ ${subtotalAfterDiscount.toLocaleString()}`;
+    }
   } else {
     msg += `\n商品小計：NT$ ${originalSubtotal.toLocaleString()}`;
   }
@@ -5721,9 +5802,9 @@ window.bulkDeleteItems = async function(orderId) {
   
   if (checkboxes.length === 0) return;
   if (!confirm(`確定要刪除選中的 ${checkboxes.length} 件商品嗎？`)) return;
-  if (!window.sb) { showToast('⚠️ Supabase 未連線'); return; }
+  if (!sb) { showToast('⚠️ Supabase 未連線'); return; }
   
-  const { data: order } = await window.sb
+  const { data: order } = await sb
     .from('customer_orders')
     .select('*')
     .eq('id', orderId)
@@ -5769,7 +5850,7 @@ window.bulkDeleteItems = async function(orderId) {
     return;
   }
   
-  const { error } = await window.sb
+  const { error } = await sb
     .from('customer_orders')
     .update({ 
       items: updatedItems,
@@ -5796,6 +5877,299 @@ window.setItemStatus = async function(orderId, idx, status) {
 };
 
 console.log('✅ 批量刪除和滾動位置保持功能已載入');
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 銷售報表功能
+// ═══════════════════════════════════════════════════════════
+
+function showSalesReport() {
+  document.getElementById('salesReportOverlay').style.display = 'flex';
+  lock();
+  updateSalesReport();
+}
+
+function closeSalesReport() {
+  document.getElementById('salesReportOverlay').style.display = 'none';
+  unlock();
+}
+
+// 銷售報表全域變數
+let _reportData = {
+  totalOrders: 0,
+  checkedOutOrders: 0,
+  totalRevenue: 0,
+  avgOrderValue: 0,
+  customers: []
+};
+
+// 更新報表數據
+async function updateSalesReport() {
+  console.log('📊 開始更新銷售報表...');
+  
+  if (!sb) {
+    console.error('❌ Supabase 未連線');
+    document.getElementById('salesReportStats').innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--red);">
+        系統錯誤：Supabase 未連線
+      </div>
+    `;
+    return;
+  }
+  
+  const period = document.getElementById('reportPeriod').value;
+  const customDateRange = document.getElementById('customDateRange');
+  
+  // 顯示/隱藏自訂日期
+  if (period === 'custom') {
+    customDateRange.style.display = 'flex';
+  } else {
+    customDateRange.style.display = 'none';
+  }
+  
+  // 計算時間範圍
+  let startDate, endDate;
+  const now = new Date();
+  
+  switch(period) {
+    case 'thisMonth':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      break;
+    case 'lastMonth':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      break;
+    case 'thisQuarter':
+      const quarter = Math.floor(now.getMonth() / 3);
+      startDate = new Date(now.getFullYear(), quarter * 3, 1);
+      endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0, 23, 59, 59);
+      break;
+    case 'thisYear':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      break;
+    case 'custom':
+      const start = document.getElementById('reportStartDate').value;
+      const end = document.getElementById('reportEndDate').value;
+      if (!start || !end) return;
+      startDate = new Date(start);
+      endDate = new Date(end + ' 23:59:59');
+      break;
+    default: // all
+      startDate = null;
+      endDate = null;
+  }
+  
+  console.log('📅 查詢時間範圍:', { startDate, endDate, period });
+  
+  // 讀取訂單數據（使用 completed_at 判斷已完成訂單）
+  let query = sb.from('customer_orders').select('*').not('completed_at', 'is', null);
+  
+  if (startDate && endDate) {
+    query = query.gte('completed_at', startDate.getTime()).lte('completed_at', endDate.getTime());
+  }
+  
+  console.log('🔍 開始查詢訂單...');
+  const { data: orders, error } = await query;
+  
+  if (error) {
+    console.error('❌ 查詢錯誤:', error);
+    document.getElementById('salesReportStats').innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--red);">
+        查詢失敗：${error.message}
+      </div>
+    `;
+    return;
+  }
+  
+  console.log('✅ 查詢結果:', orders ? orders.length : 0, '筆訂單');
+  console.log('📦 訂單資料:', orders);
+  
+  if (!orders || orders.length === 0) {
+    console.log('ℹ️ 此期間無已完成訂單');
+    document.getElementById('salesReportStats').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--text-light);">
+        <div style="font-size:3rem;margin-bottom:16px;">📊</div>
+        <div style="font-size:1rem;color:var(--text-main);margin-bottom:8px;font-weight:500;">此期間無已完成訂單</div>
+        <div style="font-size:0.85rem;line-height:1.6;">
+          請先在「訂單管理」中將訂單標記為「已完成」<br>
+          標記後即可在此查看銷售統計數據
+        </div>
+      </div>
+    `;
+    document.getElementById('customerRanking').innerHTML = '';
+    
+    // 重置報表數據
+    _reportData = { totalOrders: 0, checkedOutOrders: 0, totalRevenue: 0, avgOrderValue: 0, customers: [] };
+    return;
+  }
+  
+  // 計算基本統計
+  let totalOrders = orders.length;
+  let totalRevenue = 0;
+  let checkedOutOrders = 0;
+  const customerStats = {};
+  
+  orders.forEach(order => {
+    const items = Array.isArray(order.items) ? order.items : [];
+    
+    // 計算所有商品的總額（已完成訂單不再判斷 item_status）
+    const orderTotal = items.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+    
+    if (orderTotal > 0) {
+      totalRevenue += orderTotal;
+      if (order.checkout_at) checkedOutOrders++;
+      
+      // 統計客戶消費
+      const customerName = order.customer_name || '未知客戶';
+      if (!customerStats[customerName]) {
+        customerStats[customerName] = {
+          name: customerName,
+          total: 0,
+          orders: 0
+        };
+      }
+      customerStats[customerName].total += orderTotal;
+      customerStats[customerName].orders++;
+    }
+  });
+  
+  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  
+  // 儲存到全域變數
+  _reportData = {
+    totalOrders,
+    checkedOutOrders,
+    totalRevenue,
+    avgOrderValue,
+    customers: Object.values(customerStats).sort((a, b) => b.total - a.total).slice(0, 10)
+  };
+  
+  console.log('💾 報表數據已儲存:', _reportData);
+  
+  // 顯示基本統計
+  document.getElementById('salesReportStats').innerHTML = `
+    <div style="background:var(--cream);padding:16px;border-radius:8px;margin-bottom:16px;">
+      <div style="font-size:0.85rem;font-weight:500;margin-bottom:12px;color:var(--warm-brown);">📈 基本統計</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:white;padding:12px;border-radius:6px;text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-light);margin-bottom:4px;">總訂單數</div>
+          <div style="font-size:1.4rem;font-weight:600;color:var(--warm-brown);">${totalOrders}</div>
+        </div>
+        <div style="background:white;padding:12px;border-radius:6px;text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-light);margin-bottom:4px;">已結帳</div>
+          <div style="font-size:1.4rem;font-weight:600;color:#4CAF50;">${checkedOutOrders}</div>
+        </div>
+        <div style="background:white;padding:12px;border-radius:6px;text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-light);margin-bottom:4px;">總銷售額</div>
+          <div style="font-size:1.2rem;font-weight:600;color:var(--warm-brown);">NT$ ${totalRevenue.toLocaleString()}</div>
+        </div>
+        <div style="background:white;padding:12px;border-radius:6px;text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-light);margin-bottom:4px;">平均客單價</div>
+          <div style="font-size:1.2rem;font-weight:600;color:var(--warm-brown);">NT$ ${avgOrderValue.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // 客戶消費排行
+  const customerRanking = Object.values(customerStats)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10);
+  
+  document.getElementById('customerRanking').innerHTML = `
+    <div style="background:var(--cream);padding:16px;border-radius:8px;">
+      <div style="font-size:0.85rem;font-weight:500;margin-bottom:12px;color:var(--warm-brown);">👥 客戶消費排行 Top 10</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${customerRanking.map((customer, index) => `
+          <div style="background:white;padding:10px 12px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:${index < 3 ? 'var(--warm-brown)' : 'var(--cream-mid)'};color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;">
+                ${index + 1}
+              </div>
+              <div>
+                <div style="font-size:0.85rem;font-weight:500;">${customer.name}</div>
+                <div style="font-size:0.7rem;color:var(--text-light);">${customer.orders} 筆訂單</div>
+              </div>
+            </div>
+            <div style="font-size:0.9rem;font-weight:600;color:var(--warm-brown);">
+              NT$ ${customer.total.toLocaleString()}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// 匯出 Excel
+function exportSalesReport() {
+  console.log('📥 開始匯出報表...');
+  console.log('📊 報表數據:', _reportData);
+  
+  try {
+    // 使用 CSV 格式（Excel 可以開啟）
+    const period = document.getElementById('reportPeriod').value;
+    const periodLabels = {
+      'all': '全部時間',
+      'thisMonth': '本月',
+      'lastMonth': '上個月',
+      'thisQuarter': '本季',
+      'thisYear': '本年度',
+      'custom': '自訂區間'
+    };
+    
+    // 建立 CSV 內容
+    let csv = '\uFEFF'; // UTF-8 BOM for Excel
+    csv += `Janine Chiang Kids 銷售報表\n`;
+    csv += `報表期間,${periodLabels[period]}\n`;
+    csv += `產生時間,${new Date().toLocaleString('zh-TW')}\n\n`;
+    
+    // 基本統計（直接從全域變數讀取）
+    csv += `基本統計\n`;
+    csv += `總訂單數,${_reportData.totalOrders}\n`;
+    csv += `已結帳,${_reportData.checkedOutOrders}\n`;
+    csv += `總銷售額,${_reportData.totalRevenue}\n`;
+    csv += `平均客單價,${_reportData.avgOrderValue}\n\n`;
+    
+    // 客戶排行
+    csv += `客戶消費排行\n`;
+    csv += `排名,客戶姓名,訂單數,消費金額\n`;
+    
+    if (_reportData.customers && _reportData.customers.length > 0) {
+      _reportData.customers.forEach((customer, index) => {
+        csv += `${index + 1},${customer.name},${customer.orders},${customer.total}\n`;
+      });
+    } else {
+      csv += `(暫無數據)\n`;
+    }
+    
+    console.log('✅ CSV 內容已準備完成');
+    
+    // 下載
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `銷售報表_${periodLabels[period]}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('✅ 報表已下載');
+    showToast('✓ 報表已下載');
+    
+  } catch (error) {
+    console.error('❌ 匯出錯誤:', error);
+    showToast('⚠️ 匯出失敗，請查看控制台');
+  }
+}
+
+console.log('✅ 銷售報表功能已載入');
 </script>
 </body>
 </html>
