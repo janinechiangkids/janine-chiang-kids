@@ -874,7 +874,12 @@ function parseKoreanHtml() {
   imgNodes.forEach(img => {
     let imgUrl = img.getAttribute('src') || '';
     if (!imgUrl) return;
-    if (imgUrl.startsWith('./')) imgUrl = 'http://hangou.co.kr/gnu/' + imgUrl.slice(2);
+    if (imgUrl.startsWith('//')) imgUrl = 'http:' + imgUrl;
+    else if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {}
+    else if (imgUrl.startsWith('/')) imgUrl = 'http://hangou.co.kr' + imgUrl;
+    else if (imgUrl.startsWith('./')) imgUrl = 'http://hangou.co.kr/gnu/' + imgUrl.slice(2);
+    else if (imgUrl.startsWith('../')) imgUrl = 'http://hangou.co.kr/' + imgUrl.replace(/\.\.\//g, '');
+    else imgUrl = 'http://hangou.co.kr/gnu/' + imgUrl;
     if (seenUrls.has(imgUrl)) return;
     seenUrls.add(imgUrl);
 
