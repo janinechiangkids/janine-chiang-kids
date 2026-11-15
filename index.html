@@ -383,8 +383,11 @@ const sb = (window.supabase && window.supabase.createClient)  ? window.supabase.
 const _imgUrlSupportCache = { tested: false, supported: true };function _proxyKrUrl(url) {
   if (!url || typeof url !== 'string') return url || '';
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
-    const clean = url.replace(/^https?:\/\//i, '');
-    return 'https://wsrv.nl/?url=' + encodeURIComponent(clean);
+    // 若目前網頁是 https://，瀏覽器會擋 http:// 圖片，優先改走 HTTPS 代理；若為本機 file:// 則直接用原網址最穩
+    if (location.protocol === 'https:') {
+      const clean = url.replace(/^https?:\/\//i, '');
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean);
+    }
   }
   return url;
 }
@@ -458,18 +461,49 @@ function closeLb() {  document.getElementById('lightbox').classList.remove('acti
         </div>
         <button class="remove-btn" onclick="removeCard(${i})">✕ 移除</button>
       </div>
-    </div>  `).join('');  requestAnimationFrame(() => {    editData.forEach((d, i) => { const img = document.getElementById('eimg' + i); if (img) img.src = d.url; });  });}function toggleEditCard(i) {}function closeEditCard(i) {}function updateCardSummary(i) {}function onImgLoad(i) {  const img  = document.getElementById('eimg' + i);  const load = document.getElementById('imgload' + i);  if (img)  img.style.display = 'block';  if (load) load.style.display = 'none';}function onImgError(i) {
+    </div>  `).join('');  requestAnimationFrame(() => {    editData.forEach((d, i) => { const img = document.getElementById('eimg' + i); if (img) img.src = _proxyKrUrl(d.url); });  });}function toggleEditCard(i) {}function closeEditCard(i) {}function updateCardSummary(i) {}function onImgLoad(i) {  const img  = document.getElementById('eimg' + i);  const load = document.getElementById('imgload' + i);  if (img)  img.style.display = 'block';  if (load) load.style.display = 'none';}async function uploadSingleCardImg(i, inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  const load = document.getElementById('imgload' + i);
+  if (load) { load.style.display = 'flex'; load.innerHTML = '<div class="img-spinner"></div><div class="img-loading-txt">上傳中…</div>'; }
+  try {
+    const res = await uploadOne(file);
+    editData[i].url = res.url;
+    const img = document.getElementById('eimg' + i);
+    if (img) { img.dataset.retryStage = 'done'; img.src = res.url; }
+    showToast('✓ 圖片已替換上傳成功');
+  } catch (err) {
+    showToast('⚠️ 上傳失敗：' + (err.message || err));
+  }
+}
+function onImgError(i) {
   const img = document.getElementById('eimg' + i);
   const d = editData[i];
-  if (img && d && d.url && !img.dataset.retried) {
-    img.dataset.retried = '1';
-    if (d.url.includes('wsrv.nl/?url=')) {
-      img.src = d.url.replace('https://wsrv.nl/', 'https://images.weserv.nl/');
+  if (img && d && d.url) {
+    const stage = parseInt(img.dataset.retryStage || '0', 10);
+    const clean = d.url.replace(/^https?:\/\//i, '');
+    if (stage === 0) {
+      img.dataset.retryStage = '1';
+      img.src = 'https://wsrv.nl/?url=' + encodeURIComponent(clean);
+      return;
+    } else if (stage === 1) {
+      img.dataset.retryStage = '2';
+      img.src = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(d.url);
       return;
     }
   }
   const load = document.getElementById('imgload' + i);
-  if (load) load.innerHTML = '<div class="img-error-txt">⚠️ 圖片無法顯示<br><span>請確認網址是否為圖片直鏈</span></div>';
+  const shortUrl = (d && d.url) ? esc(d.url) : '';
+  if (load) {
+    load.innerHTML = `<div class="img-error-txt" style="padding:8px;">
+      ⚠️ 韓國網站阻擋外部直接顯示<br>
+      <span style="display:block;word-break:break-all;font-size:0.62rem;margin:4px 0;color:#999;">${shortUrl}</span>
+      <label style="display:inline-block;margin-top:4px;padding:4px 10px;background:var(--warm-brown);color:#fff;border-radius:12px;font-size:0.7rem;cursor:pointer;">
+        📷 點此補上傳圖片
+        <input type="file" accept="image/*" style="display:none;" onchange="uploadSingleCardImg(${i}, this)">
+      </label>
+    </div>`;
+  }
 }
 /* 品項選擇器 */ function categoryPicker(mode, idx, selected) {  const manualId = `cat_manual_${mode}_${idx}`;  const pickerId = `cat_picker_${mode}_${idx}`;  const chips = CATEGORY_LIST.map(c => {    const isOn = selected === c;    return `<div class="option-chip ${isOn?'on':''}" id="${pickerId}_${esc(c)}"      onclick="selectCategory('${mode}',${idx},'${esc(c)}')">${esc(c)}</div>`;  }).join('');  const manualVal = CATEGORY_LIST.includes(selected) ? '' : (selected || '');  return `<div>    <div class="option-chips">${chips}</div>
     <input class="field-input option-chip-manual" type="text" id="${manualId}"      placeholder="品項（選填，可手動輸入）"
@@ -908,7 +942,7 @@ function parseKoreanHtml() {
     else if (rawSrc.startsWith('./')) rawSrc = 'http://hangou.co.kr/gnu/' + rawSrc.slice(2);
     else if (rawSrc.startsWith('../')) rawSrc = 'http://hangou.co.kr/' + rawSrc.replace(/\.\.\//g, '');
     else rawSrc = 'http://hangou.co.kr/gnu/' + rawSrc;
-    let imgUrl = _proxyKrUrl(rawSrc);
+    let imgUrl = rawSrc;
     if (seenUrls.has(imgUrl)) return;
     seenUrls.add(imgUrl);
 
