@@ -118,9 +118,28 @@ function setBrand(b) { brandFilter = b; _currentPage = 1; renderBrandTabs(); app
 /* FILTER + RENDER */ function applyFilters(resetPage = true) {  if (resetPage) _currentPage = 1;  const q = document.getElementById('searchInput').value.trim().toLowerCase();  let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));  if (brandFilter === GROUPBUY_TAB) {    list = list.filter(p => !!p.isGroupBuy);
   } else if (brandFilter && brandFilter !== 'all') {    list = list.filter(p => (p.brand||'').trim() === brandFilter);
   } else {    list = list.filter(p => (p.brand||'').trim() !== SECONDHAND_BRAND);
-  }  if (q) list = list.filter(p =>    (p.brand||'').toLowerCase().includes(q) ||    (p.sizes||[]).join(' ').toLowerCase().includes(q) ||    (p.category||'').toLowerCase().includes(q) ||    (p.color||'').toLowerCase().includes(q)  );  const seenUrls = new Set();  const merged = [];  list.forEach(p => {    const url = p.url || '';    if (!url) { merged.push(p); return; }    if (seenUrls.has(url)) return;    seenUrls.add(url);    const siblings = list.filter(x => (x.url||'') === url);    if (siblings.length > 1) {      merged.push({ ...p, _siblings: siblings });
-    } else {      merged.push(p);
-    }  });  _lastFilteredList = merged;  renderProducts(merged);}
+  }  if (q) list = list.filter(p =>    (p.brand||'').toLowerCase().includes(q) ||    (p.sizes||[]).join(' ').toLowerCase().includes(q) ||    (p.category||'').toLowerCase().includes(q) ||    (p.color||'').toLowerCase().includes(q)  );  const seenUrls = new Set();  const merged = [];  list.forEach(p => {
+    const url = p.url || '';
+    if (!url) { merged.push(p); return; }
+    if (seenUrls.has(url)) return;
+    seenUrls.add(url);
+    const rawSiblings = list.filter(x => (x.url||'') === url);
+    // 同圖多筆資料若「品項（category）」重複（例如兩筆都是「上衣」或都空白），自動過濾只保留第一筆
+    const seenCats = new Set();
+    const uniqueSiblings = [];
+    rawSiblings.forEach(s => {
+      const catKey = (s.category || '').trim() || '__single__';
+      if (!seenCats.has(catKey)) {
+        seenCats.add(catKey);
+        uniqueSiblings.push(s);
+      }
+    });
+    if (uniqueSiblings.length > 1) {
+      merged.push({ ...uniqueSiblings[0], _siblings: uniqueSiblings });
+    } else {
+      merged.push(uniqueSiblings[0] || p);
+    }
+  });  _lastFilteredList = merged;  renderProducts(merged);}
 function renderProducts(list) {  const grid  = document.getElementById('productGrid');  const title = document.getElementById('sectionTitle');  const pageBar = document.getElementById('paginationBar');  if (_productsLoading) {    title.textContent = '— 載入商品中… —';    if (pageBar) pageBar.innerHTML = '';
     grid.innerHTML = `<div class="empty-state">      <div style="width:36px;height:36px;border:3px solid var(--blush);border-top-color:var(--warm-brown);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;"></div>      <p style="color:var(--text-light);font-size:0.85rem;">正在載入商品，請稍候…</p>
     </div>`;    return;  }  if (!list.length) {    title.textContent = '— 0 件商品 —';    if (pageBar) pageBar.innerHTML = '';
@@ -150,7 +169,16 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
     }
   }
   grid.innerHTML = pageItems.map((p,i) => {    const isMulti = Array.isArray(p._siblings) && p._siblings.length > 1;    const sz = isMulti      ? [...new Set(p._siblings.flatMap(s => s.sizes||[]))].join(' / ')      : (p.sizes||[]).join(' / ');    const brandTag = p.brand ? `<span class="product-brand-tag">${esc(p.brand)}</span>` : '';    const catTags  = isMulti      ? p._siblings.filter(s => s.category).map(s => `<span class="product-category-tag">${esc(s.category)}</span>`).join('')      : (p.category ? `<span class="product-category-tag">${esc(p.category)}</span>` : '');    const priceDisplay = isMulti      ? `${p._siblings.length} 件可選`      : _displayPrice(p);    return `    <div class="product-card" style="animation-delay:${i*0.04}s" onclick="openLb('${p.id}')">      <div class="product-img-wrap">        <img referrerpolicy="no-referrer" src="${imgUrl(p.url, 400)}" data-fullurl="${esc(p.url||'')}" alt="${esc(p.brand||'商品')}" onload="this.classList.add('loaded')" onerror="if(this.dataset.fullurl && this.dataset.failStage!=='99'){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.onerror=null;this.src=FALLBACK_IMG;} this.classList.add('loaded');">        ${isMulti ? `<span class="multi-badge">✦ ${p._siblings.length} 件可選</span>` : ''}        ${p.isGroupBuy ? `<span class="groupbuy-badge">🔥 開團特價</span>` : ''}      </div>      <div class="product-info">        <div>          ${brandTag}          ${catTags}        </div>        <div class="product-meta-row">          <span class="product-size">${sz ? esc(sz) : ''}</span>          <span class="product-price">${isMulti ? `<span style="font-size:0.8rem;color:var(--soft-brown);">${priceDisplay}</span>` : priceDisplay}</span>        </div>        <button class="order-btn${_preorderOpen ? '' : ' preorder-closed'}" ${_preorderOpen ? '' : 'disabled'} onclick="event.stopPropagation();${_preorderOpen ? `openLb('${p.id}')` : ''}" data-original-text="${isMulti ? '查看商品' : '點我選規格'}">${_preorderOpen ? (isMulti ? '查看商品' : '點我選規格') : '預購未開放'}</button>      </div>    </div>`;  }).join('');}
-/* LIGHTBOX */ function openLb(id) {  const p = products.find(x => x.id === id);  if (!p) return;  const siblings = (p.url ? products.filter(x => x.url === p.url) : [p]);  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');  _lbImg.dataset.fullurl = p.url || '';  _lbImg.onerror = function() {    this.onerror = null;    if (this.dataset.fullurl && this.src !== this.dataset.fullurl) {      _imgUrlOnFail(this, this.dataset.fullurl);    }  };  _lbImg.src = imgUrl(p.url, 900);
+/* LIGHTBOX */ function openLb(id) {  const p = products.find(x => x.id === id);  if (!p) return;  const rawLbSibs = (p.url ? products.filter(x => x.url === p.url) : [p]);
+  const _lbSeenCats = new Set();
+  const siblings = [];
+  rawLbSibs.forEach(s => {
+    const ck = (s.category || '').trim() || '__single__';
+    if (!_lbSeenCats.has(ck)) {
+      _lbSeenCats.add(ck);
+      siblings.push(s);
+    }
+  });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');  _lbImg.dataset.fullurl = p.url || '';  _lbImg.onerror = function() {    this.onerror = null;    if (this.dataset.fullurl && this.src !== this.dataset.fullurl) {      _imgUrlOnFail(this, this.dataset.fullurl);    }  };  _lbImg.src = imgUrl(p.url, 900);
   const cartBtn = document.getElementById('lbCartBtn');  if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
   const brand = document.getElementById('lbBrand');  brand.textContent = p.brand || '';  brand.style.display = p.brand ? 'inline-block' : 'none';
   _updateLbPrice(p, null);
@@ -915,42 +943,70 @@ function parseKoreanHtml() {
 
   if (!parsedItems.length) { showToast('⚠️ 此頁面沒有可匯入的商品', 4000); return; }
 
-  // 智慧合併：偵測品名/標題中有 JR / 주니어（大童款）的商品，不另外上架帶字圖片，而是把大童尺寸與價格合併到同款無 JR 的主商品中
+  // 智慧合併：偵測品名/標題/尺寸中有 JR / 주니어（大童款）的商品
   const nonJrItems = [];
   const jrItems = [];
   parsedItems.forEach(it => {
     const checkStr = `${it._rawTitle || ''} ${it._rawCat || ''}`.toUpperCase();
-    const isJr = /(^|[^A-Z])JR([^A-Z]|$)/.test(checkStr) || checkStr.includes('주니어') || (it.sizes.length > 0 && it.sizes.every(s => ['JS','JM','JL','JXL'].includes(s)));
+    // 支援 空白JR、-JR、_JR、(JR)、JR.、韓文주니어、或全部尺寸皆為大童碼
+    const isJr = /(^|[^A-Z0-9])JR([^A-Z0-9]|$)/.test(checkStr)
+      || checkStr.includes('주니어')
+      || (it.sizes.length > 0 && it.sizes.every(s => ['JS','JM','JL','JXL'].includes(s)));
     if (isJr) jrItems.push(it);
     else nonJrItems.push(it);
   });
 
-  const normalizeKey = (brand, title) => {
+  // 同時保留「款式名稱」與「顏色後綴（如 *핑크 / *블랙）」來精準配對同色的小童與大童
+  const normalizeKeyWithColor = (brand, title) => {
     let t = (title || '').toLowerCase();
     if (brand) t = t.replace(brand.toLowerCase(), '');
-    t = t.replace(/[\*\-].*$/, '');
-    t = t.replace(/jr/gi, '').replace(/주니어/g, '').replace(/[^a-z0-9가-힣]/g, '');
+    t = t.replace(/[\(\[\-\_\s]*\bjr\b[\)\]\-\_\s]*/gi, ' ');
+    t = t.replace(/[\(\[\-\_\s]*주니어[\)\]\-\_\s]*/g, ' ');
+    t = t.replace(/[^a-z0-9가-힣\*]/g, '');
     return `${(brand||'').toLowerCase().trim()}__${t}`;
   };
 
-  const mainMap = new Map();
+  // 不分顏色的純款式 key（當顏色標示寫法略不同時的第二層備援配對）
+  const normalizeBaseKey = (brand, title) => {
+    let t = (title || '').toLowerCase();
+    if (brand) t = t.replace(brand.toLowerCase(), '');
+    t = t.replace(/\*.*$/, '');
+    t = t.replace(/[\(\[\-\_\s]*\bjr\b[\)\]\-\_\s]*/gi, ' ');
+    t = t.replace(/[\(\[\-\_\s]*주니어[\)\]\-\_\s]*/g, ' ');
+    t = t.replace(/[^a-z0-9가-힣]/g, '');
+    return `${(brand||'').toLowerCase().trim()}__${t}`;
+  };
+
+  const exactMap = new Map();
+  const baseMap = new Map();
   nonJrItems.forEach(it => {
-    const k = normalizeKey(it.brand, it._rawTitle);
-    if (k && !mainMap.has(k)) mainMap.set(k, it);
+    const ek = normalizeKeyWithColor(it.brand, it._rawTitle);
+    if (ek && !exactMap.has(ek)) exactMap.set(ek, it);
+    const bk = normalizeBaseKey(it.brand, it._rawTitle);
+    if (bk && !baseMap.has(bk)) baseMap.set(bk, []);
+    if (bk) baseMap.get(bk).push(it);
   });
 
   const finalParsed = [...nonJrItems];
   let mergedJrCount = 0;
 
   jrItems.forEach(jr => {
-    const k = normalizeKey(jr.brand, jr._rawTitle);
-    let target = k ? mainMap.get(k) : null;
-    if (!target && jr.brand) {
-      const cleanJr = (jr._rawTitle || '').replace(/[\*\-].*$/, '').replace(/jr/gi, '').replace(/주니어/g, '').trim();
-      if (cleanJr.length >= 2) {
-        target = nonJrItems.find(m => m.brand === jr.brand && (m._rawTitle || '').includes(cleanJr));
+    const ek = normalizeKeyWithColor(jr.brand, jr._rawTitle);
+    let target = ek ? exactMap.get(ek) : null;
+
+    if (!target) {
+      const bk = normalizeBaseKey(jr.brand, jr._rawTitle);
+      const candidates = bk ? (baseMap.get(bk) || []) : [];
+      if (candidates.length === 1) {
+        target = candidates[0];
+      } else if (candidates.length > 1) {
+        const colorPart = ((jr._rawTitle || '').split('*')[1] || '').replace(/[^a-z0-9가-힣]/gi, '').toLowerCase();
+        if (colorPart) {
+          target = candidates.find(c => ((c._rawTitle || '').toLowerCase()).includes(colorPart)) || null;
+        }
       }
     }
+
     if (target) {
       const jrSizes = (jr.sizes && jr.sizes.length && !(jr.sizes.length === 1 && jr.sizes[0] === 'F'))
         ? jr.sizes
@@ -962,8 +1018,16 @@ function parseKoreanHtml() {
           target.sizePrices[sz] = jr.price;
         }
       });
+      if (!target.price && jr.price) target.price = jr.price;
       mergedJrCount++;
     } else {
+      // 找不到對應小童主圖時，保留原本 JR 商品在列表中並帶入大童尺寸，不讓原本 JR 商品遺漏！
+      if (!jr.sizes.length || (jr.sizes.length === 1 && jr.sizes[0] === 'F')) {
+        jr.sizes = ['JS', 'JM', 'JL'];
+        if (jr.price) {
+          jr.sizePrices = { JS: jr.price, JM: jr.price, JL: jr.price };
+        }
+      }
       finalParsed.push(jr);
     }
   });
