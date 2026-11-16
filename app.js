@@ -6,23 +6,20 @@ function setPreorderOpen(val) {  _preorderOpen = val;  localStorage.setItem(SK_P
 /* 下單連結設定 */ const ORDER_LINK_NORMAL = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/020000000000000000dfefca';  /* 未滿1500的下單連結 */ const ORDER_LINK_FREE_SHIPPING = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/69fbe5aa23741c5f80c90cb0';
 const sb = (window.supabase && window.supabase.createClient)  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)  : null;
 const _imgUrlSupportCache = { tested: false, supported: false }; // 預設直接使用 Supabase 穩定原圖直鏈，避免 /render/image/ 在免費用量超額後整批回傳 402/404 破圖
-function _normalizeExternalImg(url, width) {
+function _normalizeExternalImg(url) {
   if (!url || typeof url !== 'string') return url || '';
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
     if (typeof location !== 'undefined' && location.protocol === 'https:') {
       const clean = url.replace(/^https?:\/\//i, '');
-      const wParam = width ? `&w=${width}&q=92&we` : '&q=92';
-      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + wParam;
+      // 不帶 &w= 強制放大參數，讓 proxy 回傳原始 1:1 像素並用最高畫質 q=95，避免低解析縮圖被硬拉糊掉
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=95';
     }
   }
   return url;
 }
 function imgUrl(url, width) {
   if (!url) return '';
-  // 手機高解析度螢幕（Retina 2x/3x）自動加倍請求解析度，避免縮圖放大模糊
-  const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? Math.min(window.devicePixelRatio, 2.5) : 2;
-  const targetW = width ? Math.round(width * dpr) : 0;
-  url = _normalizeExternalImg(url, targetW);
+  url = _normalizeExternalImg(url);
   if (!width) return url;
   if (typeof url !== 'string' || !url.includes('/storage/v1/object/public/')) return url;
   if (!_imgUrlSupportCache.supported) return url;
@@ -184,14 +181,21 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
     }
   });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
   const rawUrl = p.url || '';
-  // 韓國批發網列表圖多為 /data/item/123456_m 縮圖，燈箱點開時優先嘗試載入無 _m 的高清原圖
-  const hdUrl = /\/data\/item\/\d+_m$/i.test(rawUrl) ? rawUrl.replace(/_m$/i, '') : rawUrl;
+  // 建立高清原圖候選鏈（針對韓網 _m 小縮圖自動依序嘗試 _l 大圖與無後綴原圖）
+  const hdCandidates = [];
+  if (/\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(rawUrl)) {
+    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '_l$1'));
+    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '$1'));
+  }
+  hdCandidates.push(rawUrl);
+
+  let candIdx = 0;
   _lbImg.dataset.fullurl = rawUrl;
   _lbImg.dataset.failStage = '0';
   _lbImg.onerror = function() {
-    if (this.dataset.triedHd === '1') {
-      this.dataset.triedHd = '2';
-      this.src = imgUrl(this.dataset.fullurl, 1200);
+    candIdx++;
+    if (candIdx < hdCandidates.length) {
+      this.src = imgUrl(hdCandidates[candIdx]);
       return;
     }
     if (this.dataset.fullurl && this.dataset.failStage !== '99') {
@@ -201,13 +205,22 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
       this.src = FALLBACK_IMG;
     }
   };
-  if (hdUrl !== rawUrl) {
-    _lbImg.dataset.triedHd = '1';
-    _lbImg.src = imgUrl(hdUrl, 1200);
-  } else {
-    _lbImg.dataset.triedHd = '0';
-    _lbImg.src = imgUrl(rawUrl, 1200);
-  }
+  _lbImg.style.maxWidth = '';
+  _lbImg.style.margin = '';
+  _lbImg.onload = function() {
+    const nw = this.naturalWidth || 0;
+    if (nw > 0 && nw < 420) {
+      // 小尺寸縮圖避免在手機全寬螢幕過度放大糊掉，限制最大顯示寬度並置中
+      this.style.maxWidth = Math.min(nw * 1.2, 340) + 'px';
+      this.style.margin = '12px auto 0';
+      this.style.borderRadius = '10px';
+    } else {
+      this.style.maxWidth = '100%';
+      this.style.margin = '0';
+      this.style.borderRadius = '0';
+    }
+  };
+  _lbImg.src = imgUrl(hdCandidates[0]);
   const cartBtn = document.getElementById('lbCartBtn');  if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
   const brand = document.getElementById('lbBrand');  brand.textContent = p.brand || '';  brand.style.display = p.brand ? 'inline-block' : 'none';
   _updateLbPrice(p, null);
