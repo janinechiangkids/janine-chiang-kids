@@ -163,3 +163,10 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
   accent-color: #C0614A;
   cursor: pointer;
 }
+
+
+/* 燈箱高畫質渲染優化 */
+.lightbox-img {
+  image-rendering: -webkit-optimize-contrast;
+  background: #FAF6F0;
+}

@@ -2,23 +2,27 @@
 function _loadPreorderState() {  try {    const v = localStorage.getItem(SK_PREORDER);    _preorderOpen = v === null ? true : v === 'true';  } catch(e) { _preorderOpen = true; }  _applyPreorderState();}
 function _applyPreorderState() {  /* 更新後台開關 UI  */ const toggle = document.getElementById('preorderToggle');  const label  = document.getElementById('preorderStatusLabel');  const slider = document.getElementById('preorderSlider');  const knob   = document.getElementById('preorderKnob');  if (toggle) toggle.checked = _preorderOpen;  if (label)  { label.textContent = _preorderOpen ? '✅ 預購開放中' : '🔒 預購已關閉'; label.style.color = _preorderOpen ? 'var(--warm-brown)' : 'var(--text-light)'; }  if (slider) slider.style.background = _preorderOpen ? 'var(--warm-brown)' : 'var(--cream-mid)';  if (knob)   knob.style.transform = _preorderOpen ? 'translateX(24px)' : 'translateX(0)';  /* 更新前台所有商品卡按鈕  */ document.querySelectorAll('.order-btn').forEach(btn => {    if (_preorderOpen) {      btn.classList.remove('preorder-closed');      btn.disabled = false;      if (btn.textContent.includes('預購未開放')) {        btn.textContent = btn.dataset.originalText || '點我選規格';      }    } else {      if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;      btn.classList.add('preorder-closed');      btn.disabled = true;      btn.textContent = '預購未開放';    }  });  /* 更新燈箱內按鈕  */ const lbCartBtn = document.getElementById('lbCartBtn');  if (lbCartBtn) {    if (_preorderOpen) {      lbCartBtn.disabled = false;      lbCartBtn.style.opacity = '1';      lbCartBtn.style.cursor = 'pointer';      if (lbCartBtn.textContent === '預購未開放') lbCartBtn.textContent = '＋ 加入清單';    } else {      lbCartBtn.disabled = true;      lbCartBtn.style.opacity = '0.5';      lbCartBtn.style.cursor = 'not-allowed';      lbCartBtn.textContent = '預購未開放';    }  }}
 function setPreorderOpen(val) {  _preorderOpen = val;  localStorage.setItem(SK_PREORDER, String(val));  _applyPreorderState();  showToast(val ? '✅ 預購已開放，顧客可以下單' : '🔒 預購已關閉，顧客無法下單');}
-/* ═══════════════════════════════//  CONFIG// ═══════════════════════════════*/ const SK_PROD   = 'jck_products_v3';const SK_BRAND  = 'jck_brands_v3';const LINE_URL  = 'https://lin.ee/rCNd7ai';const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';const SUPABASE_KEY    = 'sb_publishable__-Ac_0k27vvy8r456Hq_0g_AiRWZPHD';const SUPABASE_BUCKET = 'products';const SUPABASE_TABLE  = 'products';const IMG_MAX_WIDTH   = 1200;const IMG_QUALITY     = 0.8;const IMG_TARGET_SIZE = 200 * 1024;
+/* ═══════════════════════════════//  CONFIG// ═══════════════════════════════*/ const SK_PROD   = 'jck_products_v3';const SK_BRAND  = 'jck_brands_v3';const LINE_URL  = 'https://lin.ee/rCNd7ai';const SUPABASE_URL    = 'https://chxadelmnesnsjwgvdrv.supabase.co';const SUPABASE_KEY    = 'sb_publishable__-Ac_0k27vvy8r456Hq_0g_AiRWZPHD';const SUPABASE_BUCKET = 'products';const SUPABASE_TABLE  = 'products';const IMG_MAX_WIDTH   = 1400;const IMG_QUALITY     = 0.9;const IMG_TARGET_SIZE = 420 * 1024;
 /* 下單連結設定 */ const ORDER_LINK_NORMAL = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/020000000000000000dfefca';  /* 未滿1500的下單連結 */ const ORDER_LINK_FREE_SHIPPING = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/69fbe5aa23741c5f80c90cb0';
 const sb = (window.supabase && window.supabase.createClient)  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)  : null;
 const _imgUrlSupportCache = { tested: false, supported: false }; // 預設直接使用 Supabase 穩定原圖直鏈，避免 /render/image/ 在免費用量超額後整批回傳 402/404 破圖
-function _normalizeExternalImg(url) {
+function _normalizeExternalImg(url, width) {
   if (!url || typeof url !== 'string') return url || '';
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
     if (typeof location !== 'undefined' && location.protocol === 'https:') {
       const clean = url.replace(/^https?:\/\//i, '');
-      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean);
+      const wParam = width ? `&w=${width}&q=92&we` : '&q=92';
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + wParam;
     }
   }
   return url;
 }
 function imgUrl(url, width) {
   if (!url) return '';
-  url = _normalizeExternalImg(url);
+  // 手機高解析度螢幕（Retina 2x/3x）自動加倍請求解析度，避免縮圖放大模糊
+  const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? Math.min(window.devicePixelRatio, 2.5) : 2;
+  const targetW = width ? Math.round(width * dpr) : 0;
+  url = _normalizeExternalImg(url, targetW);
   if (!width) return url;
   if (typeof url !== 'string' || !url.includes('/storage/v1/object/public/')) return url;
   if (!_imgUrlSupportCache.supported) return url;
@@ -178,7 +182,32 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
       _lbSeenCats.add(ck);
       siblings.push(s);
     }
-  });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');  _lbImg.dataset.fullurl = p.url || '';  _lbImg.onerror = function() {    this.onerror = null;    if (this.dataset.fullurl && this.src !== this.dataset.fullurl) {      _imgUrlOnFail(this, this.dataset.fullurl);    }  };  _lbImg.src = imgUrl(p.url, 900);
+  });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
+  const rawUrl = p.url || '';
+  // 韓國批發網列表圖多為 /data/item/123456_m 縮圖，燈箱點開時優先嘗試載入無 _m 的高清原圖
+  const hdUrl = /\/data\/item\/\d+_m$/i.test(rawUrl) ? rawUrl.replace(/_m$/i, '') : rawUrl;
+  _lbImg.dataset.fullurl = rawUrl;
+  _lbImg.dataset.failStage = '0';
+  _lbImg.onerror = function() {
+    if (this.dataset.triedHd === '1') {
+      this.dataset.triedHd = '2';
+      this.src = imgUrl(this.dataset.fullurl, 1200);
+      return;
+    }
+    if (this.dataset.fullurl && this.dataset.failStage !== '99') {
+      _imgUrlOnFail(this, this.dataset.fullurl);
+    } else {
+      this.onerror = null;
+      this.src = FALLBACK_IMG;
+    }
+  };
+  if (hdUrl !== rawUrl) {
+    _lbImg.dataset.triedHd = '1';
+    _lbImg.src = imgUrl(hdUrl, 1200);
+  } else {
+    _lbImg.dataset.triedHd = '0';
+    _lbImg.src = imgUrl(rawUrl, 1200);
+  }
   const cartBtn = document.getElementById('lbCartBtn');  if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
   const brand = document.getElementById('lbBrand');  brand.textContent = p.brand || '';  brand.style.display = p.brand ? 'inline-block' : 'none';
   _updateLbPrice(p, null);
@@ -935,6 +964,7 @@ function parseKoreanHtml() {
       category,
       color,
       sizePrices,
+      _rawBrand: rawBrand,
       _rawTitle: rawTitle,
       _rawCat: rawCat,
       _id: 'kr_' + Date.now() + '_' + parsedItems.length
@@ -943,67 +973,71 @@ function parseKoreanHtml() {
 
   if (!parsedItems.length) { showToast('⚠️ 此頁面沒有可匯入的商品', 4000); return; }
 
-  // 智慧合併：偵測品名/標題/尺寸中有 JR / 주니어（大童款）的商品
+  // 智慧合併：全方位偵測「品牌名 / 品名 / 分類 / 尺寸」中的 JR / 주니어（大童款）
   const nonJrItems = [];
   const jrItems = [];
   parsedItems.forEach(it => {
-    const checkStr = `${it._rawTitle || ''} ${it._rawCat || ''}`.toUpperCase();
-    // 支援 空白JR、-JR、_JR、(JR)、JR.、韓文주니어、或全部尺寸皆為大童碼
+    const checkStr = `${it.brand || ''} ${it._rawBrand || ''} ${it._rawTitle || ''} ${it._rawCat || ''}`.toUpperCase();
     const isJr = /(^|[^A-Z0-9])JR([^A-Z0-9]|$)/.test(checkStr)
       || checkStr.includes('주니어')
       || (it.sizes.length > 0 && it.sizes.every(s => ['JS','JM','JL','JXL'].includes(s)));
-    if (isJr) jrItems.push(it);
-    else nonJrItems.push(it);
+    if (isJr) {
+      // 把品牌名稱裡的 JR / 주니어 清乾淨，方便與主品牌配對（例如 "VIVID-I JR" -> "VIVID-I"）
+      it.brand = (it.brand || '').replace(/[\(\[\-\_\s]*jr[\)\]\-\_\s]*/gi, '').replace(/주니어/g, '').trim();
+      jrItems.push(it);
+    } else {
+      nonJrItems.push(it);
+    }
   });
 
-  // 同時保留「款式名稱」與「顏色後綴（如 *핑크 / *블랙）」來精準配對同色的小童與大童
-  const normalizeKeyWithColor = (brand, title) => {
+  // 萃取核心款式名稱（去掉品牌名、JR、顏色*後綴、括號備註）
+  const extractCoreStyle = (brand, title) => {
     let t = (title || '').toLowerCase();
-    if (brand) t = t.replace(brand.toLowerCase(), '');
-    t = t.replace(/[\(\[\-\_\s]*\bjr\b[\)\]\-\_\s]*/gi, ' ');
-    t = t.replace(/[\(\[\-\_\s]*주니어[\)\]\-\_\s]*/g, ' ');
-    t = t.replace(/[^a-z0-9가-힣\*]/g, '');
-    return `${(brand||'').toLowerCase().trim()}__${t}`;
-  };
-
-  // 不分顏色的純款式 key（當顏色標示寫法略不同時的第二層備援配對）
-  const normalizeBaseKey = (brand, title) => {
-    let t = (title || '').toLowerCase();
-    if (brand) t = t.replace(brand.toLowerCase(), '');
-    t = t.replace(/\*.*$/, '');
-    t = t.replace(/[\(\[\-\_\s]*\bjr\b[\)\]\-\_\s]*/gi, ' ');
-    t = t.replace(/[\(\[\-\_\s]*주니어[\)\]\-\_\s]*/g, ' ');
+    const b = (brand || '').toLowerCase().trim();
+    if (b && t.startsWith(b)) t = t.slice(b.length);
+    t = t.replace(/\*.*$/, ''); // 去掉 *顏色
+    t = t.replace(/\([^)]*\)/g, ' '); // 去掉括號備註
+    t = t.replace(/[\-\_\s]*jr[\-\_\s]*/gi, ' ');
+    t = t.replace(/주니어/g, ' ');
     t = t.replace(/[^a-z0-9가-힣]/g, '');
-    return `${(brand||'').toLowerCase().trim()}__${t}`;
+    return t;
   };
 
-  const exactMap = new Map();
-  const baseMap = new Map();
-  nonJrItems.forEach(it => {
-    const ek = normalizeKeyWithColor(it.brand, it._rawTitle);
-    if (ek && !exactMap.has(ek)) exactMap.set(ek, it);
-    const bk = normalizeBaseKey(it.brand, it._rawTitle);
-    if (bk && !baseMap.has(bk)) baseMap.set(bk, []);
-    if (bk) baseMap.get(bk).push(it);
-  });
+  // 萃取顏色關鍵字（*後面的字，或品名最後一個韓文/英文單字）
+  const extractColorToken = (title) => {
+    const raw = (title || '').toLowerCase();
+    if (raw.includes('*')) {
+      return raw.split('*').pop().replace(/[^a-z0-9가-힣]/g, '');
+    }
+    const parts = raw.replace(/[\-\_\s]*jr[\-\_\s]*/gi, ' ').replace(/주니어/g, ' ').trim().split(/[\s\-\_\/]+/);
+    return parts.length > 1 ? parts[parts.length - 1].replace(/[^a-z0-9가-힣]/g, '') : '';
+  };
 
   const finalParsed = [...nonJrItems];
   let mergedJrCount = 0;
 
   jrItems.forEach(jr => {
-    const ek = normalizeKeyWithColor(jr.brand, jr._rawTitle);
-    let target = ek ? exactMap.get(ek) : null;
+    const jrBrand = (jr.brand || '').toLowerCase().trim();
+    const jrCore = extractCoreStyle(jr.brand, jr._rawTitle);
+    const jrColor = extractColorToken(jr._rawTitle);
 
-    if (!target) {
-      const bk = normalizeBaseKey(jr.brand, jr._rawTitle);
-      const candidates = bk ? (baseMap.get(bk) || []) : [];
-      if (candidates.length === 1) {
-        target = candidates[0];
-      } else if (candidates.length > 1) {
-        const colorPart = ((jr._rawTitle || '').split('*')[1] || '').replace(/[^a-z0-9가-힣]/gi, '').toLowerCase();
-        if (colorPart) {
-          target = candidates.find(c => ((c._rawTitle || '').toLowerCase()).includes(colorPart)) || null;
-        }
+    // 找出同品牌（或品牌相近）的無 JR 主商品候選清單
+    const sameBrandItems = nonJrItems.filter(m => {
+      const mb = (m.brand || '').toLowerCase().trim();
+      return mb === jrBrand || (mb && jrBrand && (mb.includes(jrBrand) || jrBrand.includes(mb)));
+    });
+
+    let target = null;
+    if (jrCore) {
+      const styleMatches = sameBrandItems.filter(m => {
+        const mCore = extractCoreStyle(m.brand, m._rawTitle);
+        return mCore === jrCore || (mCore.length >= 2 && jrCore.length >= 2 && (mCore.includes(jrCore) || jrCore.includes(mCore)));
+      });
+      if (styleMatches.length === 1) {
+        target = styleMatches[0];
+      } else if (styleMatches.length > 1 && jrColor) {
+        // 多色款式：優先比對顏色相同的主商品
+        target = styleMatches.find(m => extractColorToken(m._rawTitle) === jrColor || (m._rawTitle || '').toLowerCase().includes(jrColor)) || null;
       }
     }
 
@@ -1021,7 +1055,7 @@ function parseKoreanHtml() {
       if (!target.price && jr.price) target.price = jr.price;
       mergedJrCount++;
     } else {
-      // 找不到對應小童主圖時，保留原本 JR 商品在列表中並帶入大童尺寸，不讓原本 JR 商品遺漏！
+      // 若頁面確實沒有對應小童款，保留 JR 商品並確保帶入大童尺寸
       if (!jr.sizes.length || (jr.sizes.length === 1 && jr.sizes[0] === 'F')) {
         jr.sizes = ['JS', 'JM', 'JL'];
         if (jr.price) {
