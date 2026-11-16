@@ -371,7 +371,12 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
   const hasSizeGuide = p.brand && sizeGuideData[p.brand];  const brandEl = document.getElementById('lbBrand');  brandEl.style.display = 'block';  brandEl.style.background = '';  brandEl.style.padding = '';  brandEl.style.marginBottom = '10px';  brandEl.innerHTML = p.brand    ? `<span style="display:inline-block;font-size:0.72rem;background:var(--blush-light);color:var(--soft-brown);border-radius:10px;padding:2px 10px;">${esc(p.brand)}</span>`    : '';
   let multiTabsHtml = '';  if (siblings.length > 1) {    multiTabsHtml = `      <div class="lb-multi-hint">✦ 這張照片有 ${siblings.length} 件商品，可分別選購</div>      <div class="lb-multi-tabs">        ${siblings.map(s => {          const label = s.category || '商品';          const isActive = s.id === id;          return `<button class="lb-multi-tab${isActive?' active':''}" onclick="openLb('${s.id}')">${esc(label)}</button>`;        }).join('')}      </div>`;  }  let html = multiTabsHtml;
   if (p.category || hasSizeGuide) {    const sgBtnInline = hasSizeGuide      ? `<button class="lb-size-guide-btn" onclick="toggleSizeGuide('${esc(p.brand||'')}')">尺寸表</button>`      : '';    html += `<div class="lb-attr-row" style="align-items:center;">      <span class="lb-attr-label">品項</span>      <div style="flex:1;display:flex;align-items:center;justify-content:space-between;">        <span class="lb-attr-value">${p.category ? esc(p.category) : ''}</span>        ${sgBtnInline}      </div>    </div>    <div class="lb-size-guide" id="lbSizeGuide" style="margin-bottom:8px;"></div>`;  }
-  if ((p.sizes||[]).length) {    const sizeSet = new Set(p.sizes);    const groupRows = SIZE_GROUPS      .map(g => ({ label: g.label, sizes: g.sizes.filter(s => sizeSet.has(s)) }))      .filter(g => g.sizes.length > 0);    const chipsHTML = groupRows.map(g =>      `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;">        ${g.sizes.map(s =>          `<div class="lb-chip" onclick="toggleLbChip(this);_updateLbPriceFromChips('${p.id}')">${esc(s)}</div>`        ).join('')}      </div>`    ).join('');    html += `<div class="lb-attr-row" style="align-items:flex-start;">      <span class="lb-attr-label" style="padding-top:5px;">尺寸</span>      <div style="flex:1;">${chipsHTML}</div>    </div>`;  }
+  if ((p.sizes||[]).length) {    const sizeSet = new Set(p.sizes);    const knownAllSizes = new Set(SIZE_GROUPS.flatMap(g => g.sizes));
+    const customLbSizes = p.sizes.filter(s => !knownAllSizes.has(s));
+    const groupRows = SIZE_GROUPS      .map(g => ({ label: g.label, sizes: g.sizes.filter(s => sizeSet.has(s)) }))      .filter(g => g.sizes.length > 0);
+    if (customLbSizes.length > 0) {
+      groupRows.push({ label: '其他尺寸', sizes: customLbSizes });
+    }    const chipsHTML = groupRows.map(g =>      `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;">        ${g.sizes.map(s =>          `<div class="lb-chip" onclick="toggleLbChip(this);_updateLbPriceFromChips('${p.id}')">${esc(s)}</div>`        ).join('')}      </div>`    ).join('');    html += `<div class="lb-attr-row" style="align-items:flex-start;">      <span class="lb-attr-label" style="padding-top:5px;">尺寸</span>      <div style="flex:1;">${chipsHTML}</div>    </div>`;  }
   if (p.color) {    const colors = p.color.split(/[\/、,]/).map(c => c.trim()).filter(Boolean);    const chips = colors.map(c =>      `<div class="lb-chip" onclick="toggleLbChip(this)">${esc(c)}</div>`    ).join('');    html += `<div class="lb-attr-row">      <span class="lb-attr-label">顏色</span>      <div class="lb-chips">${chips}</div>    </div>`;  }
   attrsEl.innerHTML = html;  document.getElementById('lightbox').classList.add('active');  _applyPreorderState();  lock();}
 function toggleLbChip(el) {  const row = el.closest('.lb-attr-row');  if (!row) { el.classList.toggle('selected'); return; }  row.querySelectorAll('.lb-chip').forEach(c => c.classList.remove('selected'));  el.classList.add('selected');}function _updateLbPrice(p, selectedSize) {
@@ -1023,6 +1028,12 @@ function toggleSelectBrand(brand) {
       <div style="font-size:0.68rem;color:var(--soft-brown);margin-top:5px;" id="bmSizePreview">
         已選：${allSelectedSizes.length ? allSelectedSizes.join(' / ') : '尚未選取'}
       </div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+        <input type="text" id="bmCustomSizeInput" class="field-input" placeholder="手動輸入尺寸（如 JXL、15、大人）"
+          style="max-width:210px;font-size:0.74rem;padding:4px 8px;"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomBmSize();}">
+        <button type="button" class="bulk-apply-btn" onclick="addCustomBmSize()" style="font-size:0.72rem;padding:4px 10px;">➕ 新增尺寸</button>
+      </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">      <div class="brand-wrap" style="flex:1;">
         <input class="field-input" type="text" id="bmBulkBrand" placeholder="品牌 → 一鍵套用全部"
@@ -1341,11 +1352,89 @@ function applyBmDiffPrice() {
   _clearAllBmCheckboxes();
   showToast(`✓ 已套用差價（基準 ${basePrice} / 其他 ${otherPrice}）共 ${appliedItems} 件勾選商品`);
 }
-function _renderBmPriceInputs(idx, d) {  if (!d.sizes || !d.sizes.length) return `<span style="font-size:0.72rem;color:var(--text-light);">請先在上方選擇尺寸</span>`;  const sp = d.sizePrices || {};  const activeGroups = SIZE_GROUPS.filter(g => g.sizes.some(s => d.sizes.includes(s)));  if (!activeGroups.length) return '';  return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">    ${activeGroups.map(g => {      const groupPrice = g.sizes.map(s => sp[s]).find(Boolean) || '';      return `<div style="display:flex;align-items:center;gap:4px;background:var(--cream-dark);border-radius:8px;padding:4px 8px;">        <span style="font-size:0.72rem;font-weight:500;color:var(--text-main);">${g.label}</span>
-        <input type="number" placeholder="NT$" value="${esc(groupPrice)}"
-          style="width:70px;border:1.5px solid var(--blush);border-radius:6px;padding:2px 5px;font-size:0.72rem;text-align:center;font-family:'Noto Serif TC',serif;color:var(--warm-brown);background:var(--white);outline:none;"
-          oninput="bmSetGroupPrice(${idx},'${esc(g.label)}',this.value)">
-      </div>`;    }).join('')}  </div>`;}function bmSetGroupPrice(idx, groupLabel, val) {  const d = batchEditItems[idx]; if (!d) return;  if (!d.sizePrices) d.sizePrices = {};  const g = SIZE_GROUPS.find(g => g.label === groupLabel);  if (!g) return;  g.sizes.forEach(s => { if ((d.sizes||[]).includes(s)) d.sizePrices[s] = val; });  d.price = val;}function bmItemToggleColor(idx, val, el) {  const d = batchEditItems[idx]; if (!d) return;  const arr = (d.color||'').split('/').map(c=>c.trim()).filter(Boolean);  const exists = arr.includes(val);  d.color = exists ? arr.filter(c=>c!==val).join('/') : [...arr, val].join('/');  el.classList.toggle('on', !exists);  _trackUsage('col', val);  const metaEl = document.getElementById(`bm_meta_${idx}`);  if (metaEl) metaEl.textContent = (d.category||'未選品項') + (d.color?' ・ '+d.color:'') + (d.sizes?.length?' ・ '+d.sizes.join('/') : '');}function bmItemSetColorManual(idx, val) {  const d = batchEditItems[idx]; if (!d) return;  const chipColors = COLOR_LIST_DEFAULT.filter(c => (d.color||'').split('/').includes(c));  const manuals = val.split(/[\/,、]/).map(c=>c.trim()).filter(Boolean);  d.color = [...chipColors, ...manuals].join('/');  const metaEl = document.getElementById(`bm_meta_${idx}`);  if (metaEl) metaEl.textContent = (d.category||'未選品項') + (d.color?' ・ '+d.color:'') + (d.sizes?.length?' ・ '+d.sizes.join('/') : '');}function _refreshBmProductRows() {  batchEditItems.forEach((d, idx) => {    const priceWrap = document.getElementById(`bm_prices_${idx}`);
+function addCustomBmSize() {
+  const inp = document.getElementById('bmCustomSizeInput');
+  const raw = (inp?.value || '').trim().toUpperCase();
+  if (!raw) { showToast('請輸入要新增的尺寸名稱'); return; }
+  const parts = raw.split(/[,，\/\s]+/).map(s => s.trim()).filter(Boolean);
+  const wrap = document.getElementById('bmSizeChips');
+  parts.forEach(sz => {
+    _bmSelectedSizes.add(sz);
+    if (wrap) {
+      let existing = [...wrap.querySelectorAll('.size-chip')].find(c => c.textContent === sz);
+      if (existing) {
+        existing.classList.add('on');
+      } else {
+        const chip = document.createElement('div');
+        chip.className = 'size-chip on';
+        chip.textContent = sz;
+        chip.onclick = function() { toggleBmSingleSize(sz, this); };
+        wrap.appendChild(chip);
+      }
+    }
+  });
+  if (inp) inp.value = '';
+  _applyBmSizes();
+  showToast(`✓ 已加入尺寸「${parts.join(' / ')}」，請勾選商品後按「套用至勾選」`);
+}
+
+function _renderBmPriceInputs(idx, d) {
+  if (!d.sizes || !d.sizes.length) return `<span style="font-size:0.72rem;color:var(--text-light);">請先在上方選擇尺寸</span>`;
+  const sp = d.sizePrices || {};
+  const activeGroups = SIZE_GROUPS.filter(g => g.sizes.some(s => d.sizes.includes(s)));
+  const knownSet = new Set(SIZE_GROUPS.flatMap(g => g.sizes));
+  const customSizes = d.sizes.filter(s => !knownSet.has(s));
+
+  let html = `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">`;
+  html += activeGroups.map(g => {
+    const groupPrice = g.sizes.map(s => sp[s]).find(Boolean) || '';
+    return `<div style="display:flex;align-items:center;gap:4px;background:var(--cream-dark);border-radius:8px;padding:3px 7px;">
+      <span style="font-size:0.7rem;font-weight:500;color:var(--text-main);">${g.label}</span>
+      <input type="number" placeholder="NT$" value="${esc(groupPrice)}"
+        style="width:62px;border:1.5px solid var(--blush);border-radius:6px;padding:2px 4px;font-size:0.7rem;text-align:center;font-family:'Noto Serif TC',serif;color:var(--warm-brown);background:var(--white);outline:none;"
+        oninput="bmSetGroupPrice(${idx},'${esc(g.label)}',this.value)">
+    </div>`;
+  }).join('');
+
+  customSizes.forEach(sz => {
+    const val = sp[sz] || '';
+    html += `<div style="display:flex;align-items:center;gap:4px;background:var(--cream-dark);border-radius:8px;padding:3px 7px;">
+      <span style="font-size:0.7rem;font-weight:500;color:var(--text-main);">${esc(sz)}</span>
+      <input type="number" placeholder="NT$" value="${esc(val)}"
+        style="width:62px;border:1.5px solid var(--blush);border-radius:6px;padding:2px 4px;font-size:0.7rem;text-align:center;font-family:'Noto Serif TC',serif;color:var(--warm-brown);background:var(--white);outline:none;"
+        oninput="bmSetSingleSizePrice(${idx},'${esc(sz)}',this.value)">
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (d.sizes.includes('XXL')) {
+    const xxlVal = sp['XXL'] || '';
+    html += `<div style="display:flex;align-items:center;gap:4px;margin-top:4px;background:#FDF7F2;border:1px dashed var(--blush);border-radius:6px;padding:2px 6px;">
+      <span style="font-size:0.65rem;color:var(--soft-brown);">XXL 獨立價</span>
+      <input type="number" placeholder="大童價" value="${esc(xxlVal)}"
+        style="width:60px;border:1px solid var(--blush);border-radius:5px;padding:1px 4px;font-size:0.68rem;text-align:center;color:var(--warm-brown);background:#fff;outline:none;"
+        oninput="bmSetSingleSizePrice(${idx},'XXL',this.value)">
+    </div>`;
+  }
+  return html;
+}
+
+function bmSetSingleSizePrice(idx, sz, val) {
+  const d = batchEditItems[idx]; if (!d) return;
+  if (!d.sizePrices) d.sizePrices = {};
+  d.sizePrices[sz] = val;
+  const firstPrice = (d.sizes || []).map(s => d.sizePrices[s]).find(Boolean);
+  if (firstPrice) d.price = firstPrice;
+}
+
+function bmSetGroupPrice(idx, groupLabel, val) {
+  const d = batchEditItems[idx]; if (!d) return;
+  if (!d.sizePrices) d.sizePrices = {};
+  const g = SIZE_GROUPS.find(g => g.label === groupLabel);
+  if (!g) return;
+  g.sizes.forEach(s => { if ((d.sizes||[]).includes(s)) d.sizePrices[s] = val; });
+  d.price = val;
+}function bmItemToggleColor(idx, val, el) {  const d = batchEditItems[idx]; if (!d) return;  const arr = (d.color||'').split('/').map(c=>c.trim()).filter(Boolean);  const exists = arr.includes(val);  d.color = exists ? arr.filter(c=>c!==val).join('/') : [...arr, val].join('/');  el.classList.toggle('on', !exists);  _trackUsage('col', val);  const metaEl = document.getElementById(`bm_meta_${idx}`);  if (metaEl) metaEl.textContent = (d.category||'未選品項') + (d.color?' ・ '+d.color:'') + (d.sizes?.length?' ・ '+d.sizes.join('/') : '');}function bmItemSetColorManual(idx, val) {  const d = batchEditItems[idx]; if (!d) return;  const chipColors = COLOR_LIST_DEFAULT.filter(c => (d.color||'').split('/').includes(c));  const manuals = val.split(/[\/,、]/).map(c=>c.trim()).filter(Boolean);  d.color = [...chipColors, ...manuals].join('/');  const metaEl = document.getElementById(`bm_meta_${idx}`);  if (metaEl) metaEl.textContent = (d.category||'未選品項') + (d.color?' ・ '+d.color:'') + (d.sizes?.length?' ・ '+d.sizes.join('/') : '');}function _refreshBmProductRows() {  batchEditItems.forEach((d, idx) => {    const priceWrap = document.getElementById(`bm_prices_${idx}`);
     if (priceWrap) priceWrap.innerHTML = _renderBmPriceInputs(idx, d);
     const metaEl = document.getElementById(`bm_meta_${idx}`);
     if (metaEl) metaEl.textContent = (d.color||'未選顏色') + (d.sizes?.length?' · '+d.sizes.join('/') : '');
