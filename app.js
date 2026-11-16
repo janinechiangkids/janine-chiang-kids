@@ -544,6 +544,71 @@ function togglePendingNextRow(gIdx) {
   showToast('此品牌全部排數都已勾選囉！');
 }
 
+
+function _injectPendingRowCheckboxes() {
+  document.querySelectorAll('.pending-grid').forEach(grid => {
+    // 先清掉舊的整排標籤（避免視窗縮放重算重複）
+    grid.querySelectorAll('.pending-row-badge').forEach(el => el.remove());
+    const cards = [...grid.querySelectorAll('.pending-card')];
+    cards.forEach(c => {
+      const cb = c.querySelector('.pending-card-cb');
+      if (cb) cb.style.top = '8px';
+    });
+    if (!cards.length) return;
+
+    // 依 offsetTop 把卡片分成一排一排
+    const rows = [];
+    cards.forEach(card => {
+      const top = card.offsetTop;
+      let row = rows.find(r => Math.abs(r.top - top) < 12);
+      if (!row) {
+        row = { top, cards: [] };
+        rows.push(row);
+      }
+      row.cards.push(card);
+    });
+
+    rows.forEach((row, rIdx) => {
+      const firstCard = row.cards[0];
+      const imgWrap = firstCard?.querySelector('.pcard-img-wrap');
+      if (!imgWrap) return;
+      const singleCb = imgWrap.querySelector('.pending-card-cb');
+      if (singleCb) singleCb.style.top = '28px';
+
+      const label = document.createElement('label');
+      label.className = 'pending-row-badge';
+      label.title = '勾選／取消這一整排';
+      label.onclick = (e) => e.stopPropagation();
+      label.style.cssText = 'position:absolute;top:0;left:0;z-index:6;background:rgba(139,110,82,0.92);color:#fff;padding:3px 8px;border-bottom-right-radius:9px;display:inline-flex;align-items:center;gap:4px;font-size:0.68rem;cursor:pointer;user-select:none;box-shadow:0 1px 4px rgba(0,0,0,0.2);';
+
+      const rowCb = document.createElement('input');
+      rowCb.type = 'checkbox';
+      rowCb.style.cssText = 'width:14px;height:14px;accent-color:#fff;cursor:pointer;margin:0;';
+      const rowCardCbs = row.cards.map(c => c.querySelector('.pending-card-cb')).filter(Boolean);
+      rowCb.checked = rowCardCbs.length > 0 && rowCardCbs.every(cb => cb.checked);
+
+      rowCb.onchange = () => {
+        rowCardCbs.forEach(cb => { cb.checked = rowCb.checked; });
+        updatePendingSelectedCount();
+      };
+
+      const span = document.createElement('span');
+      span.textContent = '整排';
+
+      label.appendChild(rowCb);
+      label.appendChild(span);
+      imgWrap.appendChild(label);
+    });
+  });
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => {
+    if (document.getElementById('manage-pending')?.style.display !== 'none') {
+      _injectPendingRowCheckboxes();
+    }
+  });
+}
+
 function togglePendingSelectAll(checked) {
   document.querySelectorAll('.pending-card-cb').forEach(cb => { cb.checked = checked; });
   updatePendingSelectedCount();
@@ -553,6 +618,23 @@ function updatePendingSelectedCount() {
   const sel = cbs.filter(cb => cb.checked).length;
   const el = document.getElementById('pendingSelectedCount');
   if (el) el.textContent = `已勾選 ${sel} / ${cbs.length} 件`;
+  // 同步每排左上角「整排」checkbox 勾選狀態
+  document.querySelectorAll('.pending-grid').forEach(grid => {
+    const cards = [...grid.querySelectorAll('.pending-card')];
+    const rows = [];
+    cards.forEach(card => {
+      const top = card.offsetTop;
+      let row = rows.find(r => Math.abs(r.top - top) < 12);
+      if (!row) { row = { top, cards: [] }; rows.push(row); }
+      row.cards.push(card);
+    });
+    rows.forEach(row => {
+      const badgeCb = row.cards[0]?.querySelector('.pending-row-badge input[type="checkbox"]');
+      if (!badgeCb) return;
+      const rowCbs = row.cards.map(c => c.querySelector('.pending-card-cb')).filter(Boolean);
+      badgeCb.checked = rowCbs.length > 0 && rowCbs.every(cb => cb.checked);
+    });
+  });
 }
 function selectPendingBulkCat(val, el) {
   document.querySelectorAll('#pendingBulkCatChips .option-chip').forEach(c => c.classList.remove('on'));
@@ -686,23 +768,18 @@ function renderPending() {  _updatePendingBadge();  const dl = document.getEleme
   list.innerHTML = pendingBulkBarHtml + orderedKeys.map((key, gIdx) => {
     const items = groups[key];
     const isNoBrand = key === '__nobrand__';
-    const rowBtnsHtml = items.length > 1 ? `
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-        <button type="button" class="add-item-btn" style="padding:3px 11px;font-size:0.72rem;background:var(--white);" onclick="togglePendingGroupAll(${gIdx})">☑ 全選此品牌（${items.length} 件）</button>
-        <button type="button" class="add-item-btn" style="padding:3px 11px;font-size:0.72rem;background:var(--white);" onclick="togglePendingNextRow(${gIdx})">⚡ 整排勾選（一排）</button>
-      </div>` : '';
     return `
       <div class="pending-brand-group" id="pendingGroup_${gIdx}">
         <div class="pending-brand-header">
           <span class="pending-brand-name${isNoBrand?' empty':''}">${isNoBrand ? '（待設定品牌）' : esc(key)}</span>
           <span class="pending-brand-count">${items.length} 件</span>
         </div>
-        ${rowBtnsHtml}
         <div class="pending-grid" id="pendingGrid_${gIdx}">
-          ${items.map(p => _renderPendingCard(p)).join('')}
+          ${items.map((p, itemIdx) => _renderPendingCard(p, gIdx, itemIdx)).join('')}
         </div>
       </div>`;
-  }).join('');}
+  }).join('');
+  requestAnimationFrame(_injectPendingRowCheckboxes);}
 function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);  const sizes = p.sizes || [];  const sp = p.sizePrices || {};
   const hasBrand    = !!(p.brand    && p.brand.trim());  const hasCategory = !!(p.category && p.category.trim());  const hasColor    = !!(p.color    && p.color.trim());  const hasSize     = sizes.length > 0;  const hasPrice    = _hasSomePrice(p);  const allSizesPriced = _hasAllSelectedSizesPriced(p);
   const missingMap = {
@@ -798,6 +875,7 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
         <span style="font-size:0.72rem;color:var(--text-light);" id="bmCardSelectedCount">已勾選 0 / ${batchEditItems.length} 件</span>
         <button class="add-item-btn" onclick="applyBmToSelected('category')" style="font-size:0.72rem;">套用品項至勾選</button>
         <button class="add-item-btn" onclick="applyBmToSelected('sizes')" style="font-size:0.72rem;">套用尺寸至勾選</button>
+        <button class="add-item-btn" onclick="copySizesAndPricesToSelected()" style="font-size:0.72rem;background:var(--blush-light);border-color:var(--warm-brown);color:var(--warm-brown);">📋 複製同款尺寸/價格至勾選</button>
         <button class="batch-btn batch-btn-del" onclick="deleteBmSelected()" style="font-size:0.72rem;padding:4px 12px;margin-left:auto;">🗑 刪除勾選</button>
       </div>
 
@@ -1042,6 +1120,33 @@ async function deleteBmSelected() {
   applyFilters();
   renderManage();
   showToast(`✓ 已刪除 ${targetIds.length} 件商品`);
+}
+
+
+function copySizesAndPricesToSelected() {
+  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+  if (checked.length < 2) {
+    showToast('請同時勾選「已有大童價格的範本卡片」與「要同步的同款卡片」（至少 2 張）', 3500);
+    return;
+  }
+  const idxs = checked.map(cb => Number(cb.dataset.idx)).filter(i => batchEditItems[i]);
+  // 找出勾選卡片中尺寸最齊全（或包含大童 JS/JM/JL）的那張當作範本
+  const template = [...idxs]
+    .map(i => batchEditItems[i])
+    .sort((a, b) => (b.sizes?.length || 0) - (a.sizes?.length || 0))[0];
+  if (!template || !template.sizes?.length) {
+    showToast('勾選的卡片中沒有尺寸可複製');
+    return;
+  }
+  idxs.forEach(i => {
+    const d = batchEditItems[i];
+    if (!d || d === template) return;
+    d.sizes = [...template.sizes];
+    d.sizePrices = { ...(template.sizePrices || {}) };
+    if (template.price) d.price = template.price;
+  });
+  _refreshBmProductRows();
+  showToast(`✓ 已將完整尺寸（${template.sizes.join('/')}）與價格同步至 ${idxs.length} 件同款商品！記得按儲存`);
 }
 
 function applyBmToSelected(field) {  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];  if (!checked.length) { showToast('請先勾選要套用的商品'); return; }  const idxs = checked.map(cb => Number(cb.dataset.idx));  if (field === 'category') {    const val = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent;    if (!val) { showToast('請先在上方選擇品項'); return; }    idxs.forEach(idx => { if (batchEditItems[idx]) batchEditItems[idx].category = val; });    _refreshBmProductRows();    showToast(`✓ 已套用品項「${val}」至 ${idxs.length} 件`);  } else if (field === 'sizes') {    const sizes = [..._bmSelectedSizes];    if (!sizes.length) { showToast('請先在上方選擇尺寸'); return; }    idxs.forEach(idx => {      if (!batchEditItems[idx]) return;      batchEditItems[idx].sizes = [...sizes];    });    _refreshBmProductRows();    showToast(`✓ 已套用尺寸至 ${idxs.length} 件`);  }}
@@ -1751,18 +1856,30 @@ function parseKoreanHtml() {
       }
     }
 
-    if (target) {
+    // 找出同品牌同款式的所有主商品卡片（包含多色同款）
+    const styleTargets = jrCore
+      ? sameBrandItems.filter(m => {
+          const mCore = extractCoreStyle(m.brand, m._rawTitle);
+          return mCore === jrCore || (mCore.length >= 2 && jrCore.length >= 2 && (mCore.includes(jrCore) || jrCore.includes(mCore)));
+        })
+      : [];
+
+    const applyTargets = styleTargets.length > 0 ? styleTargets : (target ? [target] : []);
+
+    if (applyTargets.length > 0) {
       const jrSizes = (jr.sizes && jr.sizes.length && !(jr.sizes.length === 1 && jr.sizes[0] === 'F'))
         ? jr.sizes
         : ['JS', 'JM', 'JL'];
-      jrSizes.forEach(sz => {
-        if (!target.sizes.includes(sz)) target.sizes.push(sz);
-        if (jr.price) {
-          if (!target.sizePrices) target.sizePrices = {};
-          target.sizePrices[sz] = jr.price;
-        }
+      applyTargets.forEach(t => {
+        jrSizes.forEach(sz => {
+          if (!t.sizes.includes(sz)) t.sizes.push(sz);
+          if (jr.price) {
+            if (!t.sizePrices) t.sizePrices = {};
+            t.sizePrices[sz] = jr.price;
+          }
+        });
+        if (!t.price && jr.price) t.price = jr.price;
       });
-      if (!target.price && jr.price) target.price = jr.price;
       mergedJrCount++;
     } else {
       // 若頁面確實沒有對應小童款，保留 JR 商品並確保帶入大童尺寸
