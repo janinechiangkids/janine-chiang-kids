@@ -6,27 +6,23 @@ function setPreorderOpen(val) {  _preorderOpen = val;  localStorage.setItem(SK_P
 /* 下單連結設定 */ const ORDER_LINK_NORMAL = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/020000000000000000dfefca';  /* 未滿1500的下單連結 */ const ORDER_LINK_FREE_SHIPPING = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/69fbe5aa23741c5f80c90cb0';
 const sb = (window.supabase && window.supabase.createClient)  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)  : null;
 const _imgUrlSupportCache = { tested: false, supported: false }; // 預設直接使用 Supabase 穩定原圖直鏈，避免 /render/image/ 在免費用量超額後整批回傳 402/404 破圖
-function _upgradeKrHdUrl(url) {
+function _normalizeExternalImg(url, targetWidth) {
   if (!url || typeof url !== 'string') return url || '';
-  if (/^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr\/gnu\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(url)) {
-    return url.replace(/_m(\.[a-z]+)?$/i, '$1');
-  }
-  return url;
-}
-function _normalizeExternalImg(url) {
-  if (!url || typeof url !== 'string') return url || '';
-  url = _upgradeKrHdUrl(url);
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
     if (typeof location !== 'undefined' && location.protocol === 'https:') {
       const clean = url.replace(/^https?:\/\//i, '');
-      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=100&ll=1';
+      // 保留原始有效網址避免 404，並加上 Lanczos 銳化超取樣（sharp=1&q=95），消除低解析縮圖鋸齒模糊
+      const wParam = targetWidth ? `&w=${targetWidth}&we` : '';
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + wParam + '&q=95&sharp=1';
     }
   }
   return url;
 }
 function imgUrl(url, width) {
   if (!url) return '';
-  url = _normalizeExternalImg(url);
+  const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? Math.min(window.devicePixelRatio, 2) : 2;
+  const targetW = width ? Math.round(width * dpr) : 0;
+  url = _normalizeExternalImg(url, targetW);
   if (!width) return url;
   if (typeof url !== 'string' || !url.includes('/storage/v1/object/public/')) return url;
   if (!_imgUrlSupportCache.supported) return url;
@@ -220,8 +216,9 @@ function renderBrandIgBanner() {
     return;
   }
   banner.style.display = 'flex';
+  const igSvg = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
   banner.innerHTML = `<a class="brand-ig-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer">
-    <span class="brand-ig-icon">📷</span>
+    <span class="brand-ig-icon">${igSvg}</span>
     <span>前往 <strong>${esc(brandFilter)}</strong> 官方 Instagram 看更多實拍 ↗</span>
   </a>`;
 }
@@ -317,32 +314,10 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
   };
   const siblings = [p];  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
   const rawUrl = p.url || '';
-  const hdCandidates = [];
-  if (/\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(rawUrl)) {
-    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '$1'));
-    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '_l$1'));
-    hdCandidates.push(rawUrl);
-  } else if (/\/data\/item\/([^\/]+?)(\.[a-z]+)?$/i.test(rawUrl) && /hangou\.co\.kr/i.test(rawUrl)) {
-    hdCandidates.push(rawUrl);
-    hdCandidates.push(rawUrl.replace(/(\.[a-z]+)?$/i, '_l$1'));
-    hdCandidates.push(rawUrl.replace(/(\.[a-z]+)?$/i, '_m$1'));
-  } else {
-    hdCandidates.push(rawUrl);
-  }
-
-  let candIdx = 0;
+  _lbImg.referrerPolicy = 'no-referrer';
   _lbImg.dataset.fullurl = rawUrl;
   _lbImg.dataset.failStage = '0';
-  _lbImg.style.maxWidth = '100%';
-  _lbImg.style.margin = '0';
-  _lbImg.style.borderRadius = '0';
-  _lbImg.onload = null;
   _lbImg.onerror = function() {
-    candIdx++;
-    if (candIdx < hdCandidates.length) {
-      this.src = imgUrl(hdCandidates[candIdx]);
-      return;
-    }
     if (this.dataset.fullurl && this.dataset.failStage !== '99') {
       _imgUrlOnFail(this, this.dataset.fullurl);
     } else {
@@ -350,7 +325,22 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
       this.src = FALLBACK_IMG;
     }
   };
-  _lbImg.src = imgUrl(hdCandidates[0]);
+  _lbImg.src = imgUrl(rawUrl, 800);
+
+  if (/\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(rawUrl)) {
+    const hd1 = imgUrl(rawUrl.replace(/_m(\.[a-z]+)?$/i, '$1'), 1000);
+    const hd2 = imgUrl(rawUrl.replace(/_m(\.[a-z]+)?$/i, '_l$1'), 1000);
+    const probe = new Image();
+    probe.referrerPolicy = 'no-referrer';
+    probe.onload = () => { if (currentLbId === id && probe.naturalWidth > 320) _lbImg.src = hd1; };
+    probe.onerror = () => {
+      const probe2 = new Image();
+      probe2.referrerPolicy = 'no-referrer';
+      probe2.onload = () => { if (currentLbId === id && probe2.naturalWidth > 320) _lbImg.src = hd2; };
+      probe2.src = hd2;
+    };
+    probe.src = hd1;
+  }
   const cartBtn = document.getElementById('lbCartBtn');  if (cartBtn) { cartBtn.textContent = '＋ 加入清單'; cartBtn.classList.remove('added'); }
   const brand = document.getElementById('lbBrand');  brand.textContent = p.brand || '';  brand.style.display = p.brand ? 'inline-block' : 'none';
   _updateLbPrice(p, null);
@@ -474,10 +464,161 @@ function _missingFields(p) {
 const _userConfirmedDone = {};
 function switchManageSub(mode) {  _manageSubMode = mode;  document.getElementById('msubPending').classList.toggle('active', mode === 'pending');  document.getElementById('msubAll').classList.toggle('active', mode === 'all');  document.getElementById('manage-pending').style.display = (mode === 'pending') ? 'block' : 'none';  document.getElementById('manage-all').style.display     = (mode === 'all')     ? 'block' : 'none';  if (mode === 'pending') renderPending();  else renderManage();}
 function _updatePendingBadge() {  const badge = document.getElementById('pendingBadge');  if (!badge) return;  const n = products.filter(_isPending).length;  badge.textContent = n;  badge.classList.toggle('zero', n === 0);}
+
+let _pendingBulkSizes = new Set();
+function togglePendingSelectAll(checked) {
+  document.querySelectorAll('.pending-card-cb').forEach(cb => { cb.checked = checked; });
+  updatePendingSelectedCount();
+}
+function updatePendingSelectedCount() {
+  const cbs = [...document.querySelectorAll('.pending-card-cb')];
+  const sel = cbs.filter(cb => cb.checked).length;
+  const el = document.getElementById('pendingSelectedCount');
+  if (el) el.textContent = `已勾選 ${sel} / ${cbs.length} 件`;
+}
+function selectPendingBulkCat(val, el) {
+  document.querySelectorAll('#pendingBulkCatChips .option-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+function togglePendingBulkSizeGroup(gi) {
+  const g = SIZE_GROUPS[gi];
+  if (!g) return;
+  const allOn = g.sizes.every(s => _pendingBulkSizes.has(s));
+  if (allOn) g.sizes.forEach(s => _pendingBulkSizes.delete(s));
+  else g.sizes.forEach(s => _pendingBulkSizes.add(s));
+  document.querySelectorAll('#pendingBulkSizeChips .size-chip').forEach(chip => {
+    chip.classList.toggle('on', _pendingBulkSizes.has(chip.textContent));
+  });
+}
+function togglePendingBulkSingleSize(s, el) {
+  if (_pendingBulkSizes.has(s)) _pendingBulkSizes.delete(s);
+  else _pendingBulkSizes.add(s);
+  el.classList.toggle('on', _pendingBulkSizes.has(s));
+}
+async function applyPendingBulkCategory() {
+  const ids = [...document.querySelectorAll('.pending-card-cb:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) { showToast('請先勾選要套用的待完成商品'); return; }
+  const val = document.querySelector('#pendingBulkCatChips .option-chip.on')?.textContent;
+  if (!val) { showToast('請先在上方點選一個品項'); return; }
+  if (!sb) return;
+  const { error } = await sb.from(SUPABASE_TABLE).update({ category: val }).in('id', ids);
+  if (error) { showToast('⚠️ 套用失敗：' + (error.message || error)); return; }
+  ids.forEach(id => {
+    const p = products.find(x => x.id === id);
+    if (p) p.category = val;
+  });
+  renderPending();
+  applyFilters();
+  showToast(`✓ 已將 ${ids.length} 件商品的品項設為「${val}」`);
+}
+async function applyPendingBulkSizes(withPrice) {
+  const ids = [...document.querySelectorAll('.pending-card-cb:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) { showToast('請先勾選要套用的待完成商品'); return; }
+  const sizes = [..._pendingBulkSizes];
+  if (!sizes.length) { showToast('請先在上方勾選尺寸'); return; }
+  const priceVal = (document.getElementById('pendingBulkPrice')?.value || '').trim();
+  if (withPrice && !priceVal) { showToast('請先輸入統一價格'); return; }
+  if (!sb) return;
+
+  const updates = ids.map(id => {
+    const p = products.find(x => x.id === id);
+    if (!p) return null;
+    const sp = { ...(p.sizePrices || {}) };
+    if (withPrice && priceVal) {
+      sizes.forEach(s => { sp[s] = priceVal; });
+    }
+    const newPrice = (withPrice && priceVal) ? priceVal : (p.price || '');
+    return _toRow({ ...p, sizes, sizePrices: sp, price: newPrice });
+  }).filter(Boolean);
+
+  const { error } = await sb.from(SUPABASE_TABLE).upsert(updates);
+  if (error) { showToast('⚠️ 套用失敗：' + (error.message || error)); return; }
+  updates.forEach(row => {
+    const p = products.find(x => x.id === row.id);
+    if (p) {
+      p.sizes = row.sizes;
+      p.sizePrices = row.price_groups || {};
+      p.price = row.price;
+    }
+  });
+  renderPending();
+  applyFilters();
+  showToast(`✓ 已批次更新 ${updates.length} 件商品的尺寸${withPrice ? '與價格' : ''}`);
+}
+async function deleteSelectedPending() {
+  const ids = [...document.querySelectorAll('.pending-card-cb:checked')].map(cb => cb.dataset.id);
+  if (!ids.length) { showToast('請先勾選要刪除的待完成商品'); return; }
+  if (!confirm(`確定要刪除已勾選的 ${ids.length} 件商品嗎？`)) return;
+  if (!sb) return;
+  const { error } = await sb.from(SUPABASE_TABLE).delete().in('id', ids);
+  if (error) { showToast('⚠️ 刪除失敗：' + (error.message || error)); return; }
+  const delSet = new Set(ids);
+  products = products.filter(p => !delSet.has(p.id));
+  rebuildBrandHistory();
+  renderBrandTabs();
+  applyFilters();
+  renderPending();
+  showToast(`✓ 已刪除 ${ids.length} 件商品`);
+}
+
 function renderPending() {  _updatePendingBadge();  const dl = document.getElementById('pcardBrandList');  if (dl) dl.innerHTML = brandHistory.map(b => `<option value="${esc(b)}">`).join('');  const list = document.getElementById('pendingList');  const none = document.getElementById('noPending');  const hint = document.getElementById('pendingHint');  if (!list) return;
   const pending = products.filter(_isPending);  if (!pending.length) {    list.innerHTML = '';    none.style.display = 'block';    if (hint) hint.style.display = 'none';    return;  }  none.style.display = 'none';  if (hint) hint.style.display = 'block';
   const groups = {};  pending.forEach(p => {    const key = (p.brand || '').trim() || '__nobrand__';    if (!groups[key]) groups[key] = [];    groups[key].push(p);  });  const orderedKeys = Object.keys(groups).sort((a, b) => {    if (a === '__nobrand__') return -1;    if (b === '__nobrand__') return 1;    return a.localeCompare(b, 'zh-Hant');  });
-  list.innerHTML = orderedKeys.map(key => {    const items = groups[key];    const isNoBrand = key === '__nobrand__';    return `      <div class="pending-brand-group">        <div class="pending-brand-header">          <span class="pending-brand-name${isNoBrand?' empty':''}">${isNoBrand ? '（待設定品牌）' : esc(key)}</span>          <span class="pending-brand-count">${items.length} 件</span>        </div>        <div class="pending-grid">          ${items.map(p => _renderPendingCard(p)).join('')}        </div>      </div>`;  }).join('');}
+  const pendingBulkBarHtml = `
+    <div class="batch-modify-panel" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--cream-mid);">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label style="font-size:0.8rem;color:var(--text-main);font-weight:500;display:flex;align-items:center;gap:5px;cursor:pointer;">
+            <input type="checkbox" id="pendingSelectAllCb" onchange="togglePendingSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--warm-brown);">
+            <span>全選待完成</span>
+          </label>
+          <span style="font-size:0.74rem;color:var(--text-soft);" id="pendingSelectedCount">已勾選 0 / ${pending.length} 件</span>
+        </div>
+        <button type="button" class="batch-btn batch-btn-del" onclick="deleteSelectedPending()" style="font-size:0.74rem;padding:5px 12px;">🗑 刪除勾選</button>
+      </div>
+      <!-- 批量品項 -->
+      <div class="bulk-bar" style="margin-bottom:8px;padding:10px 12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div class="bulk-bar-title" style="margin-bottom:0;">👗 品項</div>
+          <button type="button" class="bulk-apply-btn" onclick="applyPendingBulkCategory()">套用至勾選</button>
+        </div>
+        <div class="option-chips" id="pendingBulkCatChips">
+          ${CATEGORY_LIST.map(c => `<div class="option-chip" style="font-size:0.72rem;" onclick="selectPendingBulkCat('${esc(c)}',this)">${esc(c)}</div>`).join('')}
+        </div>
+      </div>
+      <!-- 批量尺寸與統一價格 -->
+      <div class="bulk-bar" style="margin-bottom:0;padding:10px 12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+          <div class="bulk-bar-title" style="margin-bottom:0;">📐 尺寸</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <input type="number" inputmode="numeric" id="pendingBulkPrice" class="field-input" placeholder="統一價格" style="width:90px;font-size:0.78rem;padding:4px 8px;">
+            <button type="button" class="bulk-apply-btn" onclick="applyPendingBulkSizes(true)">套用尺寸＋價格至勾選</button>
+            <button type="button" class="bulk-apply-btn" onclick="applyPendingBulkSizes(false)" style="background:var(--soft-brown);">僅套用尺寸</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
+          ${SIZE_GROUPS.map((g, gi) => `<div class="option-chip" style="font-size:0.72rem;" onclick="togglePendingBulkSizeGroup(${gi})">${g.label}</div>`).join('')}
+        </div>
+        <div class="size-chips-wrap" id="pendingBulkSizeChips">
+          ${SIZE_GROUPS.flatMap(g => g.sizes).map(s => `<div class="size-chip ${_pendingBulkSizes.has(s)?'on':''}" onclick="togglePendingBulkSingleSize('${esc(s)}',this)">${s}</div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+
+  list.innerHTML = pendingBulkBarHtml + orderedKeys.map(key => {
+    const items = groups[key];
+    const isNoBrand = key === '__nobrand__';
+    return `
+      <div class="pending-brand-group">
+        <div class="pending-brand-header">
+          <span class="pending-brand-name${isNoBrand?' empty':''}">${isNoBrand ? '（待設定品牌）' : esc(key)}</span>
+          <span class="pending-brand-count">${items.length} 件</span>
+        </div>
+        <div class="pending-grid">
+          ${items.map(p => _renderPendingCard(p)).join('')}
+        </div>
+      </div>`;
+  }).join('');}
 function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);  const sizes = p.sizes || [];  const sp = p.sizePrices || {};
   const hasBrand    = !!(p.brand    && p.brand.trim());  const hasCategory = !!(p.category && p.category.trim());  const hasColor    = !!(p.color    && p.color.trim());  const hasSize     = sizes.length > 0;  const hasPrice    = _hasSomePrice(p);  const allSizesPriced = _hasAllSelectedSizesPriced(p);
   const missingMap = {
@@ -525,7 +666,10 @@ function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(
     </div>` : `    <button class="pcard-top-alert ok done-btn" onclick="pcardConfirmDone('${esc(p.id)}')">      <span class="done-btn-line1">✓ 已完成全部欄位</span>
       <span class="done-btn-line2">點此移到全部商品 →</span>
     </button>`;
-  return `    <div class="pending-card" id="pcard_${esc(p.id)}">      <div class="pcard-img-wrap">        <img class="pcard-img" src="${esc(imgUrl(p.url||'', 400))}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+  return `    <div class="pending-card" id="pcard_${esc(p.id)}">      <div class="pcard-img-wrap">
+        <input type="checkbox" class="pending-card-cb" data-id="${esc(p.id)}" onchange="updatePendingSelectedCount()"
+          style="position:absolute;top:8px;left:8px;z-index:5;width:20px;height:20px;accent-color:var(--warm-brown);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.25);">
+        <img referrerpolicy="no-referrer" class="pcard-img" src="${esc(imgUrl(p.url||'', 400))}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
         ${missingCount ? `<span class="pcard-missing-badge ${missingCount >= 3 ? '' : 'few'}">缺 ${missingCount} 項</span>` : ''}
         <span class="pcard-saved-flash" id="pcard_flash_${esc(p.id)}">✓ 已儲存</span>
         <button class="pcard-add-sibling" onclick="pcardAddSibling('${esc(p.id)}')" title="這張照片還有其他商品（例如上衣+褲子）">
@@ -588,7 +732,7 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
             onchange="updateBmCardSelectedCount()"
             style="position:absolute;top:${isRowStart ? '24px' : '6px'};left:6px;z-index:2;width:18px;height:18px;accent-color:var(--warm-brown);cursor:pointer;">
           <div class="edit-card-img-wrap" style="aspect-ratio:1/1;">
-            <img class="edit-card-img" src="${imgUrl(p.url, 300)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+            <img referrerpolicy="no-referrer" class="edit-card-img" src="${imgUrl(p.url, 300)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
           </div>
           <div class="edit-card-fields" style="padding:8px;gap:5px;">
             <div style="font-size:0.7rem;font-weight:500;color:var(--text-main);">${esc(p.brand||'')}${d.category?' · '+esc(d.category):''}</div>
@@ -626,18 +770,17 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
         </div>`;
       }
       return rowHeader + `        <div class="ep batch-row ${selected?'selected':''}" onclick="toggleBatchSelect('${p.id}', event)">          <input type="checkbox" class="ep-checkbox" ${selected?'checked':''}>
-          <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+          <img referrerpolicy="no-referrer" src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
           <div class="ep-info">
             <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}${p.isGroupBuy ? ` <span style="background:#C0614A;color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;">🔥 開團 NT$${esc(p.groupPrice||'')}</span>` : ''}</div>
             <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
           </div>
           <button class="edit-btn-sm" onclick="event.stopPropagation();toggleBatchMode();startEditProd('${p.id}')" title="個別編輯">✏️</button>
-        </div>`;    }    return `      <div class="ep">        <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+        </div>`;    }    return `      <div class="ep">        <img referrerpolicy="no-referrer" src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
         <div class="ep-info">
           <div class="ep-brand">${p.brand ? esc(p.brand) : '（未設定品牌）'}${p.category?' ・ '+esc(p.category):''}${p.isGroupBuy ? ` <span style="background:#C0614A;color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;">🔥 開團 NT$${esc(p.groupPrice||'')}</span>` : ''}</div>
           <div class="ep-meta">${p.price?'NT$'+esc(p.price):'未定價'}${p.color?' ・ '+esc(p.color):''}${(p.sizes||[]).length?' ・ '+esc(p.sizes.join('/')):''}</div>
         </div>
-        <button class="edit-btn-sm" onclick="startEditProd('${p.id}')" title="編輯">✏️</button>
         <button class="edit-btn-sm" onclick="downloadCard('${p.id}')" title="下載圖卡" style="color:var(--warm-brown);">⬇️</button>
         <button class="del-btn" onclick="delProd('${p.id}')" title="刪除">🗑</button>
       </div>`;  }).join('');}function renderBatchActionBar() {  const total = products.length, selected = batchSelected.size;  const allChecked = selected === total && total > 0;  const brands = uniqueBrands();  const brandChipsHTML = brands.length ? `    <div class="batch-brand-chips-wrap">      <div class="batch-brand-chips-label">🏷 依品牌快速選取</div>
@@ -813,7 +956,7 @@ function _renderBmPriceInputs(idx, d) {  if (!d.sizes || !d.sizes.length) return
     if (priceWrap) priceWrap.innerHTML = _renderBmPriceInputs(idx, d);
     const metaEl = document.getElementById(`bm_meta_${idx}`);
     if (metaEl) metaEl.textContent = (d.color||'未選顏色') + (d.sizes?.length?' · '+d.sizes.join('/') : '');
-  });}function renderEditingProd(p) {  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);  const colorChips = COLOR_LIST.map(c => {    const on = colorArr.includes(c);    return `<span class="ep-color-chip${on?' on':''}" onclick="epToggleEditColor('${p.id}','${esc(c)}',this)">${esc(c)}</span>`;  }).join('');  const catOptions = ['<option value="">— 選擇品項 —</option>']    .concat(CATEGORY_LIST.map(c => `<option value="${esc(c)}"${(p.category===c)?' selected':''}>${esc(c)}</option>`))    .join('');  return `<div class="ep-editing">    <div class="ep-editing-header">      <img src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+  });}function renderEditingProd(p) {  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);  const colorChips = COLOR_LIST.map(c => {    const on = colorArr.includes(c);    return `<span class="ep-color-chip${on?' on':''}" onclick="epToggleEditColor('${p.id}','${esc(c)}',this)">${esc(c)}</span>`;  }).join('');  const catOptions = ['<option value="">— 選擇品項 —</option>']    .concat(CATEGORY_LIST.map(c => `<option value="${esc(c)}"${(p.category===c)?' selected':''}>${esc(c)}</option>`))    .join('');  return `<div class="ep-editing">    <div class="ep-editing-header">      <img referrerpolicy="no-referrer" src="${imgUrl(p.url, 200)}" data-fullurl="${esc(p.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
       <div class="ep-editing-title">編輯商品</div>
     </div>
     <div class="ep-editing-body">
@@ -930,7 +1073,7 @@ function toggleBatchSelect(id, ev) {
   if (hasSizeOptions && selSizeArr.length === 0) {    showToast('請先選擇尺寸！', 2200);    return;  }  if (hasColorOptions && selColorArr.length === 0) {    showToast('請先選擇顏色！', 2200);    return;  }
   const selectedSize = selSizeArr[0] || '';  const basePrice = getPriceForSize(p.sizePrices, p.price, selectedSize);
   const correctPrice = (brandFilter === GROUPBUY_TAB && p.isGroupBuy && p.groupPrice && String(p.groupPrice).trim()) ? String(p.groupPrice).trim() : basePrice;
-  cart.push({    cartId:   Date.now() + Math.random().toString(36).slice(2,5),    id:       p.id,    url:      p.url,    brand:    p.brand || '',    category: p.category || '',    size:     selSizeArr.join('/') || (p.sizes||[]).join('/'),    color:    selColorArr.join('/') || p.color || '',    price:    correctPrice || p.price || ''  });  updateCartFab();  const btn = document.getElementById('lbCartBtn');  if (btn) { btn.textContent = '✓ 已加入'; btn.classList.add('added'); }  showToast('✓ 已加入清單！');}function openCart() {  renderCartPanel();  document.getElementById('cartOverlay').classList.add('active');  lock();}function closeCart() {  document.getElementById('cartOverlay').classList.remove('active');  unlock();}function cartOutside(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }function openRelovedGuide() {  document.getElementById('relovedOverlay').classList.add('active');  lock();}function closeRelovedGuide() {  document.getElementById('relovedOverlay').classList.remove('active');  unlock();}function relovedOutside(e) { if (e.target === document.getElementById('relovedOverlay')) closeRelovedGuide(); }function renderCartPanel() {  const itemsEl  = document.getElementById('cartItems');  const footerEl = document.getElementById('cartFooter');  if (!cart.length) {    itemsEl.innerHTML  = `<div class="cart-empty">清單是空的<br>快去挑選喜歡的商品吧</div>`;    footerEl.innerHTML = '';    return;  }  itemsEl.innerHTML = cart.map((item, i) => `    <div class="cart-item">      <img class="cart-item-img" src="${imgUrl(item.url, 150)}" data-fullurl="${esc(item.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
+  cart.push({    cartId:   Date.now() + Math.random().toString(36).slice(2,5),    id:       p.id,    url:      p.url,    brand:    p.brand || '',    category: p.category || '',    size:     selSizeArr.join('/') || (p.sizes||[]).join('/'),    color:    selColorArr.join('/') || p.color || '',    price:    correctPrice || p.price || ''  });  updateCartFab();  const btn = document.getElementById('lbCartBtn');  if (btn) { btn.textContent = '✓ 已加入'; btn.classList.add('added'); }  showToast('✓ 已加入清單！');}function openCart() {  renderCartPanel();  document.getElementById('cartOverlay').classList.add('active');  lock();}function closeCart() {  document.getElementById('cartOverlay').classList.remove('active');  unlock();}function cartOutside(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }function openRelovedGuide() {  document.getElementById('relovedOverlay').classList.add('active');  lock();}function closeRelovedGuide() {  document.getElementById('relovedOverlay').classList.remove('active');  unlock();}function relovedOutside(e) { if (e.target === document.getElementById('relovedOverlay')) closeRelovedGuide(); }function renderCartPanel() {  const itemsEl  = document.getElementById('cartItems');  const footerEl = document.getElementById('cartFooter');  if (!cart.length) {    itemsEl.innerHTML  = `<div class="cart-empty">清單是空的<br>快去挑選喜歡的商品吧</div>`;    footerEl.innerHTML = '';    return;  }  itemsEl.innerHTML = cart.map((item, i) => `    <div class="cart-item">      <img referrerpolicy="no-referrer" class="cart-item-img" src="${imgUrl(item.url, 150)}" data-fullurl="${esc(item.url||'')}" onerror="this.onerror=null; if(this.dataset.fullurl && this.src!==this.dataset.fullurl){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.src=FALLBACK_IMG;}" alt="">
       <div class="cart-item-info">
         <div class="cart-item-brand">${esc(item.brand)}${item.category?' · '+esc(item.category):''}</div>
         <div class="cart-item-specs">
@@ -984,7 +1127,7 @@ async function renderOrders() { _loadGroupBuyDates();  const el  = document.getE
       </button>`;      const oosBtn = `<button class="order-ordered-btn ${st==='oos'?'on':''}"        onclick="event.stopPropagation();setItemStatus('${o.id}',${i},'${st}'==='oos'?'':'oos')"        style="font-size:0.72rem;padding:3px 10px;${st==='oos'?'background:var(--red);border-color:var(--red);':'background:transparent;border:1.5px solid var(--cream-mid);color:var(--text-soft);'}">
         ${st==='oos'?'✓ 斷貨':'斷貨'}
       </button>`;      return `<div class="order-item-row" data-item-index="${i}" data-order-id="${o.id}">        <div class="order-item-label ${labelClass}">
-          ${item.url?`<img class="order-item-thumb" src="${esc(imgUrl(item.url, 120))}" data-fullurl="${esc(item.url)}" data-caption="${esc((item.brand||item.desc||'') + (item.category?' · '+item.category:'') + (item.size?' ／'+item.size:'') + (item.color?' ／'+item.color:''))}" onclick="event.stopPropagation();openOrderImgLightbox(this.dataset.fullurl, this.dataset.caption)" title="點擊放大檢視圖片" onerror="this.style.display='none'">`:''}
+          ${item.url?`<img referrerpolicy="no-referrer" class="order-item-thumb" src="${esc(imgUrl(item.url, 120))}" data-fullurl="${esc(item.url)}" data-caption="${esc((item.brand||item.desc||'') + (item.category?' · '+item.category:'') + (item.size?' ／'+item.size:'') + (item.color?' ／'+item.color:''))}" onclick="event.stopPropagation();openOrderImgLightbox(this.dataset.fullurl, this.dataset.caption)" title="點擊放大檢視圖片" onerror="this.style.display='none'">`:''}
           <strong>${esc(item.brand||item.desc||'')}</strong>${item.category?' · '+esc(item.category):''}
           ${item.size?' ／'+esc(item.size):''}${item.color?' ／'+esc(item.color):''}
           ${item.price?` <span style="color:var(--warm-brown);">NT$${esc(item.price)}</span>`:''}
@@ -1383,13 +1526,8 @@ function parseKoreanHtml() {
       sizes.forEach(s => { sizePrices[s] = ntdPrice; });
     }
 
-    // 韓國批發網高清大圖通常為去掉 _m 後綴的原圖（例如 /data/item/1777022672），若無則自動退回 _m
-    const hdImgUrl = /\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(imgUrl)
-      ? imgUrl.replace(/_m(\.[a-z]+)?$/i, '$1')
-      : imgUrl;
-
     parsedItems.push({
-      url: hdImgUrl,
+      url: imgUrl,
       price: ntdPrice,
       brand,
       sizes,
