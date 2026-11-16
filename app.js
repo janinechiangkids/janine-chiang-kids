@@ -1280,15 +1280,67 @@ function applyBmToSelected(field) {
   }
 }
 function selectBmCategory(val, el) {  document.querySelectorAll('#bmCategoryChips .option-chip').forEach(c => c.classList.remove('on'));  el.classList.add('on');  _trackUsage('cat', val);}
-let _bmSelectedSizes = new Set();function toggleBmSizeGroupAll(gi, el) {  const g = SIZE_GROUPS[gi];  const allOn = g.sizes.every(s => _bmSelectedSizes.has(s));  if (allOn) g.sizes.forEach(s => _bmSelectedSizes.delete(s));  else g.sizes.forEach(s => _bmSelectedSizes.add(s));  document.querySelectorAll('#bmSizeChips .size-chip').forEach(chip => {    chip.classList.toggle('on', _bmSelectedSizes.has(chip.textContent));  });  _applyBmSizes();}function toggleBmSingleSize(s, el) {  if (_bmSelectedSizes.has(s)) _bmSelectedSizes.delete(s);  else _bmSelectedSizes.add(s);  el.classList.toggle('on', _bmSelectedSizes.has(s));  _applyBmSizes();}function _applyBmSizes() {  const sizes = [..._bmSelectedSizes];  batchEditItems.forEach(d => d.sizes = [...sizes]);  document.getElementById('bmSizePreview').textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');  _refreshBmProductRows();}function applyBmUnifiedPrice() {  const price = document.getElementById('bmUnifiedPrice')?.value.trim();  if (!price) { showToast('請先輸入統一價格'); return; }  batchEditItems.forEach(d => {    const sp = d.sizePrices || {};    (d.sizes||[]).forEach(s => { sp[s] = price; });    d.sizePrices = sp;    d.price = price;  });  _refreshBmProductRows();  showToast(`✓ 已套用統一價格 NT$${price}`);}
-function applyBmDiffPrice() {  const baseGroupIdx = parseInt(document.getElementById('bmBaseGroup')?.value || '2');  const baseRaw      = (document.getElementById('bmBasePrice')?.value || '').trim();  const sign         = document.getElementById('bmDiffSign')?.value || '+';  const diffRaw      = (document.getElementById('bmDiffAmt')?.value || '').trim();  if (!baseRaw)  { showToast('請先輸入基準價'); return; }  if (!diffRaw)  { showToast('請輸入差額金額'); return; }  const basePrice = parseFloat(baseRaw);  const diff      = parseFloat(diffRaw);  if (isNaN(basePrice) || isNaN(diff)) { showToast('價格與差額需為數字'); return; }  const otherPrice = sign === '+' ? basePrice + diff : basePrice - diff;  if (otherPrice < 0) { showToast('⚠ 計算結果為負數'); return; }  const baseGroup = SIZE_GROUPS[baseGroupIdx];  if (!baseGroup) { showToast('⚠ 無效的基準組'); return; }  let appliedItems = 0;  batchEditItems.forEach(d => {    if (!d.sizes || !d.sizes.length) return;    const sp = d.sizePrices || {};    let touched = false;    d.sizes.forEach(s => {      const inBaseGroup = baseGroup.sizes.includes(s);
+let _bmSelectedSizes = new Set();function toggleBmSizeGroupAll(gi, el) {  const g = SIZE_GROUPS[gi];  const allOn = g.sizes.every(s => _bmSelectedSizes.has(s));  if (allOn) g.sizes.forEach(s => _bmSelectedSizes.delete(s));  else g.sizes.forEach(s => _bmSelectedSizes.add(s));  document.querySelectorAll('#bmSizeChips .size-chip').forEach(chip => {    chip.classList.toggle('on', _bmSelectedSizes.has(chip.textContent));  });  _applyBmSizes();}function toggleBmSingleSize(s, el) {  if (_bmSelectedSizes.has(s)) _bmSelectedSizes.delete(s);  else _bmSelectedSizes.add(s);  el.classList.toggle('on', _bmSelectedSizes.has(s));  _applyBmSizes();}function _applyBmSizes() {
+  const sizes = [..._bmSelectedSizes];
+  const prevEl = document.getElementById('bmSizePreview');
+  if (prevEl) prevEl.textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');
+}
+
+function applyBmUnifiedPrice() {
+  const price = document.getElementById('bmUnifiedPrice')?.value.trim();
+  if (!price) { showToast('請先輸入統一價格'); return; }
+  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+  if (!checked.length) { showToast('請先勾選要套用價格的商品'); return; }
+  const targetItems = checked.map(cb => batchEditItems[Number(cb.dataset.idx)]).filter(Boolean);
+  targetItems.forEach(d => {
+    const sp = d.sizePrices || {};
+    (d.sizes||[]).forEach(s => { sp[s] = price; });
+    d.sizePrices = sp;
+    d.price = price;
+  });
+  _refreshBmProductRows();
+  _clearAllBmCheckboxes();
+  showToast(`✓ 已套用統一價格 NT$${price} 至 ${targetItems.length} 件勾選商品`);
+}
+
+function applyBmDiffPrice() {
+  const baseGroupIdx = parseInt(document.getElementById('bmBaseGroup')?.value || '2');
+  const baseRaw      = (document.getElementById('bmBasePrice')?.value || '').trim();
+  const sign         = document.getElementById('bmDiffSign')?.value || '+';
+  const diffRaw      = (document.getElementById('bmDiffAmt')?.value || '').trim();
+  if (!baseRaw)  { showToast('請先輸入基準價'); return; }
+  if (!diffRaw)  { showToast('請輸入差額金額'); return; }
+  const basePrice = parseFloat(baseRaw);
+  const diff      = parseFloat(diffRaw);
+  if (isNaN(basePrice) || isNaN(diff)) { showToast('價格與差額需為數字'); return; }
+  const otherPrice = sign === '+' ? basePrice + diff : basePrice - diff;
+  if (otherPrice < 0) { showToast('⚠ 計算結果為負數'); return; }
+  const baseGroup = SIZE_GROUPS[baseGroupIdx];
+  if (!baseGroup) { showToast('⚠ 無效的基準組'); return; }
+  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+  if (!checked.length) { showToast('請先勾選要套用差價的商品'); return; }
+  const targetItems = checked.map(cb => batchEditItems[Number(cb.dataset.idx)]).filter(Boolean);
+  let appliedItems = 0;
+  targetItems.forEach(d => {
+    if (!d.sizes || !d.sizes.length) return;
+    const sp = d.sizePrices || {};
+    let touched = false;
+    d.sizes.forEach(s => {
+      const inBaseGroup = baseGroup.sizes.includes(s);
       sp[s] = String(inBaseGroup ? basePrice : otherPrice);
       touched = true;
-    });    if (touched) {
+    });
+    if (touched) {
       d.sizePrices = sp;
       d.price = sp[d.sizes[0]];
       appliedItems++;
-    }  });  if (!appliedItems) { showToast('沒有可套用的商品（請先選尺寸）'); return; }  _refreshBmProductRows();  showToast(`✓ 已套用差價（基準 ${basePrice} / 其他 ${otherPrice}）共 ${appliedItems} 件商品`);}
+    }
+  });
+  if (!appliedItems) { showToast('勾選的商品尚未設定尺寸'); return; }
+  _refreshBmProductRows();
+  _clearAllBmCheckboxes();
+  showToast(`✓ 已套用差價（基準 ${basePrice} / 其他 ${otherPrice}）共 ${appliedItems} 件勾選商品`);
+}
 function _renderBmPriceInputs(idx, d) {  if (!d.sizes || !d.sizes.length) return `<span style="font-size:0.72rem;color:var(--text-light);">請先在上方選擇尺寸</span>`;  const sp = d.sizePrices || {};  const activeGroups = SIZE_GROUPS.filter(g => g.sizes.some(s => d.sizes.includes(s)));  if (!activeGroups.length) return '';  return `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">    ${activeGroups.map(g => {      const groupPrice = g.sizes.map(s => sp[s]).find(Boolean) || '';      return `<div style="display:flex;align-items:center;gap:4px;background:var(--cream-dark);border-radius:8px;padding:4px 8px;">        <span style="font-size:0.72rem;font-weight:500;color:var(--text-main);">${g.label}</span>
         <input type="number" placeholder="NT$" value="${esc(groupPrice)}"
           style="width:70px;border:1.5px solid var(--blush);border-radius:6px;padding:2px 5px;font-size:0.72rem;text-align:center;font-family:'Noto Serif TC',serif;color:var(--warm-brown);background:var(--white);outline:none;"
