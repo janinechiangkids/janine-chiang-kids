@@ -6,13 +6,20 @@ function setPreorderOpen(val) {  _preorderOpen = val;  localStorage.setItem(SK_P
 /* 下單連結設定 */ const ORDER_LINK_NORMAL = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/020000000000000000dfefca';  /* 未滿1500的下單連結 */ const ORDER_LINK_FREE_SHIPPING = 'https://famistore.famiport.com.tw/famistore/users/3244139/merchandises/69fbe5aa23741c5f80c90cb0';
 const sb = (window.supabase && window.supabase.createClient)  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)  : null;
 const _imgUrlSupportCache = { tested: false, supported: false }; // 預設直接使用 Supabase 穩定原圖直鏈，避免 /render/image/ 在免費用量超額後整批回傳 402/404 破圖
+function _upgradeKrHdUrl(url) {
+  if (!url || typeof url !== 'string') return url || '';
+  if (/^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr\/gnu\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(url)) {
+    return url.replace(/_m(\.[a-z]+)?$/i, '$1');
+  }
+  return url;
+}
 function _normalizeExternalImg(url) {
   if (!url || typeof url !== 'string') return url || '';
+  url = _upgradeKrHdUrl(url);
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
     if (typeof location !== 'undefined' && location.protocol === 'https:') {
       const clean = url.replace(/^https?:\/\//i, '');
-      // 請求最高畫質 q=100 且不進行二次降採樣，保持原始清晰度
-      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=100&n=-1';
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=100&ll=1';
     }
   }
   return url;
@@ -65,7 +72,26 @@ const SK_USAGE = 'jck_usage_v1';let _usageData = {};
 function _loadUsage() {  try { _usageData = JSON.parse(localStorage.getItem(SK_USAGE) || '{}'); } catch(e) { _usageData = {}; }}function _trackUsage(type, val) {  if (!val) return;  const key = type + ':' + val;  _usageData[key] = (_usageData[key] || 0) + 1;  localStorage.setItem(SK_USAGE, JSON.stringify(_usageData));}function _sortByUsage(type, list) {  return [...list].sort((a, b) => {    const ua = _usageData[type + ':' + a] || 0;    const ub = _usageData[type + ':' + b] || 0;    return ub - ua;  });}Object.defineProperty(window, 'CATEGORY_LIST', { get: () => _sortByUsage('cat', CATEGORY_LIST_DEFAULT) });Object.defineProperty(window, 'COLOR_LIST',    { get: () => _sortByUsage('col', COLOR_LIST_DEFAULT) });
 const FALLBACK_IMG = 'data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect fill%3D%22%23EDE3D5%22 width%3D%22200%22 height%3D%22200%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2255%25%22 text-anchor%3D%22middle%22 fill%3D%22%23B09880%22 font-size%3D%2230%22%3E%F0%9F%91%97%3C%2Ftext%3E%3C%2Fsvg%3E';
 const SK_ORDERS = 'jck_orders_v1';let sizeGuideData = {};let orders = [];
-async function _loadSizeGuide() {  if (!sb) return;  const { data, error } = await sb.from('size_guides').select('*');  if (error) { console.error('[loadSizeGuide]', error); return; }  sizeGuideData = {};  (data || []).forEach(row => {    sizeGuideData[row.brand] = {      headers: Array.isArray(row.headers) ? row.headers : [],      rows:    Array.isArray(row.rows)    ? row.rows    : []    };  });}async function _saveSizeGuideToStorage(brand, guide) {  if (!sb) return;  const { error } = await sb.from('size_guides').upsert([{    brand,    headers: guide.headers,    rows:    guide.rows,    updated_at: Date.now()  }]);  if (error) { console.error('[saveSizeGuide]', error); throw error; }}async function _deleteSizeGuideFromStorage(brand) {  if (!sb) return;  const { error } = await sb.from('size_guides').delete().eq('brand', brand);  if (error) { console.error('[deleteSizeGuide]', error); throw error; }}function _loadOrders() {  try { orders = JSON.parse(localStorage.getItem(SK_ORDERS) || '[]'); } catch(e) { orders = []; }}function _saveOrders() {  localStorage.setItem(SK_ORDERS, JSON.stringify(orders));}
+async function _loadSizeGuide() {
+  _loadBrandIgLocal();
+  if (!sb) return;
+  const { data, error } = await sb.from('size_guides').select('*');
+  if (error) { console.error('[loadSizeGuide]', error); return; }
+  sizeGuideData = {};
+  (data || []).forEach(row => {
+    if (row.brand && row.brand.startsWith('__IG__')) {
+      const bName = row.brand.slice(6);
+      const urlVal = Array.isArray(row.headers) && row.headers[0] ? row.headers[0] : '';
+      if (bName && urlVal) brandIgMap[bName] = urlVal;
+      return;
+    }
+    sizeGuideData[row.brand] = {
+      headers: Array.isArray(row.headers) ? row.headers : [],
+      rows:    Array.isArray(row.rows)    ? row.rows    : []
+    };
+  });
+  _saveBrandIgLocal();
+}async function _saveSizeGuideToStorage(brand, guide) {  if (!sb) return;  const { error } = await sb.from('size_guides').upsert([{    brand,    headers: guide.headers,    rows:    guide.rows,    updated_at: Date.now()  }]);  if (error) { console.error('[saveSizeGuide]', error); throw error; }}async function _deleteSizeGuideFromStorage(brand) {  if (!sb) return;  const { error } = await sb.from('size_guides').delete().eq('brand', brand);  if (error) { console.error('[deleteSizeGuide]', error); throw error; }}function _loadOrders() {  try { orders = JSON.parse(localStorage.getItem(SK_ORDERS) || '[]'); } catch(e) { orders = []; }}function _saveOrders() {  localStorage.setItem(SK_ORDERS, JSON.stringify(orders));}
 /* ═══════════════════════════════//  STATE// ═══════════════════════════════*/ let products       = [];let brandHistory   = [];let editData       = [];let brandFilter    = 'all';let currentLbId    = null;let pendingOrderId = null;let editingProdId  = null;let editingSizes   = [];let bulkSizes      = [];let batchMode       = false;let batchSelected   = new Set();let batchEditing    = false;let batchEditItems  = [];let batchBulkSizes  = [];let cart = [];
 /* ═══════════════════════════════//  STORAGE// ═══════════════════════════════*/ let _productsLoading = true;
 async function loadProducts() {  if (!sb) { _productsLoading = false; products = []; return; }
@@ -129,31 +155,120 @@ function goToPage(page) {
   const titleEl = document.getElementById('sectionTitle');
   if (titleEl) titleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-function setBrand(b) { brandFilter = b; _currentPage = 1; renderBrandTabs(); applyFilters(); window.scrollTo({top:0,behavior:'smooth'}); }
-/* FILTER + RENDER */ function applyFilters(resetPage = true) {  if (resetPage) _currentPage = 1;  const q = document.getElementById('searchInput').value.trim().toLowerCase();  let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));  if (brandFilter === GROUPBUY_TAB) {    list = list.filter(p => !!p.isGroupBuy);
-  } else if (brandFilter && brandFilter !== 'all') {    list = list.filter(p => (p.brand||'').trim() === brandFilter);
-  } else {    list = list.filter(p => (p.brand||'').trim() !== SECONDHAND_BRAND);
-  }  if (q) list = list.filter(p =>    (p.brand||'').toLowerCase().includes(q) ||    (p.sizes||[]).join(' ').toLowerCase().includes(q) ||    (p.category||'').toLowerCase().includes(q) ||    (p.color||'').toLowerCase().includes(q)  );  const seenUrls = new Set();  const merged = [];  list.forEach(p => {
+function setBrand(b) { brandFilter = b; _categoryFilter = 'all'; _sizeFilter = 'all'; _currentPage = 1; renderBrandTabs(); applyFilters(); window.scrollTo({top:0,behavior:'smooth'}); }
+/* FILTER + RENDER */ let _categoryFilter = 'all';
+let _sizeFilter = 'all';
+function setCategoryFilter(c) { _categoryFilter = (_categoryFilter === c) ? 'all' : c; _currentPage = 1; applyFilters(true); }
+function setSizeFilter(s) { _sizeFilter = (_sizeFilter === s) ? 'all' : s; _currentPage = 1; applyFilters(true); }
+
+function renderFrontFilterChips(brandScopedList) {
+  const panel = document.getElementById('frontFilterPanel');
+  const catRow = document.getElementById('frontCatFilterRow');
+  const sizeRow = document.getElementById('frontSizeFilterRow');
+  if (!panel || !catRow || !sizeRow) return;
+
+  const availableCats = [...new Set(brandScopedList.map(p => (p.category || '').trim()).filter(c => c && !c.includes('斷貨')))];
+  const sizeOrder = SIZE_GROUPS.flatMap(g => g.sizes);
+  const rawSizes = new Set(brandScopedList.flatMap(p => p.sizes || []).filter(Boolean));
+  const availableSizes = [...rawSizes].sort((a, b) => {
+    const ia = sizeOrder.indexOf(a);
+    const ib = sizeOrder.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  if (_categoryFilter !== 'all' && !availableCats.includes(_categoryFilter)) _categoryFilter = 'all';
+  if (_sizeFilter !== 'all' && !availableSizes.includes(_sizeFilter)) _sizeFilter = 'all';
+
+  if (!availableCats.length && !availableSizes.length) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'flex';
+
+  if (availableCats.length) {
+    catRow.style.display = 'flex';
+    catRow.innerHTML = `<span class="front-filter-label">品項：</span>`
+      + `<button class="front-filter-chip ${_categoryFilter==='all'?'active':''}" onclick="setCategoryFilter('all')">全部</button>`
+      + availableCats.map(c => `<button class="front-filter-chip ${_categoryFilter===c?'active':''}" onclick="setCategoryFilter('${esc(c)}')">${esc(c)}</button>`).join('');
+  } else {
+    catRow.style.display = 'none';
+  }
+
+  if (availableSizes.length) {
+    sizeRow.style.display = 'flex';
+    sizeRow.innerHTML = `<span class="front-filter-label">尺寸：</span>`
+      + `<button class="front-filter-chip ${_sizeFilter==='all'?'active':''}" onclick="setSizeFilter('all')">全部</button>`
+      + availableSizes.map(s => `<button class="front-filter-chip ${_sizeFilter===s?'active':''}" onclick="setSizeFilter('${esc(s)}')">${esc(s)}</button>`).join('');
+  } else {
+    sizeRow.style.display = 'none';
+  }
+}
+
+function renderBrandIgBanner() {
+  const banner = document.getElementById('brandIgBanner');
+  if (!banner) return;
+  if (!brandFilter || brandFilter === 'all' || brandFilter === GROUPBUY_TAB || brandFilter === SECONDHAND_BRAND) {
+    banner.style.display = 'none';
+    return;
+  }
+  const igUrl = _getBrandIg(brandFilter);
+  if (!igUrl) {
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'flex';
+  banner.innerHTML = `<a class="brand-ig-link" href="${esc(igUrl)}" target="_blank" rel="noopener noreferrer">
+    <span class="brand-ig-icon">📷</span>
+    <span>前往 <strong>${esc(brandFilter)}</strong> 官方 Instagram 看更多實拍 ↗</span>
+  </a>`;
+}
+
+function applyFilters(resetPage = true) {
+  if (resetPage) _currentPage = 1;
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  if (brandFilter === GROUPBUY_TAB) {
+    list = list.filter(p => !!p.isGroupBuy);
+  } else if (brandFilter && brandFilter !== 'all') {
+    list = list.filter(p => (p.brand||'').trim() === brandFilter);
+  } else {
+    list = list.filter(p => (p.brand||'').trim() !== SECONDHAND_BRAND);
+  }
+  renderBrandIgBanner();
+  renderFrontFilterChips(list);
+  if (_categoryFilter && _categoryFilter !== 'all') {
+    list = list.filter(p => (p.category || '').trim() === _categoryFilter);
+  }
+  if (_sizeFilter && _sizeFilter !== 'all') {
+    list = list.filter(p => (p.sizes || []).includes(_sizeFilter));
+  }
+  if (q) list = list.filter(p =>    (p.brand||'').toLowerCase().includes(q) ||    (p.sizes||[]).join(' ').toLowerCase().includes(q) ||    (p.category||'').toLowerCase().includes(q) ||    (p.color||'').toLowerCase().includes(q)  );  const seenUrls = new Set();  const merged = [];  list.forEach(p => {
     const url = p.url || '';
     if (!url) { merged.push(p); return; }
     if (seenUrls.has(url)) return;
     seenUrls.add(url);
     const rawSiblings = list.filter(x => (x.url||'') === url);
-    // 同圖多筆資料若「品項（category）」重複（例如兩筆都是「上衣」或都空白），自動過濾只保留第一筆
-    const seenCats = new Set();
-    const uniqueSiblings = [];
+    // 優先保留有填寫品項（category）的那一筆；強制同張圖片合併為單一品項（不再拆成兩件可選）
+    const primary = rawSiblings.find(s => (s.category || '').trim()) || rawSiblings[0] || p;
+    const primaryCat = (primary.category || '').trim();
+    const mergedSizes = [...new Set(rawSiblings.flatMap(s => s.sizes || []))];
+    const mergedSizePrices = {};
     rawSiblings.forEach(s => {
-      const catKey = (s.category || '').trim() || '__single__';
-      if (!seenCats.has(catKey)) {
-        seenCats.add(catKey);
-        uniqueSiblings.push(s);
+      if (s.sizePrices && typeof s.sizePrices === 'object') {
+        Object.entries(s.sizePrices).forEach(([k, v]) => {
+          if (v && !mergedSizePrices[k]) mergedSizePrices[k] = v;
+        });
       }
     });
-    if (uniqueSiblings.length > 1) {
-      merged.push({ ...uniqueSiblings[0], _siblings: uniqueSiblings });
-    } else {
-      merged.push(uniqueSiblings[0] || p);
-    }
+    merged.push({
+      ...primary,
+      category: primaryCat,
+      sizes: mergedSizes.length ? mergedSizes : (primary.sizes || []),
+      sizePrices: Object.keys(mergedSizePrices).length ? mergedSizePrices : (primary.sizePrices || {})
+    });
   });  _lastFilteredList = merged;  renderProducts(merged);}
 function renderProducts(list) {  const grid  = document.getElementById('productGrid');  const title = document.getElementById('sectionTitle');  const pageBar = document.getElementById('paginationBar');  if (_productsLoading) {    title.textContent = '— 載入商品中… —';    if (pageBar) pageBar.innerHTML = '';
     grid.innerHTML = `<div class="empty-state">      <div style="width:36px;height:36px;border:3px solid var(--blush);border-top-color:var(--warm-brown);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;"></div>      <p style="color:var(--text-light);font-size:0.85rem;">正在載入商品，請稍候…</p>
@@ -184,16 +299,23 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
     }
   }
   grid.innerHTML = pageItems.map((p,i) => {    const isMulti = Array.isArray(p._siblings) && p._siblings.length > 1;    const sz = isMulti      ? [...new Set(p._siblings.flatMap(s => s.sizes||[]))].join(' / ')      : (p.sizes||[]).join(' / ');    const brandTag = p.brand ? `<span class="product-brand-tag">${esc(p.brand)}</span>` : '';    const catTags  = isMulti      ? p._siblings.filter(s => s.category).map(s => `<span class="product-category-tag">${esc(s.category)}</span>`).join('')      : (p.category ? `<span class="product-category-tag">${esc(p.category)}</span>` : '');    const priceDisplay = isMulti      ? `${p._siblings.length} 件可選`      : _displayPrice(p);    return `    <div class="product-card" style="animation-delay:${i*0.04}s" onclick="openLb('${p.id}')">      <div class="product-img-wrap">        <img referrerpolicy="no-referrer" src="${imgUrl(p.url, 400)}" data-fullurl="${esc(p.url||'')}" alt="${esc(p.brand||'商品')}" onload="this.classList.add('loaded')" onerror="if(this.dataset.fullurl && this.dataset.failStage!=='99'){_imgUrlOnFail(this,this.dataset.fullurl);} else {this.onerror=null;this.src=FALLBACK_IMG;} this.classList.add('loaded');">        ${isMulti ? `<span class="multi-badge">✦ ${p._siblings.length} 件可選</span>` : ''}        ${p.isGroupBuy ? `<span class="groupbuy-badge">🔥 開團特價</span>` : ''}      </div>      <div class="product-info">        <div>          ${brandTag}          ${catTags}        </div>        <div class="product-meta-row">          <span class="product-size">${sz ? esc(sz) : ''}</span>          <span class="product-price">${isMulti ? `<span style="font-size:0.8rem;color:var(--soft-brown);">${priceDisplay}</span>` : priceDisplay}</span>        </div>        <button class="order-btn${_preorderOpen ? '' : ' preorder-closed'}" ${_preorderOpen ? '' : 'disabled'} onclick="event.stopPropagation();${_preorderOpen ? `openLb('${p.id}')` : ''}" data-original-text="${isMulti ? '查看商品' : '點我選規格'}">${_preorderOpen ? (isMulti ? '查看商品' : '點我選規格') : '預購未開放'}</button>      </div>    </div>`;  }).join('');}
-/* LIGHTBOX */ function openLb(id) {  const p = products.find(x => x.id === id);  if (!p) return;  const rawLbSibs = (p.url ? products.filter(x => x.url === p.url) : [p]);
-  const _lbSeenCats = new Set();
-  const siblings = [];
+/* LIGHTBOX */ function openLb(id) {  let p = products.find(x => x.id === id);  if (!p) return;  const rawLbSibs = (p.url ? products.filter(x => x.url === p.url) : [p]);
+  const primary = rawLbSibs.find(s => (s.category || '').trim()) || p;
+  const mergedSizes = [...new Set(rawLbSibs.flatMap(s => s.sizes || []))];
+  const mergedSizePrices = {};
   rawLbSibs.forEach(s => {
-    const ck = (s.category || '').trim() || '__single__';
-    if (!_lbSeenCats.has(ck)) {
-      _lbSeenCats.add(ck);
-      siblings.push(s);
+    if (s.sizePrices && typeof s.sizePrices === 'object') {
+      Object.entries(s.sizePrices).forEach(([k, v]) => {
+        if (v && !mergedSizePrices[k]) mergedSizePrices[k] = v;
+      });
     }
-  });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
+  });
+  p = {
+    ...primary,
+    sizes: mergedSizes.length ? mergedSizes : (primary.sizes || []),
+    sizePrices: Object.keys(mergedSizePrices).length ? mergedSizePrices : (primary.sizePrices || {})
+  };
+  const siblings = [p];  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
   const rawUrl = p.url || '';
   const hdCandidates = [];
   if (/\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(rawUrl)) {
@@ -327,9 +449,28 @@ function _getSizes(mode, idx) {  if (mode === 'new')       return editData[idx].
 /* 匯出 / 匯入 */ function exportData() {  if (!products.length) { showToast('目前沒有商品可以匯出'); return; }  const payload = { products, brandHistory, exportedAt: new Date().toISOString() };  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });  const url  = URL.createObjectURL(blob);  const a    = document.createElement('a');  a.href = url; a.download = `jck-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();  URL.revokeObjectURL(url);  showToast(`✓ 已匯出 ${products.length} 件商品資料`);}function importData(event) {  const file = event.target.files[0];  if (!file) return;  const reader = new FileReader();  reader.onload = async (e) => {    try {      const data = JSON.parse(e.target.result);      if (!Array.isArray(data.products)) throw new Error('格式錯誤');      if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }      const existingIds = new Set(products.map(p => p.id));      const toAdd = data.products.filter(p => !existingIds.has(p.id));      if (toAdd.length) {        const rows = toAdd.map(p => _toRow({ id:p.id, url:p.url, brand:p.brand, price:p.price, sizes:p.sizes, category:p.category||'', color:p.color||'', createdAt:p.createdAt||Date.now() }));        const { error } = await sb.from(SUPABASE_TABLE).insert(rows);        if (error) { showToast('⚠️ 匯入失敗：' + (error.message || error), 4000); return; }      }      await loadProducts(); renderBrandTabs(); applyFilters(); renderManage();      showToast(`✓ 匯入完成！新增 ${toAdd.length} 件，共 ${products.length} 件商品`);    } catch (err) { showToast('⚠️ 檔案格式錯誤：' + (err.message || err), 4000); }    event.target.value = '';  };  reader.readAsText(file);}
 /* PENDING PRODUCTS（待完成商品） */ let _manageSubMode = 'pending';const _pendingSaveTimers = {};const _pcardActiveField = {};const ACTIVE_FIELD_KEEP_MS = 8000;
 function _markFieldActive(id, field) {  _pcardActiveField[id] = { field, expireAt: Date.now() + ACTIVE_FIELD_KEEP_MS };}function _isFieldActive(id, field) {  const a = _pcardActiveField[id];  if (!a) return false;  if (Date.now() > a.expireAt) { delete _pcardActiveField[id]; return false; }  return a.field === field;}function _clearFieldActive(id) { delete _pcardActiveField[id]; }
-function _isPending(p) {  if (_userConfirmedDone[p.id]) return false;  if (!p.brand || !p.brand.trim()) return true;  if (!p.sizes || !p.sizes.length) return true;  const hasGroupPrice = p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim());  if (!hasGroupPrice && !(p.price && String(p.price).trim())) return true;  return false;}
+function _isPending(p) {
+  if (_userConfirmedDone[p.id]) return false;
+  if (!p.brand || !p.brand.trim()) return true;
+  if (!p.category || !p.category.trim()) return true;
+  if (!p.sizes || !p.sizes.length) return true;
+  const hasGroupPrice = p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim());
+  if (!hasGroupPrice && !(p.price && String(p.price).trim())) return true;
+  return false;
+}
 function _hasSomePrice(p) {  if (p.sizePrices && Object.values(p.sizePrices).some(v => String(v||'').trim())) return true;  if (p.price && String(p.price).trim()) return true;  return false;}function _hasAllSelectedSizesPriced(p) {  if (!p.sizes || !p.sizes.length) return false;  if (!p.sizePrices) return !!(p.price && String(p.price).trim());  return p.sizes.every(s => {    if (p.sizePrices[s] && String(p.sizePrices[s]).trim()) return true;    if (p.price && String(p.price).trim()) return true;    return false;  });}
-function _missingFields(p) {  const miss = [];  if (!p.brand    || !p.brand.trim())    miss.push('品牌');  const hasSize  = !!(p.sizes && p.sizes.length);  const hasPrice = _hasSomePrice(p);  if (!hasSize && !hasPrice) miss.push('尺寸與價格');  else if (!hasSize)         miss.push('尺寸');  else if (!hasPrice)        miss.push('價格');  else if (!_hasAllSelectedSizesPriced(p)) miss.push('部分尺寸的價格');  return miss;}
+function _missingFields(p) {
+  const miss = [];
+  if (!p.brand    || !p.brand.trim())    miss.push('品牌');
+  if (!p.category || !p.category.trim()) miss.push('品項');
+  const hasSize  = !!(p.sizes && p.sizes.length);
+  const hasPrice = _hasSomePrice(p);
+  if (!hasSize && !hasPrice) miss.push('尺寸與價格');
+  else if (!hasSize)         miss.push('尺寸');
+  else if (!hasPrice)        miss.push('價格');
+  else if (!_hasAllSelectedSizesPriced(p)) miss.push('部分尺寸的價格');
+  return miss;
+}
 const _userConfirmedDone = {};
 function switchManageSub(mode) {  _manageSubMode = mode;  document.getElementById('msubPending').classList.toggle('active', mode === 'pending');  document.getElementById('msubAll').classList.toggle('active', mode === 'all');  document.getElementById('manage-pending').style.display = (mode === 'pending') ? 'block' : 'none';  document.getElementById('manage-all').style.display     = (mode === 'all')     ? 'block' : 'none';  if (mode === 'pending') renderPending();  else renderManage();}
 function _updatePendingBadge() {  const badge = document.getElementById('pendingBadge');  if (!badge) return;  const n = products.filter(_isPending).length;  badge.textContent = n;  badge.classList.toggle('zero', n === 0);}
@@ -339,7 +480,14 @@ function renderPending() {  _updatePendingBadge();  const dl = document.getEleme
   list.innerHTML = orderedKeys.map(key => {    const items = groups[key];    const isNoBrand = key === '__nobrand__';    return `      <div class="pending-brand-group">        <div class="pending-brand-header">          <span class="pending-brand-name${isNoBrand?' empty':''}">${isNoBrand ? '（待設定品牌）' : esc(key)}</span>          <span class="pending-brand-count">${items.length} 件</span>        </div>        <div class="pending-grid">          ${items.map(p => _renderPendingCard(p)).join('')}        </div>      </div>`;  }).join('');}
 function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(s => s.trim()).filter(Boolean);  const sizes = p.sizes || [];  const sp = p.sizePrices || {};
   const hasBrand    = !!(p.brand    && p.brand.trim());  const hasCategory = !!(p.category && p.category.trim());  const hasColor    = !!(p.color    && p.color.trim());  const hasSize     = sizes.length > 0;  const hasPrice    = _hasSomePrice(p);  const allSizesPriced = _hasAllSelectedSizesPriced(p);
-  const missingMap = {    brand:    !hasBrand,    category: false,    sizes:    !hasSize || !hasPrice || !allSizesPriced,  };  const showOnTopMap = {    brand:    missingMap.brand    || _isFieldActive(p.id, 'brand'),    category: _isFieldActive(p.id, 'category'),
+  const missingMap = {
+    brand:    !hasBrand,
+    category: !hasCategory,
+    sizes:    !hasSize || !hasPrice || !allSizesPriced,
+  };
+  const showOnTopMap = {
+    brand:    missingMap.brand    || _isFieldActive(p.id, 'brand'),
+    category: missingMap.category || _isFieldActive(p.id, 'category'),
     sizes:    missingMap.sizes    || _isFieldActive(p.id, 'sizes'),
   };  const filledKeys = Object.keys(showOnTopMap).filter(k => !showOnTopMap[k]);  const missingCount = Object.values(missingMap).filter(Boolean).length;
   const colorChips = COLOR_LIST.map(c => {    const on = colorArr.includes(c);    return `<span class="pcard-chip${on?' on':''}" onclick="pcardToggleColor('${esc(p.id)}','${esc(c)}',this)">${esc(c)}</span>`;  }).join('');
@@ -358,7 +506,7 @@ function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(
           placeholder="例：Bebeholic"
           list="pcardBrandList"
           onchange="pcardSetField('${esc(p.id)}','brand',this.value)">
-      </div>`,    category: `      <div class="pcard-field" data-field="category">        <label class="pcard-field-label${missingMap.category?' missing':''}">📦 品項（選填）</label>
+      </div>`,    category: `      <div class="pcard-field" data-field="category">        <label class="pcard-field-label${missingMap.category?' missing':''}">📦 品項</label>
         <select class="pcard-select${missingMap.category?' empty':''}"          onchange="pcardSetField('${esc(p.id)}','category',this.value)">
           ${catOptions}
         </select>
@@ -371,7 +519,7 @@ function _renderPendingCard(p) {  const colorArr = (p.color||'').split('/').map(
         ${sizeGroupsHtml}
       </div>`,  };
   const missingFieldsHtml = Object.keys(showOnTopMap).filter(k => showOnTopMap[k]).map(k => fieldsHtml[k]).join('');  const filledFieldsHtml = filledKeys.map(k => fieldsHtml[k]).join('');
-  const missLabels = [];  if (missingMap.brand)    missLabels.push('品牌');  if (missingMap.sizes) {    if (!hasSize && !hasPrice) missLabels.push('尺寸與價格');    else if (!hasSize)         missLabels.push('尺寸');    else if (!hasPrice)        missLabels.push('價格');    else if (!allSizesPriced)  missLabels.push('部分尺寸的價格');  }
+  const missLabels = [];  if (missingMap.brand)    missLabels.push('品牌');  if (missingMap.category) missLabels.push('品項');  if (missingMap.sizes) {    if (!hasSize && !hasPrice) missLabels.push('尺寸與價格');    else if (!hasSize)         missLabels.push('尺寸');    else if (!hasPrice)        missLabels.push('價格');    else if (!allSizesPriced)  missLabels.push('部分尺寸的價格');  }
   const topBar = missLabels.length ? `    <div class="pcard-top-alert">      <span class="pcard-top-alert-icon">⚠</span>
       <span>還缺：<strong>${missLabels.join('、')}</strong></span>
     </div>` : `    <button class="pcard-top-alert ok done-btn" onclick="pcardConfirmDone('${esc(p.id)}')">      <span class="done-btn-line1">✓ 已完成全部欄位</span>
@@ -824,7 +972,7 @@ function openOrderImgLightbox(url, caption) {
   ov.classList.add('active');
 }
 
-async function renderOrders() {  const el  = document.getElementById('orderList');  const cnt = document.getElementById('orderCount');  if (!el) return;  el.innerHTML = `<div class="no-results">載入中…</div>`;  if (!sb) { el.innerHTML = `<div class="no-results">Supabase 未連線</div>`; return; }  const filter = document.getElementById('orderFilterStatus')?.value;  let query = sb.from('customer_orders').select('*').is('completed_at', null).order('created_at', { ascending: false });  if (filter !== '' && filter !== undefined) query = query.eq('status', Number(filter));  let { data, error } = await query;  if (error) {    let q2 = sb.from('customer_orders').select('*').order('created_at', { ascending: false });    if (filter !== '' && filter !== undefined) q2 = q2.eq('status', Number(filter));    const r2 = await q2;    if (r2.error) { el.innerHTML = `<div class="no-results">載入失敗</div>`; return; }    data = (r2.data || []).filter(o => !o.completed_at);  }  const list = data || [];  if (cnt) cnt.textContent = list.length;  if (!list.length) { el.innerHTML = `<div class="no-results">尚無訂單紀錄</div>`; return; }
+async function renderOrders() { _loadGroupBuyDates();  const el  = document.getElementById('orderList');  const cnt = document.getElementById('orderCount');  if (!el) return;  el.innerHTML = `<div class="no-results">載入中…</div>`;  if (!sb) { el.innerHTML = `<div class="no-results">Supabase 未連線</div>`; return; }  const filter = document.getElementById('orderFilterStatus')?.value;  let query = sb.from('customer_orders').select('*').is('completed_at', null).order('created_at', { ascending: false });  if (filter !== '' && filter !== undefined) query = query.eq('status', Number(filter));  let { data, error } = await query;  if (error) {    let q2 = sb.from('customer_orders').select('*').order('created_at', { ascending: false });    if (filter !== '' && filter !== undefined) q2 = q2.eq('status', Number(filter));    const r2 = await q2;    if (r2.error) { el.innerHTML = `<div class="no-results">載入失敗</div>`; return; }    data = (r2.data || []).filter(o => !o.completed_at);  }  const list = data || [];  if (cnt) cnt.textContent = list.length;  if (!list.length) { el.innerHTML = `<div class="no-results">尚無訂單紀錄</div>`; return; }
   el.innerHTML = list.map(o => {    const items      = Array.isArray(o.items) ? o.items : [];    const itemStatus = (o.item_status && typeof o.item_status === 'object') ? o.item_status : {};    const total = items.reduce((s, item, i) =>      itemStatus[i] === 'oos' ? s : s + (Number(item.price)||0), 0);    const arrivedTotal = items.reduce((s, item, i) =>      itemStatus[i] === 'arrived' ? s + (Number(item.price)||0) : s, 0);    const orderUrl   = `${location.origin}${location.pathname}?c=${o.token}`;    const hasChildren = o.merged_orders && o.merged_orders.length > 0;
     const itemsHTML = items.map((item, i) => {      const st = itemStatus[i] || '';      const labelClass = st === 'arrived' ? 'arrived' : st === 'oos' ? 'oos' : '';      const phaseVal = (st === 'phase_1' || st === 'phase_2') ? st : 'phase_0';      const phaseDisabled = (st === 'arrived' || st === 'oos');      const phaseSelect = `<select class="order-status-select" style="font-size:0.72rem;${phaseDisabled?'opacity:0.45;':''}"        onclick="event.stopPropagation()"        onchange="event.stopPropagation();setItemStatus('${o.id}',${i},this.value==='phase_0'?'':this.value)">        <option value="phase_0" ${phaseVal==='phase_0'?'selected':''}>訂購中</option>
         <option value="phase_1" ${phaseVal==='phase_1'?'selected':''}>待回台</option>
@@ -875,7 +1023,227 @@ async function setItemStatus(id, idx, val) {  if (!sb) return;  const { data } =
   const items = Array.isArray(data.items) ? data.items : [];
   const total = items.reduce((s, item) => s + (Number(item.price)||0), 0);
   inner.innerHTML = `<div class="oq-name">${esc(data.customer_name)} 的清單</div><div class="oq-total">合計 NT$ ${total.toLocaleString()}</div>`;}
-function showSgBrandSugg(val) { const el = document.getElementById('sgBrandSugg'); const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,8); if (!hit.length) { el.classList.remove('open'); return; } el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="document.getElementById('sgBrandInput').value='${esc(b)}';hideSgBrandSugg();loadSgEditor()">${esc(b)}</div>`).join(''); el.classList.add('open'); }function hideSgBrandSugg() { document.getElementById('sgBrandSugg')?.classList.remove('open'); }function loadSgEditor() { const brand = document.getElementById('sgBrandInput').value.trim(); if (!brand) return; document.getElementById('sgEditor').style.display = 'block'; const existing = sizeGuideData[brand]; document.getElementById('sgHeaders').value = existing ? existing.headers.join(',') : ''; document.getElementById('sgRows').value = existing ? existing.rows.map(r => r.join(',')).join('\n') : ''; }async function saveSizeGuide() { const brand = document.getElementById('sgBrandInput').value.trim(), headers = document.getElementById('sgHeaders').value.trim(), rowsRaw = document.getElementById('sgRows').value.trim(); if (!brand || !headers || !rowsRaw) return; const guide = { headers: headers.split(',').map(h=>h.trim()), rows: rowsRaw.split('\n').map(l=>l.split(',').map(c=>c.trim())) }; await _saveSizeGuideToStorage(brand, guide); sizeGuideData[brand] = guide; renderSgList(); showToast(`✓ 已儲存「${brand}」的尺寸表`); }async function deleteSizeGuide() { const brand = document.getElementById('sgBrandInput').value.trim(); if (!brand) return; await _deleteSizeGuideFromStorage(brand); delete sizeGuideData[brand]; document.getElementById('sgEditor').style.display = 'none'; renderSgList(); showToast('已刪除'); }function renderSgList() { const el = document.getElementById('sgList'); if (!el) return; const brands = Object.keys(sizeGuideData); el.innerHTML = brands.length ? brands.map(b => `<div class="ep"><div class="ep-info"><div class="ep-brand">${esc(b)}</div></div><button class="edit-btn-sm" onclick="document.getElementById('sgBrandInput').value='${esc(b)}';loadSgEditor()">✏️</button></div>`).join('') : '<div class="no-results">尚未設定任何品牌尺寸表</div>'; }
+function showSgBrandSugg(val) { const el = document.getElementById('sgBrandSugg'); const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,8); if (!hit.length) { el.classList.remove('open'); return; } el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="document.getElementById('sgBrandInput').value='${esc(b)}';hideSgBrandSugg();loadSgEditor()">${esc(b)}</div>`).join(''); el.classList.add('open'); }function hideSgBrandSugg() { document.getElementById('sgBrandSugg')?.classList.remove('open'); }function loadSgEditor() { const brand = document.getElementById('sgBrandInput').value.trim(); if (!brand) return; document.getElementById('sgEditor').style.display = 'block'; const existing = sizeGuideData[brand]; document.getElementById('sgHeaders').value = existing ? existing.headers.join(',') : ''; document.getElementById('sgRows').value = existing ? existing.rows.map(r => r.join(',')).join('\n') : ''; }async function saveSizeGuide() { const brand = document.getElementById('sgBrandInput').value.trim(), headers = document.getElementById('sgHeaders').value.trim(), rowsRaw = document.getElementById('sgRows').value.trim(); if (!brand || !headers || !rowsRaw) return; const guide = { headers: headers.split(',').map(h=>h.trim()), rows: rowsRaw.split('\n').map(l=>l.split(',').map(c=>c.trim())) }; await _saveSizeGuideToStorage(brand, guide); sizeGuideData[brand] = guide; renderSgList(); showToast(`✓ 已儲存「${brand}」的尺寸表`); }async function deleteSizeGuide() { const brand = document.getElementById('sgBrandInput').value.trim(); if (!brand) return; await _deleteSizeGuideFromStorage(brand); delete sizeGuideData[brand]; document.getElementById('sgEditor').style.display = 'none'; renderSgList(); showToast('已刪除'); }
+/* ═══════════════════════════════════════════════════════════
+   品牌 IG 官方連結管理（雲端同步至 Supabase size_guides 表）
+   ═══════════════════════════════════════════════════════════ */
+let brandIgMap = {};
+const SK_BRAND_IG = 'jck_brand_ig_v1';
+
+function _loadBrandIgLocal() {
+  try { brandIgMap = JSON.parse(localStorage.getItem(SK_BRAND_IG) || '{}'); } catch (e) { brandIgMap = {}; }
+}
+function _saveBrandIgLocal() {
+  try { localStorage.setItem(SK_BRAND_IG, JSON.stringify(brandIgMap)); } catch (e) {}
+}
+function _getBrandIg(brand) {
+  if (!brand) return '';
+  const b = brand.trim();
+  if (brandIgMap[b]) return brandIgMap[b];
+  const key = Object.keys(brandIgMap).find(k => k.toLowerCase() === b.toLowerCase());
+  return key ? brandIgMap[key] : '';
+}
+async function saveBrandIg() {
+  const brand = (document.getElementById('igBrandInput')?.value || '').trim();
+  let url = (document.getElementById('igUrlInput')?.value || '').trim();
+  if (!brand) { showToast('請輸入品牌名稱'); return; }
+  if (!url) { showToast('請貼上 IG 連結'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  brandIgMap[brand] = url;
+  _saveBrandIgLocal();
+  if (sb) {
+    try {
+      await _saveSizeGuideToStorage('__IG__' + brand, { headers: [url], rows: [] });
+    } catch (e) {}
+  }
+  document.getElementById('igBrandInput').value = '';
+  document.getElementById('igUrlInput').value = '';
+  renderBrandIgList();
+  renderBrandIgBanner();
+  showToast(`✓ 已儲存「${brand}」的 IG 連結`);
+}
+async function deleteBrandIg(brand) {
+  if (!confirm(`確定移除「${brand}」的 IG 連結？`)) return;
+  delete brandIgMap[brand];
+  _saveBrandIgLocal();
+  if (sb) {
+    try { await _deleteSizeGuideFromStorage('__IG__' + brand); } catch (e) {}
+  }
+  renderBrandIgList();
+  renderBrandIgBanner();
+  showToast('✓ 已移除 IG 連結');
+}
+function renderBrandIgList() {
+  const el = document.getElementById('brandIgList');
+  if (!el) return;
+  const entries = Object.entries(brandIgMap);
+  if (!entries.length) {
+    el.innerHTML = `<div style="font-size:0.74rem;color:var(--text-light);">尚未設定任何品牌 IG 連結</div>`;
+    return;
+  }
+  el.innerHTML = entries.map(([b, u]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--white);padding:7px 10px;border-radius:8px;border:1px solid var(--cream-mid);font-size:0.78rem;">
+      <div style="min-width:0;flex:1;">
+        <strong>${esc(b)}</strong>：
+        <a href="${esc(u)}" target="_blank" style="color:var(--soft-brown);word-break:break-all;">${esc(u)}</a>
+      </div>
+      <button type="button" class="edit-btn-sm" onclick="document.getElementById('igBrandInput').value='${esc(b)}';document.getElementById('igUrlInput').value='${esc(u)}';" title="編輯">✏️</button>
+      <button type="button" class="del-btn" onclick="deleteBrandIg('${esc(b)}')" title="刪除">🗑</button>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   訂單開團日期 / 結單日設定 ＋ 一鍵下載叫貨總表（按品牌彙總）
+   ═══════════════════════════════════════════════════════════ */
+const SK_GB_DATES = 'jck_gb_dates_v1';
+function _loadGroupBuyDates() {
+  try {
+    const obj = JSON.parse(localStorage.getItem(SK_GB_DATES) || '{}');
+    const sEl = document.getElementById('gbStartDateInput');
+    const eEl = document.getElementById('gbEndDateInput');
+    const cEl = document.getElementById('gbAutoCloseCheck');
+    if (sEl && obj.start) sEl.value = obj.start;
+    if (eEl && obj.end) eEl.value = obj.end;
+    if (cEl) cEl.checked = !!obj.autoClose;
+    _updateGbDateSummary(obj);
+    if (obj.autoClose && obj.end) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (todayStr > obj.end && _preorderOpen) {
+        setPreorderOpen(false);
+      }
+    }
+  } catch (e) {}
+}
+function saveGroupBuyDates() {
+  const start = document.getElementById('gbStartDateInput')?.value || '';
+  const end = document.getElementById('gbEndDateInput')?.value || '';
+  const autoClose = !!document.getElementById('gbAutoCloseCheck')?.checked;
+  const obj = { start, end, autoClose };
+  try { localStorage.setItem(SK_GB_DATES, JSON.stringify(obj)); } catch (e) {}
+  _updateGbDateSummary(obj);
+  if (autoClose && end) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (todayStr > end && _preorderOpen) {
+      setPreorderOpen(false);
+      showToast('🔒 已超過結單日，自動關閉預購');
+      return;
+    }
+  }
+  showToast('✓ 已更新開團／結單日期設定');
+}
+function _updateGbDateSummary(obj) {
+  const el = document.getElementById('gbDateSummaryText');
+  if (!el) return;
+  if (!obj.start && !obj.end) {
+    el.textContent = '';
+    return;
+  }
+  el.textContent = `目前設定：${obj.start ? '開團日 ' + obj.start : ''}${obj.start && obj.end ? ' ～ ' : ''}${obj.end ? '結單日 ' + obj.end : ''}${obj.autoClose ? '（結單日後自動關單）' : ''}`;
+}
+
+async function downloadOrderSummaryExcel() {
+  if (!sb) { showToast('⚠️ Supabase 未連線'); return; }
+  showToast('正在彙整所有訂單叫貨總表…');
+  const { data, error } = await sb
+    .from('customer_orders')
+    .select('*')
+    .is('completed_at', null)
+    .order('created_at', { ascending: true });
+  if (error) { showToast('⚠️ 讀取訂單失敗'); return; }
+  const orderList = (data || []).filter(o => !o.merged_into);
+  if (!orderList.length) { showToast('目前沒有進行中的訂單'); return; }
+
+  const summaryMap = new Map();
+  let totalPieces = 0;
+
+  orderList.forEach(o => {
+    const items = Array.isArray(o.items) ? o.items : [];
+    const itemStatus = (o.item_status && typeof o.item_status === 'object') ? o.item_status : {};
+    items.forEach((item, idx) => {
+      const st = itemStatus[idx] || '';
+      if (st === 'oos' || st === 'arrived') return;
+      const brand = (item.brand || item.desc || '未分類品牌').trim();
+      const category = (item.category || '一般款式').trim();
+      const size = (item.size || 'F').trim();
+      const color = (item.color || '圖片色').trim();
+      const price = Number(item.price) || 0;
+      const url = item.url || '';
+      const key = `${brand}|||${category}|||${size}|||${color}|||${url}`;
+      if (!summaryMap.has(key)) {
+        summaryMap.set(key, { brand, category, size, color, qty: 0, unitPrice: price, url, customers: [] });
+      }
+      const entry = summaryMap.get(key);
+      entry.qty += 1;
+      if (o.customer_name && !entry.customers.includes(o.customer_name)) {
+        entry.customers.push(o.customer_name);
+      }
+      totalPieces += 1;
+    });
+  });
+
+  if (!summaryMap.size) {
+    showToast('目前沒有需要叫貨的商品（皆已到貨或斷貨）');
+    return;
+  }
+
+  const rows = [...summaryMap.values()].sort((a, b) => {
+    if (a.brand !== b.brand) return a.brand.localeCompare(b.brand, 'zh-Hant');
+    if (a.category !== b.category) return a.category.localeCompare(b.category, 'zh-Hant');
+    return a.size.localeCompare(b.size);
+  });
+
+  const gbDates = JSON.parse(localStorage.getItem(SK_GB_DATES) || '{}');
+  const periodLabel = (gbDates.start || gbDates.end)
+    ? `${gbDates.start || '未設定'} ~ ${gbDates.end || '未設定'}`
+    : new Date().toISOString().slice(0, 10);
+
+  const csvLines = [];
+  csvLines.push(`"Janine Chiang Kids 韓國叫貨彙總表","開團期間：${periodLabel}","總計件數：${totalPieces} 件"`);
+  csvLines.push('');
+  csvLines.push('"品牌","品項 / 款式","尺寸","顏色","叫貨總數量","單價(NT$)","預估小計(NT$)","訂購客人備註","商品圖片網址"');
+
+  let currentBrand = '';
+  let brandSubtotal = 0;
+  rows.forEach((r, idx) => {
+    if (currentBrand && r.brand !== currentBrand) {
+      csvLines.push(`"【${currentBrand} 小計】","","","","${brandSubtotal} 件","","","",""`);
+      csvLines.push('');
+      brandSubtotal = 0;
+    }
+    currentBrand = r.brand;
+    brandSubtotal += r.qty;
+    const subAmt = r.unitPrice * r.qty;
+    const custNote = r.customers.join('、');
+    csvLines.push([
+      `"${r.brand.replace(/"/g, '""')}"`,
+      `"${r.category.replace(/"/g, '""')}"`,
+      `"${r.size.replace(/"/g, '""')}"`,
+      `"${r.color.replace(/"/g, '""')}"`,
+      `"${r.qty}"`,
+      `"${r.unitPrice || ''}"`,
+      `"${subAmt || ''}"`,
+      `"${custNote.replace(/"/g, '""')}"`,
+      `"${r.url.replace(/"/g, '""')}"`
+    ].join(','));
+
+    if (idx === rows.length - 1) {
+      csvLines.push(`"【${currentBrand} 小計】","","","","${brandSubtotal} 件","","","",""`);
+    }
+  });
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  const fileDate = gbDates.end || new Date().toISOString().slice(0, 10);
+  a.href = URL.createObjectURL(blob);
+  a.download = `JanineChiangKids_叫貨總表_${fileDate}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`✓ 已下載叫貨總表（共 ${rows.length} 款、合計 ${totalPieces} 件）`);
+}
+
+function renderSgList() { renderBrandIgList(); const el = document.getElementById('sgList'); if (!el) return; const brands = Object.keys(sizeGuideData); el.innerHTML = brands.length ? brands.map(b => `<div class="ep"><div class="ep-info"><div class="ep-brand">${esc(b)}</div></div><button class="edit-btn-sm" onclick="document.getElementById('sgBrandInput').value='${esc(b)}';loadSgEditor()">✏️</button></div>`).join('') : '<div class="no-results">尚未設定任何品牌尺寸表</div>'; }
 function showSalesReport() { document.getElementById('salesReportOverlay').style.display = 'flex'; updateSalesReport(); }function closeSalesReport() { document.getElementById('salesReportOverlay').style.display = 'none'; }async function updateSalesReport() { if (!sb) return; const { data: orders } = await sb.from('customer_orders').select('*').not('completed_at', 'is', null); const list = orders || []; const totalRevenue = list.reduce((s, o) => s + (o.items||[]).reduce((a, b) => a + (Number(b.price)||0), 0), 0); document.getElementById('salesReportStats').innerHTML = `<div style="padding:12px;">總完成訂單：${list.length} 筆｜總銷售額：NT$ ${totalRevenue.toLocaleString()}</div>`; }function exportSalesReport() { showToast('✓ 報表已下載'); }
 function closeCardEditor() { document.getElementById('cardEditorOverlay').classList.remove('active'); }function ceOutside(e) { if (e.target.id === 'cardEditorOverlay') closeCardEditor(); }function ceReset() {}function ceDownload() {}function downloadCard(id) { showToast('請先登入後台'); }
 
@@ -1149,6 +1517,7 @@ function parseKoreanHtml() {
   _loadUsage();
   _loadOrders();
   _loadPreorderState();
+  _loadGroupBuyDates();
   renderProducts([]);
   setupDragDrop();
   await loadProducts();

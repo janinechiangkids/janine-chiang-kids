@@ -170,3 +170,100 @@ body { font-family: 'Noto Serif TC', serif; background: var(--cream); color: var
   image-rendering: -webkit-optimize-contrast;
   background: #FAF6F0;
 }
+
+
+/* ── 品牌 IG 官方連結橫幅 ── */
+.brand-ig-banner {
+  max-width: 1440px;
+  margin: 12px auto 0;
+  padding: 0 16px;
+  display: flex;
+  justify-content: center;
+}
+.brand-ig-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1.5px solid var(--blush);
+  color: var(--warm-brown);
+  padding: 7px 18px;
+  border-radius: 22px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 10px var(--shadow);
+  transition: all 0.2s;
+}
+.brand-ig-link:hover {
+  background: var(--blush-light);
+  transform: translateY(-1px);
+}
+.brand-ig-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+/* ── 前台品項與尺寸快速篩選列 ── */
+.front-filter-panel {
+  max-width: 1440px;
+  margin: 12px auto 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.front-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.front-filter-row::-webkit-scrollbar {
+  display: none;
+}
+.front-filter-label {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.front-filter-chip {
+  background: var(--white);
+  border: 1px solid var(--cream-mid);
+  color: var(--text-soft);
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-family: 'Noto Serif TC', serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.16s;
+}
+.front-filter-chip:hover {
+  background: var(--blush-light);
+  border-color: var(--blush);
+}
+.front-filter-chip.active {
+  background: linear-gradient(135deg, var(--warm-brown), var(--soft-brown));
+  color: var(--white);
+  border-color: transparent;
+  font-weight: 500;
+}
+@media (min-width: 1024px) {
+  .front-filter-panel, .brand-ig-banner {
+    padding: 0 24px;
+  }
+}
