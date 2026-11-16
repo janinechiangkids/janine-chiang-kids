@@ -11,8 +11,8 @@ function _normalizeExternalImg(url) {
   if (/^http:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
     if (typeof location !== 'undefined' && location.protocol === 'https:') {
       const clean = url.replace(/^https?:\/\//i, '');
-      // 不帶 &w= 強制放大參數，讓 proxy 回傳原始 1:1 像素並用最高畫質 q=95，避免低解析縮圖被硬拉糊掉
-      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=95';
+      // 請求最高畫質 q=100 且不進行二次降採樣，保持原始清晰度
+      return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=100&n=-1';
     }
   }
   return url;
@@ -30,13 +30,21 @@ function _imgUrlOnFail(imgEl, originalUrl) {
   _imgUrlSupportCache.supported = false;
   if (!imgEl || !originalUrl) return;
   const stage = parseInt(imgEl.dataset.failStage || '0', 10);
-  if (stage === 0) {
+  const isKr = /^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(originalUrl);
+  // 若為韓網無 _m 高清網址失敗，先自動補回 _m 縮圖再試一次
+  if (stage === 0 && isKr && /\/data\/item\/([^\/]+?)(\.[a-z]+)?$/i.test(originalUrl) && !/_m(\.[a-z]+)?$/i.test(originalUrl)) {
     imgEl.dataset.failStage = '1';
+    const fallbackM = originalUrl.replace(/(\.[a-z]+)?$/i, '_m$1');
+    imgEl.src = _normalizeExternalImg(fallbackM);
+    return;
+  }
+  if (stage <= 1) {
+    imgEl.dataset.failStage = '2';
     imgEl.src = originalUrl;
     return;
   }
-  if (stage === 1 && /^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(originalUrl)) {
-    imgEl.dataset.failStage = '2';
+  if (stage === 2 && isKr) {
+    imgEl.dataset.failStage = '3';
     const clean = originalUrl.replace(/^https?:\/\//i, '');
     imgEl.src = 'https://wsrv.nl/?url=' + encodeURIComponent(clean);
     return;
@@ -45,7 +53,13 @@ function _imgUrlOnFail(imgEl, originalUrl) {
   imgEl.src = FALLBACK_IMG;
 }
 /* ── 商品資料快取 ──*/ const SK_PRODUCTS_CACHE = 'jck_products_cache_v1';const PRODUCTS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;function _saveProductsCache(list) {  try {    localStorage.setItem(SK_PRODUCTS_CACHE, JSON.stringify({ ts: Date.now(), data: list }));  } catch (e) {}}function _loadProductsCache() {  try {    const raw = localStorage.getItem(SK_PRODUCTS_CACHE);    if (!raw) return null;    const obj = JSON.parse(raw);    if (!obj || !Array.isArray(obj.data)) return null;    if (Date.now() - (obj.ts || 0) > PRODUCTS_CACHE_TTL) return null;    return obj.data;  } catch (e) { return null; }}
-/* ── 尺寸新增「F」──────────────────────────*/ const SIZE_GROUPS = [  { label:'單一尺寸', sizes:['F'] },  { label:'Baby',     sizes:['BXS','BS','BM','BL'] },  { label:'小童',     sizes:['XS','S','M','L','XL','XXL'] },  { label:'大童',     sizes:['JS','JM','JL'] },  { label:'身高(cm)', sizes:['90','95','100','105','110','115','120','125','130','140','150'] },];
+/* ── 尺寸新增「F」──────────────────────────*/ const SIZE_GROUPS = [
+  { label:'單一/親子', sizes:['F','MOM'] },
+  { label:'Baby',      sizes:['3M','6M','12M','18M','24M','BXS','BS','BM','BL'] },
+  { label:'小童',      sizes:['XS','S','M','L','XL','XXL'] },
+  { label:'大童',      sizes:['JS','JM','JL'] },
+  { label:'身高(cm)',  sizes:['90','95','100','105','110','115','120','125','130','140','150'] },
+];
 /* ── 品項 & 顏色清單 ──────────────────────*/ const CATEGORY_LIST_DEFAULT = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭','包屁衣','配件','帽子','吊帶'];const COLOR_LIST_DEFAULT    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫','粉','棕','素色','花花','圖案','圖片色','卡其','杏','深藍','淺藍','深綠','淺綠'];
 const SK_USAGE = 'jck_usage_v1';let _usageData = {};
 function _loadUsage() {  try { _usageData = JSON.parse(localStorage.getItem(SK_USAGE) || '{}'); } catch(e) { _usageData = {}; }}function _trackUsage(type, val) {  if (!val) return;  const key = type + ':' + val;  _usageData[key] = (_usageData[key] || 0) + 1;  localStorage.setItem(SK_USAGE, JSON.stringify(_usageData));}function _sortByUsage(type, list) {  return [...list].sort((a, b) => {    const ua = _usageData[type + ':' + a] || 0;    const ub = _usageData[type + ':' + b] || 0;    return ub - ua;  });}Object.defineProperty(window, 'CATEGORY_LIST', { get: () => _sortByUsage('cat', CATEGORY_LIST_DEFAULT) });Object.defineProperty(window, 'COLOR_LIST',    { get: () => _sortByUsage('col', COLOR_LIST_DEFAULT) });
@@ -181,17 +195,26 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
     }
   });  currentLbId = id;  window._lbSiblings = siblings;  const _lbImg = document.getElementById('lbImg');
   const rawUrl = p.url || '';
-  // 建立高清原圖候選鏈（針對韓網 _m 小縮圖自動依序嘗試 _l 大圖與無後綴原圖）
   const hdCandidates = [];
   if (/\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(rawUrl)) {
-    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '_l$1'));
     hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '$1'));
+    hdCandidates.push(rawUrl.replace(/_m(\.[a-z]+)?$/i, '_l$1'));
+    hdCandidates.push(rawUrl);
+  } else if (/\/data\/item\/([^\/]+?)(\.[a-z]+)?$/i.test(rawUrl) && /hangou\.co\.kr/i.test(rawUrl)) {
+    hdCandidates.push(rawUrl);
+    hdCandidates.push(rawUrl.replace(/(\.[a-z]+)?$/i, '_l$1'));
+    hdCandidates.push(rawUrl.replace(/(\.[a-z]+)?$/i, '_m$1'));
+  } else {
+    hdCandidates.push(rawUrl);
   }
-  hdCandidates.push(rawUrl);
 
   let candIdx = 0;
   _lbImg.dataset.fullurl = rawUrl;
   _lbImg.dataset.failStage = '0';
+  _lbImg.style.maxWidth = '100%';
+  _lbImg.style.margin = '0';
+  _lbImg.style.borderRadius = '0';
+  _lbImg.onload = null;
   _lbImg.onerror = function() {
     candIdx++;
     if (candIdx < hdCandidates.length) {
@@ -203,21 +226,6 @@ function renderProducts(list) {  const grid  = document.getElementById('productG
     } else {
       this.onerror = null;
       this.src = FALLBACK_IMG;
-    }
-  };
-  _lbImg.style.maxWidth = '';
-  _lbImg.style.margin = '';
-  _lbImg.onload = function() {
-    const nw = this.naturalWidth || 0;
-    if (nw > 0 && nw < 420) {
-      // 小尺寸縮圖避免在手機全寬螢幕過度放大糊掉，限制最大顯示寬度並置中
-      this.style.maxWidth = Math.min(nw * 1.2, 340) + 'px';
-      this.style.margin = '12px auto 0';
-      this.style.borderRadius = '10px';
-    } else {
-      this.style.maxWidth = '100%';
-      this.style.margin = '0';
-      this.style.borderRadius = '0';
     }
   };
   _lbImg.src = imgUrl(hdCandidates[0]);
@@ -414,6 +422,7 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
         <span style="font-size:0.72rem;color:var(--text-light);" id="bmCardSelectedCount">已勾選 0 / ${batchEditItems.length} 件</span>
         <button class="add-item-btn" onclick="applyBmToSelected('category')" style="font-size:0.72rem;">套用品項至勾選</button>
         <button class="add-item-btn" onclick="applyBmToSelected('sizes')" style="font-size:0.72rem;">套用尺寸至勾選</button>
+        <button class="batch-btn batch-btn-del" onclick="deleteBmSelected()" style="font-size:0.72rem;padding:4px 12px;margin-left:auto;">🗑 刪除勾選</button>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;" class="bm-edit-grid">      ${products.filter(p => batchSelected.has(p.id)).map((p, visIdx) => {        const d = batchEditItems.find(d => d.id === p.id);        if (!d) return '';        const idx = batchEditItems.indexOf(d);        const isRowStart = (visIdx % 6 === 0);
@@ -606,7 +615,38 @@ function toggleBmCardSelectAll(checked) {  document.querySelectorAll('.bm-card-c
     const slice = cbs.slice(r * 6, (r + 1) * 6);
     rcb.checked = slice.length > 0 && slice.every(cb => cb.checked);
   });
-}function applyBmToSelected(field) {  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];  if (!checked.length) { showToast('請先勾選要套用的商品'); return; }  const idxs = checked.map(cb => Number(cb.dataset.idx));  if (field === 'category') {    const val = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent;    if (!val) { showToast('請先在上方選擇品項'); return; }    idxs.forEach(idx => { if (batchEditItems[idx]) batchEditItems[idx].category = val; });    _refreshBmProductRows();    showToast(`✓ 已套用品項「${val}」至 ${idxs.length} 件`);  } else if (field === 'sizes') {    const sizes = [..._bmSelectedSizes];    if (!sizes.length) { showToast('請先在上方選擇尺寸'); return; }    idxs.forEach(idx => {      if (!batchEditItems[idx]) return;      batchEditItems[idx].sizes = [...sizes];    });    _refreshBmProductRows();    showToast(`✓ 已套用尺寸至 ${idxs.length} 件`);  }}
+}
+async function deleteBmSelected() {
+  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+  if (!checked.length) { showToast('請先勾選要刪除的商品'); return; }
+  const idxs = checked.map(cb => Number(cb.dataset.idx)).filter(i => batchEditItems[i]);
+  const targetIds = idxs.map(i => batchEditItems[i].id);
+  if (!targetIds.length) return;
+  if (!confirm(`確定要刪除已勾選的 ${targetIds.length} 件商品嗎？\n此操作會直接從資料庫移除且無法復原。`)) return;
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
+
+  const { error } = await sb.from(SUPABASE_TABLE).delete().in('id', targetIds);
+  if (error) { showToast('⚠️ 刪除失敗：' + (error.message || error), 4000); return; }
+
+  const delSet = new Set(targetIds);
+  products = products.filter(p => !delSet.has(p.id));
+  batchEditItems = batchEditItems.filter(d => !delSet.has(d.id));
+  targetIds.forEach(id => batchSelected.delete(id));
+
+  rebuildBrandHistory();
+  if (!batchEditItems.length) {
+    batchMode = false;
+    _resetBatchState();
+    _batchBrandFilter = null;
+    document.getElementById('floatSaveBtn')?.classList.remove('visible');
+  }
+  renderBrandTabs();
+  applyFilters();
+  renderManage();
+  showToast(`✓ 已刪除 ${targetIds.length} 件商品`);
+}
+
+function applyBmToSelected(field) {  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];  if (!checked.length) { showToast('請先勾選要套用的商品'); return; }  const idxs = checked.map(cb => Number(cb.dataset.idx));  if (field === 'category') {    const val = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent;    if (!val) { showToast('請先在上方選擇品項'); return; }    idxs.forEach(idx => { if (batchEditItems[idx]) batchEditItems[idx].category = val; });    _refreshBmProductRows();    showToast(`✓ 已套用品項「${val}」至 ${idxs.length} 件`);  } else if (field === 'sizes') {    const sizes = [..._bmSelectedSizes];    if (!sizes.length) { showToast('請先在上方選擇尺寸'); return; }    idxs.forEach(idx => {      if (!batchEditItems[idx]) return;      batchEditItems[idx].sizes = [...sizes];    });    _refreshBmProductRows();    showToast(`✓ 已套用尺寸至 ${idxs.length} 件`);  }}
 function selectBmCategory(val, el) {  document.querySelectorAll('#bmCategoryChips .option-chip').forEach(c => c.classList.remove('on'));  el.classList.add('on');  _trackUsage('cat', val);}
 let _bmSelectedSizes = new Set();function toggleBmSizeGroupAll(gi, el) {  const g = SIZE_GROUPS[gi];  const allOn = g.sizes.every(s => _bmSelectedSizes.has(s));  if (allOn) g.sizes.forEach(s => _bmSelectedSizes.delete(s));  else g.sizes.forEach(s => _bmSelectedSizes.add(s));  document.querySelectorAll('#bmSizeChips .size-chip').forEach(chip => {    chip.classList.toggle('on', _bmSelectedSizes.has(chip.textContent));  });  _applyBmSizes();}function toggleBmSingleSize(s, el) {  if (_bmSelectedSizes.has(s)) _bmSelectedSizes.delete(s);  else _bmSelectedSizes.add(s);  el.classList.toggle('on', _bmSelectedSizes.has(s));  _applyBmSizes();}function _applyBmSizes() {  const sizes = [..._bmSelectedSizes];  batchEditItems.forEach(d => d.sizes = [...sizes]);  document.getElementById('bmSizePreview').textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');  _refreshBmProductRows();}function applyBmUnifiedPrice() {  const price = document.getElementById('bmUnifiedPrice')?.value.trim();  if (!price) { showToast('請先輸入統一價格'); return; }  batchEditItems.forEach(d => {    const sp = d.sizePrices || {};    (d.sizes||[]).forEach(s => { sp[s] = price; });    d.sizePrices = sp;    d.price = price;  });  _refreshBmProductRows();  showToast(`✓ 已套用統一價格 NT$${price}`);}
 function applyBmDiffPrice() {  const baseGroupIdx = parseInt(document.getElementById('bmBaseGroup')?.value || '2');  const baseRaw      = (document.getElementById('bmBasePrice')?.value || '').trim();  const sign         = document.getElementById('bmDiffSign')?.value || '+';  const diffRaw      = (document.getElementById('bmDiffAmt')?.value || '').trim();  if (!baseRaw)  { showToast('請先輸入基準價'); return; }  if (!diffRaw)  { showToast('請輸入差額金額'); return; }  const basePrice = parseFloat(baseRaw);  const diff      = parseFloat(diffRaw);  if (isNaN(basePrice) || isNaN(diff)) { showToast('價格與差額需為數字'); return; }  const otherPrice = sign === '+' ? basePrice + diff : basePrice - diff;  if (otherPrice < 0) { showToast('⚠ 計算結果為負數'); return; }  const baseGroup = SIZE_GROUPS[baseGroupIdx];  if (!baseGroup) { showToast('⚠ 無效的基準組'); return; }  let appliedItems = 0;  batchEditItems.forEach(d => {    if (!d.sizes || !d.sizes.length) return;    const sp = d.sizePrices || {};    let touched = false;    d.sizes.forEach(s => {      const inBaseGroup = baseGroup.sizes.includes(s);
@@ -892,6 +932,7 @@ function parseKoreanHtml() {
   if (!imgNodes.length) { showToast('⚠️ 找不到商品資料，請確認是否複製了完整的 <body> 編碼', 4000); return; }
 
   const parsedItems = [], seenUrls = new Set();
+  let skippedSoldOutCount = 0;
   const validSizes = new Set(SIZE_GROUPS.flatMap(g => g.sizes));
 
   imgNodes.forEach(img => {
@@ -948,10 +989,15 @@ function parseKoreanHtml() {
       if (dashIdx > 0) brand = rawTitle.slice(0, dashIdx).trim();
     }
 
+    // 斷貨（품절）商品直接省略不匯入
+    if (isSoldOut) {
+      skippedSoldOutCount++;
+      return;
+    }
+
     const combined = `${rawCat} ${rawTitle}`;
     let category = '';
     for (const item of KR_CATEGORY_MAP) { if (item.kw.some(k => combined.includes(k))) { category = item.cat; break; } }
-    if (isSoldOut) category = category ? `${category}（斷貨）` : '斷貨';
 
     let color = '';
 
@@ -969,8 +1015,13 @@ function parseKoreanHtml() {
       sizes.forEach(s => { sizePrices[s] = ntdPrice; });
     }
 
+    // 韓國批發網高清大圖通常為去掉 _m 後綴的原圖（例如 /data/item/1777022672），若無則自動退回 _m
+    const hdImgUrl = /\/data\/item\/([^\/]+)_m(\.[a-z]+)?$/i.test(imgUrl)
+      ? imgUrl.replace(/_m(\.[a-z]+)?$/i, '$1')
+      : imgUrl;
+
     parsedItems.push({
-      url: imgUrl,
+      url: hdImgUrl,
       price: ntdPrice,
       brand,
       sizes,
@@ -1089,8 +1140,9 @@ function parseKoreanHtml() {
   editSec.scrollIntoView({ behavior: 'smooth' });
   document.getElementById('krHtmlInput').value = '';
   const pricedCount = finalParsed.filter(x => x.price).length;
-  const jrMsg = mergedJrCount > 0 ? `，已自動合併 ${mergedJrCount} 件 JR 大童價格並過濾帶字圖片` : '';
-  showToast(`🎉 成功解析 ${finalParsed.length} 件商品（${pricedCount} 件已算好價格${jrMsg}）！`, 5000);
+  const jrMsg = mergedJrCount > 0 ? `，已自動合併 ${mergedJrCount} 件 JR 大童價格` : '';
+  const oosMsg = skippedSoldOutCount > 0 ? `，已略過 ${skippedSoldOutCount} 件斷貨商品` : '';
+  showToast(`🎉 成功解析 ${finalParsed.length} 件商品（${pricedCount} 件已算好價格${jrMsg}${oosMsg}）！`, 5500);
 }
 
 (async function init() {
