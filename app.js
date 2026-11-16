@@ -62,6 +62,7 @@ function _imgUrlOnFail(imgEl, originalUrl) {
   { label:'小童',      sizes:['XS','S','M','L','XL','XXL'] },
   { label:'大童',      sizes:['JS','JM','JL'] },
   { label:'身高(cm)',  sizes:['90','95','100','105','110','115','120','125','130','140','150'] },
+  { label:'鞋子(mm)',  sizes:['120','130','140','150','160','170','180','190','200','210','220'] },
 ];
 /* ── 品項 & 顏色清單 ──────────────────────*/ const CATEGORY_LIST_DEFAULT = ['上衣','外套','褲子','裙子','洋裝','套裝','飾品','鞋子','襪子','包包','泳衣','背心','內搭','包屁衣','配件','帽子','吊帶'];const COLOR_LIST_DEFAULT    = ['白','米白','灰','深色','淺色','黑','紅','橘','黃','綠','藍','紫','粉','棕','素色','花花','圖案','圖片色','卡其','杏','深藍','淺藍','深綠','淺綠'];
 const SK_USAGE = 'jck_usage_v1';let _usageData = {};
@@ -129,6 +130,19 @@ function _displayPrice(p) {
   }
   return origText;
 }
+
+function _sortByBrandAndCategory(list) {
+  return [...list].sort((a, b) => {
+    const ba = (a.brand || '').trim();
+    const bb = (b.brand || '').trim();
+    if (ba !== bb) return ba.localeCompare(bb, 'zh-Hant');
+    const ca = (a.category || '').trim() || 'zzzz';
+    const cb = (b.category || '').trim() || 'zzzz';
+    if (ca !== cb) return ca.localeCompare(cb, 'zh-Hant');
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+}
+
 function uniqueBrands() {  return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))];}const SECONDHAND_BRAND = '愛循環・二手專區';
 const GROUPBUY_TAB = '__GROUPBUY__';
 function renderBrandTabs() {  let brands = uniqueBrands();  const hasSecondhand = brands.includes(SECONDHAND_BRAND);  const hasGroupBuy = products.some(p => p.isGroupBuy);  if (hasSecondhand) brands = brands.filter(b => b !== SECONDHAND_BRAND);  const wrap   = document.getElementById('brandTabsWrap');  const tabs   = document.getElementById('brandTabs');  if (!brands.length && !hasSecondhand && !hasGroupBuy) { wrap.style.display = 'none'; return; }  wrap.style.display = 'block';  const allBrands = [
@@ -226,7 +240,7 @@ function renderBrandIgBanner() {
 function applyFilters(resetPage = true) {
   if (resetPage) _currentPage = 1;
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  let list = [...products].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  let list = _sortByBrandAndCategory(products);
   if (brandFilter === GROUPBUY_TAB) {
     list = list.filter(p => !!p.isGroupBuy);
   } else if (brandFilter && brandFilter !== 'all') {
@@ -384,7 +398,7 @@ function toggleLbChip(el) {  const row = el.closest('.lb-attr-row');  if (!row) 
 function toggleSizeGuide(brand) {  const el = document.getElementById('lbSizeGuide');  if (!el) return;  if (el.classList.contains('open')) {    el.classList.remove('open');    return;  }  const guide = sizeGuideData[brand];  if (!guide) return;  const keepIdx = guide.headers    .map((h, i) => ({ h, i }))    .filter(({ h }) => h !== '適合')    .map(({ i }) => i);  const filteredHeaders = keepIdx.map(i => guide.headers[i]);  const filteredRows    = guide.rows.map(row => keepIdx.map(i => row[i] || ''));  el.innerHTML = `    <div style="font-size:0.72rem;color:var(--text-soft);margin-bottom:6px;font-weight:500;">${esc(brand)} 尺寸表</div>    <table><thead><tr>${filteredHeaders.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>    ${filteredRows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}    </tbody></table>`;  el.classList.add('open');}
 function closeLb() {  document.getElementById('lightbox').classList.remove('active');  unlock();}function lbOutside(e) { if (e.target === document.getElementById('lightbox')) closeLb(); }
 /* RULES MODAL */ function initiateOrder(id) {  closeLb();  pendingOrderId = id;  document.getElementById('rulesOverlay').classList.add('active');  lock();}function showRulesBeforeLine() {  pendingOrderId = '__line__';  document.getElementById('rulesOverlay').classList.add('active');  lock();}function closeRules() {  document.getElementById('rulesOverlay').classList.remove('active');  unlock();  pendingOrderId = null;}function confirmOrder() {  closeRules();  if (LINE_URL === '#') { showToast('LINE 連結尚未設定，請聯繫管理員'); return; }  window.open(LINE_URL, '_blank');}
-/* ADMIN */ async function openAdmin() {  document.getElementById('adminModal').classList.add('active');  lock();  if (sb) {    const { data: { session } } = await sb.auth.getSession();    if (session && session.user) { _showAdminContent(session.user); return; }  }  document.getElementById('pwScreen').style.display   = 'block';  document.getElementById('adminContent').style.display = 'none';  document.getElementById('adminEmail').value = '';  document.getElementById('adminPass').value  = '';  document.getElementById('pwError').textContent = '';  requestAnimationFrame(() => document.getElementById('adminEmail')?.focus());}function _showAdminContent(user) {  document.getElementById('pwScreen').style.display   = 'none';  document.getElementById('adminContent').style.display = 'block';  const info = document.getElementById('adminUserInfo');  if (info) info.textContent = user?.email ? '已登入：' + user.email : '';  renderManage();}function closeAdmin() {  document.getElementById('adminModal').classList.remove('active');  editingProdId = null;  unlock();}function adminOutside(e) { if (e.target === document.getElementById('adminModal')) closeAdmin(); }async function adminLogin() {  if (!sb) { document.getElementById('pwError').textContent = 'Supabase 尚未初始化'; return; }  const email = document.getElementById('adminEmail').value.trim();  const pass  = document.getElementById('adminPass').value;  const errEl = document.getElementById('pwError');  const btn   = document.getElementById('adminLoginBtn');  if (!email || !pass) { errEl.textContent = '請輸入 Email 與密碼'; return; }  errEl.textContent = '登入中…';  if (btn) { btn.disabled = true; btn.textContent = '登入中…'; }  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });  if (btn) { btn.disabled = false; btn.textContent = '登入'; }  if (error) {    errEl.textContent = '登入失敗：' + (error.message || '請確認帳號密碼');    document.getElementById('adminPass').value = '';    return;  }  errEl.textContent = '';  _showAdminContent(data?.user);  await loadProducts();  renderBrandTabs();  applyFilters();  renderManage();  showToast('✓ 歡迎回來');}async function adminLogout() {  if (!sb) { closeAdmin(); return; }  await sb.auth.signOut();  closeAdmin();  showToast('✓ 已登出');}function switchTab(tab) {  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active',    (i===0&&tab==='upload')||(i===1&&tab==='manage')||(i===2&&tab==='brands')||(i===3&&tab==='orders')||(i===4&&tab==='completed')));  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));  document.getElementById('tab-'+tab).classList.add('active');  if (tab === 'manage') { editingProdId = null; renderManage(); switchManageSub(_manageSubMode); }  if (tab === 'upload') { batchMode = false; _resetBatchState(); }  if (tab === 'brands') { renderSgList(); }  if (tab === 'orders') { renderOrders(); }  if (tab === 'completed') { renderCompletedOrders(); }}
+/* ADMIN */ async function openAdmin() {  document.getElementById('adminModal').classList.add('active');  lock();  if (sb) {    const { data: { session } } = await sb.auth.getSession();    if (session && session.user) { _showAdminContent(session.user); return; }  }  document.getElementById('pwScreen').style.display   = 'block';  document.getElementById('adminContent').style.display = 'none';  document.getElementById('adminEmail').value = '';  document.getElementById('adminPass').value  = '';  document.getElementById('pwError').textContent = '';  requestAnimationFrame(() => document.getElementById('adminEmail')?.focus());}function _showAdminContent(user) {  document.getElementById('pwScreen').style.display   = 'none';  document.getElementById('adminContent').style.display = 'block';  const info = document.getElementById('adminUserInfo');  if (info) info.textContent = user?.email ? '已登入：' + user.email : '';  renderManage();}function closeAdmin() { _updateFloatingBatchBar('all', 0);  document.getElementById('adminModal').classList.remove('active');  editingProdId = null;  unlock();}function adminOutside(e) { if (e.target === document.getElementById('adminModal')) closeAdmin(); }async function adminLogin() {  if (!sb) { document.getElementById('pwError').textContent = 'Supabase 尚未初始化'; return; }  const email = document.getElementById('adminEmail').value.trim();  const pass  = document.getElementById('adminPass').value;  const errEl = document.getElementById('pwError');  const btn   = document.getElementById('adminLoginBtn');  if (!email || !pass) { errEl.textContent = '請輸入 Email 與密碼'; return; }  errEl.textContent = '登入中…';  if (btn) { btn.disabled = true; btn.textContent = '登入中…'; }  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });  if (btn) { btn.disabled = false; btn.textContent = '登入'; }  if (error) {    errEl.textContent = '登入失敗：' + (error.message || '請確認帳號密碼');    document.getElementById('adminPass').value = '';    return;  }  errEl.textContent = '';  _showAdminContent(data?.user);  await loadProducts();  renderBrandTabs();  applyFilters();  renderManage();  showToast('✓ 歡迎回來');}async function adminLogout() {  if (!sb) { closeAdmin(); return; }  await sb.auth.signOut();  closeAdmin();  showToast('✓ 已登出');}function switchTab(tab) {  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active',    (i===0&&tab==='upload')||(i===1&&tab==='manage')||(i===2&&tab==='brands')||(i===3&&tab==='orders')||(i===4&&tab==='completed')));  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));  document.getElementById('tab-'+tab).classList.add('active');  if (tab === 'manage') { editingProdId = null; renderManage(); switchManageSub(_manageSubMode); }  if (tab === 'upload') { batchMode = false; _resetBatchState(); }  if (tab === 'brands') { renderSgList(); }  if (tab === 'orders') { renderOrders(); }  if (tab === 'completed') { renderCompletedOrders(); }}
 /* IMAGE COMPRESSION + UPLOAD */ function _loadImage(file) {  return new Promise((resolve, reject) => {    const url = URL.createObjectURL(file);    const img = new Image();    img.onload  = () => { resolve({ img, url }); };    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('無法讀取圖片')); };    img.src = url;  });}function _canvasToBlob(canvas, quality) {  return new Promise(res => canvas.toBlob(b => res(b), 'image/jpeg', quality));}async function compressImage(file) {  const { img, url } = await _loadImage(file);  let w = img.naturalWidth  || img.width;  let h = img.naturalHeight || img.height;  if (w > IMG_MAX_WIDTH) { h = Math.round(h * IMG_MAX_WIDTH / w); w = IMG_MAX_WIDTH; }  const canvas = document.createElement('canvas');  canvas.width = w; canvas.height = h;  const ctx = canvas.getContext('2d');  ctx.fillStyle = '#FFFFFF';  ctx.fillRect(0, 0, w, h);  ctx.drawImage(img, 0, 0, w, h);  URL.revokeObjectURL(url);  let q = IMG_QUALITY;  let blob = await _canvasToBlob(canvas, q);  while (blob && blob.size > IMG_TARGET_SIZE && q > 0.4) {    q = +(q - 0.1).toFixed(2);    blob = await _canvasToBlob(canvas, q);  }  return { blob, width: w, height: h, quality: q };}function _uniqueName() {  const d = new Date();  const stamp = d.getFullYear().toString() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + '_' + d.getTime();  const rnd = Math.random().toString(36).slice(2, 8);  return `jck_${stamp}_${rnd}.jpg`;}async function uploadOne(file) {  if (!sb) throw new Error('Supabase 尚未初始化');  const { blob } = await compressImage(file);  const filename = _uniqueName();  const { error } = await sb.storage.from(SUPABASE_BUCKET).upload(filename, blob, {    contentType: 'image/jpeg', cacheControl: '31536000', upsert: false  });  if (error) throw error;  const { data: pub } = sb.storage.from(SUPABASE_BUCKET).getPublicUrl(filename);  return { url: pub.publicUrl, size: blob.size, filename };}async function handleFileSelect(ev) {  const files = Array.from(ev.target.files || []).filter(f => f.type.startsWith('image/'));  ev.target.value = '';  if (!files.length) { showToast('請選擇圖片檔案'); return; }  await uploadFiles(files);}async function uploadFiles(files) {  if (!sb) { showToast('⚠️ 請先在程式碼中填入你的 SUPABASE_URL'); return; }  const progEl = document.getElementById('uploadProgress');  const txtEl  = document.getElementById('uploadProgressText');  const fillEl = document.getElementById('uploadProgressFill');  progEl.style.display = 'block'; fillEl.style.width = '0%';  const uploaded = [], failed = [];  for (let i = 0; i < files.length; i++) {    const f = files[i];    const kbOrig = Math.round(f.size / 1024);    txtEl.textContent = `壓縮並上傳中（${i+1}/${files.length}）：${f.name}（原 ${kbOrig}KB）`;    try {      const res = await uploadOne(f);      uploaded.push(res);      txtEl.textContent = `已完成（${i+1}/${files.length}）：壓縮後 ${Math.round(res.size/1024)}KB`;    } catch (err) {      failed.push({ name: f.name, msg: (err && err.message) || String(err) });
     }    fillEl.style.width = `${((i+1)/files.length)*100}%`;  }  setTimeout(() => { progEl.style.display = 'none'; fillEl.style.width = '0%'; }, 600);  if (!uploaded.length) { showToast(failed.length ? `上傳全部失敗：${failed[0].msg}` : '沒有成功上傳的圖片', 3600); return; }  const startIdx = editData.length;  uploaded.forEach((u, k) => {    editData.push({ url: u.url, price:'', brand:'', sizes:[], category:'', color:'', sizePrices:{}, _id:'tmp'+(startIdx+k) });  });  const bulkBrandVal = (document.getElementById('bulkBrandInput')?.value || '').trim();  if (bulkBrandVal) for (let k = startIdx; k < editData.length; k++) editData[k].brand = bulkBrandVal;  if (bulkSizes.length) for (let k = startIdx; k < editData.length; k++) editData[k].sizes = [...bulkSizes];  const bulkCont = document.getElementById('bulkSizeContainer');  if (bulkCont && !bulkCont.innerHTML.trim()) bulkCont.innerHTML = sizePicker('bulk', 0, bulkSizes);  renderEditCards();  const editSec = document.getElementById('editSection');  editSec.style.display = 'block';  editSec.scrollIntoView({ behavior:'smooth' });  if (failed.length) showToast(`✓ 成功 ${uploaded.length} 張；失敗 ${failed.length} 張`, 3600);  else showToast(`✓ 已成功上傳 ${uploaded.length} 張照片`);}function setupDragDrop() {  const zone = document.getElementById('uploadZone');  if (!zone) return;  ['dragenter','dragover'].forEach(ev => {    zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });  });  ['dragleave','drop'].forEach(ev => {    zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover'); });  });  zone.addEventListener('drop', async e => {    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith('image/'));    if (!files.length) { showToast('請拖曳圖片檔案'); return; }    await uploadFiles(files);  });  window.addEventListener('dragover', e => e.preventDefault());  window.addEventListener('drop',     e => e.preventDefault());  document.addEventListener('click', e => {    if (!e.target.closest('.edit-card')) {      document.querySelectorAll('.edit-card-panel.open').forEach(p => p.classList.remove('open'));      document.querySelectorAll('.edit-card.expanded').forEach(c => c.classList.remove('expanded'));    }  });}
 /* BULK BRAND / SIZES */ function applyBulkBrand() {  const val = document.getElementById('bulkBrandInput').value.trim();  if (!val) { showToast('請先輸入品牌名稱'); return; }  if (!editData.length) { showToast('尚無商品可套用'); return; }  editData.forEach(d => { d.brand = val; });  editData.forEach((_, i) => { const inp = document.getElementById('bi' + i); if (inp) inp.value = val; });  hideBulkSugg();  showToast(`✓ 已將 ${editData.length} 件商品的品牌設為「${val}」`);}function showBulkSugg(val) {  const el  = document.getElementById('bulkBs');  const hit = brandHistory.filter(b => b.toLowerCase().includes((val||'').toLowerCase())).slice(0,6);  if (!hit.length) { el.classList.remove('open'); return; }  el.innerHTML = hit.map(b => `<div class="brand-sugg-item" onmousedown="pickBulkBrand('${esc(b)}')">${esc(b)}</div>`).join('');  el.classList.add('open');}function hideBulkSugg() { document.getElementById('bulkBs')?.classList.remove('open'); }function pickBulkBrand(b) { document.getElementById('bulkBrandInput').value = b; hideBulkSugg(); }function applyBulkSizes() {  if (!bulkSizes.length) { showToast('請先勾選要套用的尺寸'); return; }  if (!editData.length)  { showToast('尚無商品可套用'); return; }  editData.forEach(d => { d.sizes = [...bulkSizes]; });  renderEditCards();  showToast(`✓ 已將 ${editData.length} 件商品的尺寸設為：${bulkSizes.join(' / ')}`);}
@@ -477,6 +491,7 @@ function switchManageSub(mode) {
   document.getElementById('msubAll').classList.toggle('active', mode === 'all');
   document.getElementById('manage-pending').style.display = (mode === 'pending') ? 'block' : 'none';
   document.getElementById('manage-all').style.display     = (mode === 'all')     ? 'block' : 'none';
+  _updateFloatingBatchBar('pending', 0);
   if (mode === 'pending') {
     batchMode = false;
     batchEditing = false;
@@ -618,6 +633,7 @@ function updatePendingSelectedCount() {
   const sel = cbs.filter(cb => cb.checked).length;
   const el = document.getElementById('pendingSelectedCount');
   if (el) el.textContent = `已勾選 ${sel} / ${cbs.length} 件`;
+  _updateFloatingBatchBar('pending', sel);
   // 同步每排左上角「整排」checkbox 勾選狀態
   document.querySelectorAll('.pending-grid').forEach(grid => {
     const cards = [...grid.querySelectorAll('.pending-card')];
@@ -879,7 +895,7 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
         <button class="batch-btn batch-btn-del" onclick="deleteBmSelected()" style="font-size:0.72rem;padding:4px 12px;margin-left:auto;">🗑 刪除勾選</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;" class="bm-edit-grid">      ${products.filter(p => batchSelected.has(p.id)).map((p, visIdx) => {        const d = batchEditItems.find(d => d.id === p.id);        if (!d) return '';        const idx = batchEditItems.indexOf(d);        const isRowStart = (visIdx % 6 === 0);
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;" class="bm-edit-grid">      ${_sortByBrandAndCategory(products.filter(p => batchSelected.has(p.id))).map((p, visIdx) => {        const d = batchEditItems.find(d => d.id === p.id);        if (!d) return '';        const idx = batchEditItems.indexOf(d);        const isRowStart = (visIdx % 6 === 0);
         const rowIndex = Math.floor(visIdx / 6);
         const rowSelectHtml = isRowStart ? `
           <label title="勾選／取消這一整排（6件）" onclick="event.stopPropagation()"
@@ -1086,6 +1102,7 @@ function toggleBmCardSelectAll(checked) {  document.querySelectorAll('.bm-card-c
   const selected = cbs.filter(cb => cb.checked).length;
   const el = document.getElementById('bmCardSelectedCount');
   if (el) el.textContent = `已勾選 ${selected} / ${total} 件`;
+  _updateFloatingBatchBar('all', selected);
   document.querySelectorAll('.bm-row-cb').forEach(rcb => {
     const r = Number(rcb.dataset.row);
     const slice = cbs.slice(r * 6, (r + 1) * 6);
@@ -1126,30 +1143,142 @@ async function deleteBmSelected() {
 function copySizesAndPricesToSelected() {
   const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
   if (checked.length < 2) {
-    showToast('請同時勾選「已有大童價格的範本卡片」與「要同步的同款卡片」（至少 2 張）', 3500);
+    showToast('請同時勾選要合併尺寸與價格的同款卡片（至少 2 張）', 3500);
     return;
   }
   const idxs = checked.map(cb => Number(cb.dataset.idx)).filter(i => batchEditItems[i]);
-  // 找出勾選卡片中尺寸最齊全（或包含大童 JS/JM/JL）的那張當作範本
-  const template = [...idxs]
-    .map(i => batchEditItems[i])
-    .sort((a, b) => (b.sizes?.length || 0) - (a.sizes?.length || 0))[0];
-  if (!template || !template.sizes?.length) {
-    showToast('勾選的卡片中沒有尺寸可複製');
+  const selectedItems = idxs.map(i => batchEditItems[i]);
+
+  // 雙向聯集合併：把所有勾選卡片的「尺寸」與「各尺寸對應價格」全部合併在一起（例如小童 690 + 大童 780）
+  const sizeOrder = SIZE_GROUPS.flatMap(g => g.sizes);
+  const mergedSizesSet = new Set();
+  const mergedSizePrices = {};
+
+  selectedItems.forEach(item => {
+    const sp = item.sizePrices || {};
+    (item.sizes || []).forEach(sz => {
+      mergedSizesSet.add(sz);
+      const pVal = (sp[sz] && String(sp[sz]).trim()) || (item.price && String(item.price).trim()) || '';
+      if (pVal && !mergedSizePrices[sz]) {
+        mergedSizePrices[sz] = pVal;
+      }
+    });
+  });
+
+  const mergedSizes = [...mergedSizesSet].sort((a, b) => {
+    const ia = sizeOrder.indexOf(a);
+    const ib = sizeOrder.indexOf(b);
+    if (ia !== -1 && ib !== -1) return ia - ib;
+    if (ia !== -1) return -1;
+    if (ib !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  if (!mergedSizes.length) {
+    showToast('勾選的卡片中沒有尺寸可合併');
     return;
   }
-  idxs.forEach(i => {
-    const d = batchEditItems[i];
-    if (!d || d === template) return;
-    d.sizes = [...template.sizes];
-    d.sizePrices = { ...(template.sizePrices || {}) };
-    if (template.price) d.price = template.price;
+
+  const firstPrice = mergedSizes.map(s => mergedSizePrices[s]).find(Boolean) || '';
+  selectedItems.forEach(d => {
+    d.sizes = [...mergedSizes];
+    d.sizePrices = { ...mergedSizePrices };
+    if (firstPrice) d.price = firstPrice;
   });
+
   _refreshBmProductRows();
-  showToast(`✓ 已將完整尺寸（${template.sizes.join('/')}）與價格同步至 ${idxs.length} 件同款商品！記得按儲存`);
+  _clearAllBmCheckboxes();
+  showToast(`✓ 已合併大小童尺寸（${mergedSizes.join('/')}）與價格並套用至 ${selectedItems.length} 件！記得按儲存`, 4000);
 }
 
-function applyBmToSelected(field) {  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];  if (!checked.length) { showToast('請先勾選要套用的商品'); return; }  const idxs = checked.map(cb => Number(cb.dataset.idx));  if (field === 'category') {    const val = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent;    if (!val) { showToast('請先在上方選擇品項'); return; }    idxs.forEach(idx => { if (batchEditItems[idx]) batchEditItems[idx].category = val; });    _refreshBmProductRows();    showToast(`✓ 已套用品項「${val}」至 ${idxs.length} 件`);  } else if (field === 'sizes') {    const sizes = [..._bmSelectedSizes];    if (!sizes.length) { showToast('請先在上方選擇尺寸'); return; }    idxs.forEach(idx => {      if (!batchEditItems[idx]) return;      batchEditItems[idx].sizes = [...sizes];    });    _refreshBmProductRows();    showToast(`✓ 已套用尺寸至 ${idxs.length} 件`);  }}
+
+/* ═══════════════════════════════════════════════════════════
+   底部浮動「快捷批量操作列」（勾選任一商品時自動浮現，免往上滑回頂端）
+   ═══════════════════════════════════════════════════════════ */
+function _ensureFloatingBatchBar() {
+  let bar = document.getElementById('floatingQuickBatchBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'floatingQuickBatchBar';
+    bar.style.cssText = 'display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:260;background:rgba(61,43,31,0.96);color:#FFFDF9;padding:10px 14px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,0.32);max-width:95vw;width:max-content;backdrop-filter:blur(6px);align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;';
+    document.body.appendChild(bar);
+  }
+  return bar;
+}
+function _updateFloatingBatchBar(mode, count) {
+  const bar = _ensureFloatingBatchBar();
+  if (!count || count <= 0) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  if (mode === 'pending') {
+    const selCat = document.querySelector('#pendingBulkCatChips .option-chip.on')?.textContent || '';
+    const hasSizes = _pendingBulkSizes && _pendingBulkSizes.size > 0;
+    bar.innerHTML = `
+      <span style="font-size:0.76rem;color:#E8C9B0;font-weight:600;white-space:nowrap;">已選 ${count} 件</span>
+      <select onchange="if(this.value){_quickSelectPendingCat(this.value);this.value='';}" style="background:#FFFDF9;color:#2C1F14;border:none;border-radius:12px;padding:5px 9px;font-size:0.74rem;font-family:'Noto Serif TC',serif;cursor:pointer;">
+        <option value="">👗 快速套用品項…</option>
+        ${CATEGORY_LIST.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+      </select>
+      ${selCat ? `<button type="button" onclick="applyPendingBulkCategory()" style="background:#A8866A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">套用「${esc(selCat)}」</button>` : ''}
+      ${hasSizes ? `<button type="button" onclick="applyPendingBulkSizes(true)" style="background:#8B6E52;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">📐 套用已選尺寸/價</button>` : ''}
+      <button type="button" onclick="deleteSelectedPending()" style="background:#C0614A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">🗑 刪除</button>
+      <button type="button" onclick="togglePendingSelectAll(false)" style="background:rgba(255,255,255,0.16);color:#fff;border:none;border-radius:12px;padding:5px 9px;font-size:0.72rem;cursor:pointer;">✕ 取消</button>
+    `;
+  } else {
+    const selCat = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent || '';
+    const hasSizes = _bmSelectedSizes && _bmSelectedSizes.size > 0;
+    bar.innerHTML = `
+      <span style="font-size:0.76rem;color:#E8C9B0;font-weight:600;white-space:nowrap;">已選 ${count} 件</span>
+      <select onchange="if(this.value){_quickSelectBmCat(this.value);this.value='';}" style="background:#FFFDF9;color:#2C1F14;border:none;border-radius:12px;padding:5px 9px;font-size:0.74rem;font-family:'Noto Serif TC',serif;cursor:pointer;">
+        <option value="">👗 快速套用品項…</option>
+        ${CATEGORY_LIST.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+      </select>
+      ${selCat ? `<button type="button" onclick="applyBmToSelected('category')" style="background:#A8866A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">套用「${esc(selCat)}」</button>` : ''}
+      ${hasSizes ? `<button type="button" onclick="applyBmToSelected('sizes')" style="background:#8B6E52;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">📐 套用已選尺寸</button>` : ''}
+      ${count >= 2 ? `<button type="button" onclick="copySizesAndPricesToSelected()" style="background:#E8C9B0;color:#3D2B1F;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;font-weight:600;cursor:pointer;">📋 合併同款尺寸/價格</button>` : ''}
+      <button type="button" onclick="deleteBmSelected()" style="background:#C0614A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">🗑 刪除</button>
+      <button type="button" onclick="_clearAllBmCheckboxes()" style="background:rgba(255,255,255,0.16);color:#fff;border:none;border-radius:12px;padding:5px 9px;font-size:0.72rem;cursor:pointer;">✕ 取消</button>
+    `;
+  }
+}
+function _quickSelectPendingCat(val) {
+  document.querySelectorAll('#pendingBulkCatChips .option-chip').forEach(c => c.classList.toggle('on', c.textContent === val));
+  applyPendingBulkCategory();
+}
+function _quickSelectBmCat(val) {
+  document.querySelectorAll('#bmCategoryChips .option-chip').forEach(c => c.classList.toggle('on', c.textContent === val));
+  applyBmToSelected('category');
+}
+
+function _clearAllBmCheckboxes() {
+  document.querySelectorAll('.bm-card-cb, .bm-row-cb, #bmCardSelectAll').forEach(cb => { cb.checked = false; });
+  updateBmCardSelectedCount();
+}
+function applyBmToSelected(field) {
+  const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+  if (!checked.length) { showToast('請先勾選要套用的商品'); return; }
+  const idxs = checked.map(cb => Number(cb.dataset.idx));
+  if (field === 'category') {
+    const val = document.querySelector('#bmCategoryChips .option-chip.on')?.textContent;
+    if (!val) { showToast('請先在上方選擇品項'); return; }
+    idxs.forEach(idx => { if (batchEditItems[idx]) batchEditItems[idx].category = val; });
+    _refreshBmProductRows();
+    _clearAllBmCheckboxes();
+    showToast(`✓ 已套用品項「${val}」至 ${idxs.length} 件（已自動取消勾選）`);
+  } else if (field === 'sizes') {
+    const sizes = [..._bmSelectedSizes];
+    if (!sizes.length) { showToast('請先在上方選擇尺寸'); return; }
+    idxs.forEach(idx => {
+      if (!batchEditItems[idx]) return;
+      batchEditItems[idx].sizes = [...sizes];
+    });
+    _refreshBmProductRows();
+    _clearAllBmCheckboxes();
+    showToast(`✓ 已套用尺寸至 ${idxs.length} 件（已自動取消勾選）`);
+  }
+}
 function selectBmCategory(val, el) {  document.querySelectorAll('#bmCategoryChips .option-chip').forEach(c => c.classList.remove('on'));  el.classList.add('on');  _trackUsage('cat', val);}
 let _bmSelectedSizes = new Set();function toggleBmSizeGroupAll(gi, el) {  const g = SIZE_GROUPS[gi];  const allOn = g.sizes.every(s => _bmSelectedSizes.has(s));  if (allOn) g.sizes.forEach(s => _bmSelectedSizes.delete(s));  else g.sizes.forEach(s => _bmSelectedSizes.add(s));  document.querySelectorAll('#bmSizeChips .size-chip').forEach(chip => {    chip.classList.toggle('on', _bmSelectedSizes.has(chip.textContent));  });  _applyBmSizes();}function toggleBmSingleSize(s, el) {  if (_bmSelectedSizes.has(s)) _bmSelectedSizes.delete(s);  else _bmSelectedSizes.add(s);  el.classList.toggle('on', _bmSelectedSizes.has(s));  _applyBmSizes();}function _applyBmSizes() {  const sizes = [..._bmSelectedSizes];  batchEditItems.forEach(d => d.sizes = [...sizes]);  document.getElementById('bmSizePreview').textContent = '已選：' + (sizes.length ? sizes.join(' / ') : '尚未選取');  _refreshBmProductRows();}function applyBmUnifiedPrice() {  const price = document.getElementById('bmUnifiedPrice')?.value.trim();  if (!price) { showToast('請先輸入統一價格'); return; }  batchEditItems.forEach(d => {    const sp = d.sizePrices || {};    (d.sizes||[]).forEach(s => { sp[s] = price; });    d.sizePrices = sp;    d.price = price;  });  _refreshBmProductRows();  showToast(`✓ 已套用統一價格 NT$${price}`);}
 function applyBmDiffPrice() {  const baseGroupIdx = parseInt(document.getElementById('bmBaseGroup')?.value || '2');  const baseRaw      = (document.getElementById('bmBasePrice')?.value || '').trim();  const sign         = document.getElementById('bmDiffSign')?.value || '+';  const diffRaw      = (document.getElementById('bmDiffAmt')?.value || '').trim();  if (!baseRaw)  { showToast('請先輸入基準價'); return; }  if (!diffRaw)  { showToast('請輸入差額金額'); return; }  const basePrice = parseFloat(baseRaw);  const diff      = parseFloat(diffRaw);  if (isNaN(basePrice) || isNaN(diff)) { showToast('價格與差額需為數字'); return; }  const otherPrice = sign === '+' ? basePrice + diff : basePrice - diff;  if (otherPrice < 0) { showToast('⚠ 計算結果為負數'); return; }  const baseGroup = SIZE_GROUPS[baseGroupIdx];  if (!baseGroup) { showToast('⚠ 無效的基準組'); return; }  let appliedItems = 0;  batchEditItems.forEach(d => {    if (!d.sizes || !d.sizes.length) return;    const sp = d.sizePrices || {};    let touched = false;    d.sizes.forEach(s => {      const inBaseGroup = baseGroup.sizes.includes(s);
