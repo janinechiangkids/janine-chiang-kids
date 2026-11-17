@@ -1,5 +1,161 @@
 <!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="referrer" content="no-referrer">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Janine Chiang Kids｜精品童裝</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link rel="stylesheet" href="style.css"></head><body><!-- HEADER --><header class="site-header">  <div class="header-top">    <div class="logo">      <span class="normal-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="l4">K</span><span class="l2">i</span><span class="l1">d</span><span class="l3">s</span></span>      <span class="cute-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="earth-blue">R</span><span class="earth-blue">e</span><span class="earth-green">-</span><span class="earth-green">l</span><span class="earth-green">o</span><span class="earth-green">v</span><span class="earth-green">e</span><span class="earth-green">d</span></span>      <span>韓國童裝選品</span>    </div>    <div class="header-btns">      <a class="line-btn" href="https://lin.ee/rCNd7ai" target="_blank">💬 官方Line</a>      <button class="admin-btn" onclick="openAdmin()">🔑 後台</button>    </div>  </div>  <div class="search-wrap">    <span class="search-icon">🔍</span>    <input class="search-box" type="text" placeholder="搜尋品牌、尺寸…" id="searchInput" oninput="applyFilters()">  </div></header><!-- HERO --><section class="hero">  <div class="normal-only">    <div class="hero-eyebrow">Janine Chiang Kids｜美學宣言</div>    <h1>讓美好的質地<br>成為成長中溫暖的底色</h1>    <div class="hero-deco"><span></span><i>✦</i><span></span></div>    <div class="hero-manifesto">      <p>我們相信，童裝不只是布料的裁切，<br>而是孩子觸摸世界的第一種方式，<br>也是父母記錄時光的一種溫柔。</p>      <div class="hero-divider"></div>      <p>每一件衣服都承載著流動的愛。<br>我們推崇「美好的延續」，<br>讓那些裝滿回憶的衣裳，透過分享與循環，<br>在不同的孩子身上，編織出新的故事。</p>    </div>  </div>  <div class="cute-only">    <div class="hero-eyebrow">Janine Chiang Re-loved｜循環計畫</div>    <h1>成長很快<br>但愛可以留得更久</h1>    <div class="hero-deco"><span></span><i>♡</i><span></span></div>    <div class="hero-manifesto">      <p class="reloved-lead">寶貝長大的速度，<br>趕不上衣服汰換的速度。</p>      <p class="reloved-body">加入 <strong style="color:#A8C5D6;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">Re</strong><strong style="color:#B8C9A8;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">-loved</strong> 循環計畫，<br>將那些承載美好回憶的衣物，<br>化作下一份禮物。</p>      <button class="reloved-cta" onclick="openRelovedGuide()">申請回收</button>    </div>  </div></section><!-- BRAND TABS --><div class="brand-tabs-wrap" id="brandTabsWrap" style="display:none;">  <div class="brand-tabs" id="brandTabs"></div></div><!-- FILTER & BRAND IG BAR -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Janine Chiang Kids｜精品童裝</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500;600&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link rel="stylesheet" href="style.css">
+<style>
+  /* ── 本期收單倒數 ＋ 儲值5000送500 優惠公告橫幅 ── */
+  .promo-countdown-bar {
+    background: linear-gradient(135deg, #FDF8F2 0%, #F7EBE1 100%);
+    border-bottom: 1px solid #EBD9C8;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: #5C4332;
+    position: relative;
+    z-index: 20;
+  }
+  .countdown-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    border: 1px solid #E2C8B2;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-weight: 500;
+    color: #4A3425;
+    box-shadow: 0 1px 4px rgba(92, 67, 50, 0.06);
+  }
+  .countdown-pill strong {
+    color: #C0614A;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+  }
+  .topup-promo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #8B6E52 0%, #6E543D 100%);
+    color: #FFFDF9;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.76rem;
+    font-family: 'Noto Serif TC', serif;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 6px rgba(110, 84, 61, 0.22);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .topup-promo-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(110, 84, 61, 0.28);
+  }
+  .topup-promo-pill .badge-tag {
+    background: #FCE3D2;
+    color: #8B452E;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  /* ── 滿 1,500 免運進度條（購物清單內） ── */
+  .free-ship-banner {
+    background: linear-gradient(135deg, #FFFBF6 0%, #F7EDE2 100%);
+    border: 1px solid #E8D5C4;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .free-ship-banner.achieved {
+    background: linear-gradient(135deg, #F3F8F2 0%, #E5F1E3 100%);
+    border-color: #BBD8B6;
+  }
+  .free-ship-text {
+    font-size: 0.78rem;
+    color: #5C4332;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .free-ship-banner.achieved .free-ship-text {
+    color: #2E6B34;
+  }
+  .free-ship-track {
+    width: 100%;
+    height: 6px;
+    background: #EAD9C9;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .free-ship-banner.achieved .free-ship-track {
+    background: #CBE3C8;
+  }
+  .free-ship-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #C99A78 0%, #8B6E52 100%);
+    border-radius: 99px;
+    transition: width 0.35s ease;
+  }
+  .free-ship-banner.achieved .free-ship-fill {
+    background: linear-gradient(90deg, #5BA362 0%, #3A7D41 100%);
+  }
+
+  /* ── 浮動回到頂部按鈕 ── */
+  .scroll-top-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 76px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 253, 249, 0.94);
+    color: #6E543D;
+    border: 1.5px solid #DFCBB8;
+    box-shadow: 0 4px 14px rgba(61, 43, 31, 0.14);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 180;
+    backdrop-filter: blur(4px);
+  }
+  .scroll-top-fab.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .scroll-top-fab:hover {
+    background: #8B6E52;
+    color: #FFFDF9;
+    border-color: #8B6E52;
+  }
+</style>
+</head><body>
+<!-- PROMO & COUNTDOWN BAR -->
+<div class="promo-countdown-bar" id="promoCountdownBar">
+  <div class="countdown-pill" id="gbCountdownPill">
+    <span>⏳ 本期韓國連線：</span>
+    <strong id="gbCountdownText">熱烈開放預購中</strong>
+  </div>
+  <button type="button" class="topup-promo-pill" onclick="openTopupModal()">
+    <span class="badge-tag">儲值禮</span>
+    <span>儲值 NT$5,000 送 NT$500 購物金 ›</span>
+  </button>
+</div>
+
+<!-- HEADER --><header class="site-header">  <div class="header-top">    <div class="logo">      <span class="normal-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="l4">K</span><span class="l2">i</span><span class="l1">d</span><span class="l3">s</span></span>      <span class="cute-only-inline"><span class="l1">J</span><span class="l2">a</span><span class="l3">n</span><span class="l1">i</span><span class="l4">n</span><span class="l2">e</span> <span class="l3">C</span><span class="l1">h</span><span class="l4">i</span><span class="l2">a</span><span class="l3">n</span><span class="l1">g</span> <span class="earth-blue">R</span><span class="earth-blue">e</span><span class="earth-green">-</span><span class="earth-green">l</span><span class="earth-green">o</span><span class="earth-green">v</span><span class="earth-green">e</span><span class="earth-green">d</span></span>      <span>韓國童裝選品</span>    </div>    <div class="header-btns">      <a class="line-btn" href="https://line.me/R/oaMessage/@027nskmc/?Hi%EF%BC%81%E6%88%91%E6%83%B3%E8%A9%A2%E5%95%8F%E7%AB%A5%E8%A3%9D%E9%81%B8%E5%93%81" target="_blank" rel="noopener noreferrer">💬 官方Line</a>      <button class="admin-btn" onclick="openAdmin()">🔑 後台</button>    </div>  </div>  <div class="search-wrap">    <span class="search-icon">🔍</span>    <input class="search-box" type="text" placeholder="搜尋品牌、尺寸…" id="searchInput" oninput="applyFilters()">  </div></header><!-- HERO --><section class="hero">  <div class="normal-only">    <div class="hero-eyebrow">Janine Chiang Kids｜美學宣言</div>    <h1>讓美好的質地<br>成為成長中溫暖的底色</h1>    <div class="hero-deco"><span></span><i>✦</i><span></span></div>    <div class="hero-manifesto">      <p>我們相信，童裝不只是布料的裁切，<br>而是孩子觸摸世界的第一種方式，<br>也是父母記錄時光的一種溫柔。</p>      <div class="hero-divider"></div>      <p>每一件衣服都承載著流動的愛。<br>我們推崇「美好的延續」，<br>讓那些裝滿回憶的衣裳，透過分享與循環，<br>在不同的孩子身上，編織出新的故事。</p>    </div>  </div>  <div class="cute-only">    <div class="hero-eyebrow">Janine Chiang Re-loved｜循環計畫</div>    <h1>成長很快<br>但愛可以留得更久</h1>    <div class="hero-deco"><span></span><i>♡</i><span></span></div>    <div class="hero-manifesto">      <p class="reloved-lead">寶貝長大的速度，<br>趕不上衣服汰換的速度。</p>      <p class="reloved-body">加入 <strong style="color:#A8C5D6;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">Re</strong><strong style="color:#B8C9A8;font-family:'Fredoka',sans-serif;font-weight:600;letter-spacing:0;">-loved</strong> 循環計畫，<br>將那些承載美好回憶的衣物，<br>化作下一份禮物。</p>      <button class="reloved-cta" onclick="openRelovedGuide()">申請回收</button>    </div>  </div></section><!-- BRAND TABS --><div class="brand-tabs-wrap" id="brandTabsWrap" style="display:none;">  <div class="brand-tabs" id="brandTabs"></div></div><!-- FILTER & BRAND IG BAR -->
 <div id="brandIgBanner" class="brand-ig-banner" style="display:none;"></div>
 <div id="frontFilterPanel" class="front-filter-panel" style="display:none;">
   <div class="front-filter-row" id="frontCatFilterRow"></div>
@@ -41,7 +197,7 @@
     </div>
   </div></div><!-- RULES MODAL --><div class="rules-overlay" id="rulesOverlay">  <div class="rules-box">    <div class="rules-icon">📋</div>    <div class="rules-title">賣場購買須知</div>    <div class="rules-item">
       <div class="rules-item-icon">💳</div>
-      <div class="rules-item-text"><strong>首次購買需先匯款：</strong>第一次下單請先行匯款，往後再次下單即可享受<strong>先訂貨、後付款</strong>的優惠方式。</div>
+      <div class="rules-item-text"><strong>首次購買需先匯款：</strong>第一次下單請先行匯款，往後再次下單即可享受<strong>先訂貨、後付款</strong>的優惠方式（儲值會員可直接扣抵）。</div>
     </div>
     <div class="rules-divider"></div>
     <div class="rules-item">
@@ -63,9 +219,52 @@
       <div class="rules-item-icon">📐</div>
       <div class="rules-item-text"><strong>尺寸確認：</strong>下單前請務必確認孩子的身高體重，預購商品<strong>恕不接受尺寸錯誤退換</strong>，如有疑問請先私訊詢問。</div>
     </div>
-    <button class="rules-agree-btn" onclick="confirmOrder()">✓ 我已閱讀並同意，前往官方LINE私訊下單</button>
+    <button class="rules-agree-btn" onclick="confirmOrder()">✓ 我已閱讀並同意，一鍵帶入清單至官方LINE</button>
     <div class="rules-cancel" onclick="closeRules()">取消</div>
-  </div></div><!-- 品牌自動完成清單（供待完成卡片使用） --><datalist id="pcardBrandList"></datalist><!-- ADMIN MODAL --><div class="modal-overlay" id="adminModal" onclick="adminOutside(event)">  <div class="admin-panel">    <div class="admin-handle"></div>    <!-- Login -->    <div id="pwScreen" class="pw-screen">      <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--dark-brown);margin-bottom:6px;">商家後台</p>      <p>請登入管理員帳號</p>      <input class="pw-input login-email" type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"        onkeydown="if(event.key==='Enter')document.getElementById('adminPass').focus()">
+  </div></div>
+
+<!-- 儲值 5000 送 500 活動詳情 MODAL -->
+<div class="reloved-overlay" id="topupOverlay" onclick="if(event.target===this)closeTopupModal()">
+  <div class="reloved-panel">
+    <div class="reloved-handle"></div>
+    <div class="reloved-modal-header">
+      <div class="reloved-modal-eyebrow">VIP Member Benefit</div>
+      <h3>🎁 儲值 5,000 送 500 購物金</h3>
+      <button class="reloved-close" onclick="closeTopupModal()">✕</button>
+    </div>
+    <div class="reloved-modal-body">
+      <p class="reloved-intro">成為 Janine Chiang Kids 儲值會員，<br>每次買童裝都享 9 折起超值回饋，下單免等對帳！</p>
+      <div class="reloved-section-title"><span>儲值優惠內容</span></div>
+      <div class="reloved-step">
+        <div class="reloved-step-num">01</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">單筆儲值 NT$ 5,000，帳戶立即入帳 NT$ 5,500</div>
+          <div class="reloved-step-desc">現賺 <strong>NT$ 500 購物金</strong>，等同全館商品直接享 91 折優惠，開團特價品也能同步折抵！</div>
+        </div>
+      </div>
+      <div class="reloved-step">
+        <div class="reloved-step-num">02</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">無使用期限・優先保留訂貨</div>
+          <div class="reloved-step-desc">儲值金<strong>永久有效、無使用期限</strong>。連線期間送出清單即可直接從儲值金扣款，搶韓國熱門款更快一步。</div>
+        </div>
+      </div>
+      <div class="reloved-step">
+        <div class="reloved-step-num">03</div>
+        <div class="reloved-step-content">
+          <div class="reloved-step-title">斷貨自動退回帳戶餘額</div>
+          <div class="reloved-step-desc">若遇韓國廠商斷貨，該筆金額將直接退回您的儲值金帳戶，隨時可於下次選購折抵。</div>
+        </div>
+      </div>
+      <div class="reloved-modal-footer">
+        <a class="reloved-apply-btn" href="https://line.me/R/oaMessage/@027nskmc/?Hi%EF%BC%81%E6%88%91%E6%83%B3%E7%94%B3%E8%AB%8B%E3%80%90%E5%84%B2%E5%80%BC5000%E9%80%81500%E8%B3%BC%E7%89%A9%E9%87%91%E3%80%91%EF%BC%8C%E8%AB%8B%E5%95%8F%E5%8C%AF%E6%AC%BE%E8%B3%87%E8%A8%8A%EF%BC%9F" target="_blank" rel="noopener noreferrer">💬 一鍵私訊官方 Line 申請儲值</a>
+        <div class="reloved-footer-note">點擊後將自動帶入儲值申請訊息至官方 Line（@027nskmc），直接按送出即可！</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 品牌自動完成清單（供待完成卡片使用） --><datalist id="pcardBrandList"></datalist><!-- ADMIN MODAL --><div class="modal-overlay" id="adminModal" onclick="adminOutside(event)">  <div class="admin-panel">    <div class="admin-handle"></div>    <!-- Login -->    <div id="pwScreen" class="pw-screen">      <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--dark-brown);margin-bottom:6px;">商家後台</p>      <p>請登入管理員帳號</p>      <input class="pw-input login-email" type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username"        onkeydown="if(event.key==='Enter')document.getElementById('adminPass').focus()">
       <input class="pw-input" type="password" id="adminPass" placeholder="密碼" autocomplete="current-password"        onkeydown="if(event.key==='Enter')adminLogin()">
       <button class="pw-btn" id="adminLoginBtn" onclick="adminLogin()">登入</button>
       <div class="pw-error" id="pwError"></div>
@@ -94,12 +293,12 @@
         <div class="tab-pane active" id="tab-upload">
           <!-- 🇰🇷 韓國批發網一鍵貼上匯入 -->
           <div style="background:linear-gradient(135deg,#FFFBF5 0%,var(--blush-light) 100%);border:1.5px solid var(--blush);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
-            <div style="font-size:0.92rem;font-weight:600;color:var(--dark-brown);margin-bottom:6px;">🇰🇷 韓國批發網（hangou.co.kr）一鍵貼上匯入</div>
+            <div style="font-size:0.92rem;font-weight:600;color:var(--dark-brown);margin-bottom:6px;">🇰🇷 韓國批發網（hangou.co.kr）一鍵貼上匯入（自動高清畫質升級版）</div>
             <div style="font-size:0.74rem;color:var(--text-soft);line-height:1.8;margin-bottom:10px;">
               <strong>操作教學（貼網頁原始碼）：</strong><br>
               1. 在韓國批發網商品列表頁的空白處按右鍵 → 點選 <strong>「檢視網頁原始碼」</strong>（快捷鍵：Mac 按 <code>Command + Option + U</code>，Windows 按 <code>Ctrl + U</code>）。<br>
               2. 按 <code>Command + A</code>（或 <code>Ctrl + A</code>）全選整頁程式碼並複製。<br>
-              3. 直接貼入下方文字框，按下「✨ 解析韓國網頁並自動帶入商品」即可自動抓圖、翻譯並換算台幣！
+              3. 直接貼入下方文字框，按下「✨ 解析韓國網頁並自動帶入商品」即可<strong>自動抓原圖高清大圖</strong>、翻譯並換算台幣！
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--white);padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--cream-mid);margin-bottom:10px;font-size:0.74rem;color:var(--text-soft);">
               <span>計價：(韓幣 ÷</span>
@@ -120,7 +319,7 @@
               <div class="upload-zone-inner" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">📷</div>
                 <div class="upload-title">點擊此處 或 拖曳照片進來</div>
-                <div class="upload-hint">支援 JPG / PNG / WEBP，可一次選多張<br>系統會自動壓縮（寬度 1200px、約 80% 品質，單張 ≦ 200KB）<br>並上傳至 Supabase 雲端儲存</div>
+                <div class="upload-hint">支援 JPG / PNG / WEBP，可一次選多張<br>系統會自動壓縮（寬度 1400px、約 90% 高畫質）<br>並上傳至 Supabase 雲端儲存</div>
               </div>
             </div>
             <div class="upload-progress" id="uploadProgress" style="display:none;">
@@ -161,7 +360,6 @@
         </div>
         <!-- MANAGE -->
         <div class="tab-pane" id="tab-manage">
-          <!-- 子分頁切換：待完成 / 全部 -->
           <div class="manage-subtabs">
             <button class="manage-subtab active" id="msubPending" onclick="switchManageSub('pending')">
               <span class="msub-icon">⚠️</span>
@@ -173,7 +371,6 @@
               <span class="msub-count" id="prodCount">0</span>
             </button>
           </div>
-          <!-- 待完成模式 -->
           <div id="manage-pending">
             <div class="pending-hint" id="pendingHint">
               ⚠ 以下商品還缺欄位，顧客看不到完整資訊。改完任一欄位會自動儲存。
@@ -184,7 +381,6 @@
               <div>太棒了，所有商品都填寫完整！</div>
             </div>
           </div>
-          <!-- 全部商品模式（保留原樣） -->
           <div id="manage-all" style="display:none;">
             <div id="batchSection"></div>
             <div id="existingProds"></div>
@@ -207,8 +403,7 @@
             </div>
 
             <div class="admin-section-title" style="margin-bottom:4px;">品牌尺寸表管理</div>
-            <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:16px;line-height:1.7;">為每個品牌設定尺寸對照表，客人點開商品燈箱時可直接查看。資料儲存在瀏覽器中，無需重新部署。</p>
-            <!-- 新增品牌 -->
+            <p style="font-size:0.78rem;color:var(--text-soft);margin-bottom:16px;line-height:1.7;">為每個品牌設定尺寸對照表，客人點開商品燈箱時可直接查看。資料儲存在雲端資料庫中。</p>
             <div class="bulk-bar" style="margin-bottom:20px;">
               <div class="bulk-bar-title">➕ 新增 / 編輯品牌尺寸表</div>
               <div class="bulk-bar-hint">選擇品牌後設定表格欄位與資料，完成後點「儲存」即可在燈箱中顯示。</div>
@@ -242,7 +437,6 @@
                 </div>
               </div>
             </div>
-            <!-- 現有品牌尺寸表列表 -->
             <div class="admin-section-title" style="margin-bottom:10px;">已設定尺寸表的品牌</div>
             <div id="sgList"></div>
           </div>
@@ -255,8 +449,8 @@
             <div style="background:linear-gradient(135deg,#FFFBF5 0%,var(--blush-light) 100%);border:1.5px solid var(--blush);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;">
               <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
                 <div>
-                  <div style="font-size:0.86rem;font-weight:600;color:var(--dark-brown);">📅 本期開團日期與結單設定</div>
-                  <div style="font-size:0.72rem;color:var(--text-soft);margin-top:2px;">設定後可記錄本團收單期間，並一鍵匯出所有未叫貨商品的「品牌叫貨總表」</div>
+                  <div style="font-size:0.86rem;font-weight:600;color:var(--dark-brown);">📅 本期開團日期與結單設定（同步顯示於首頁倒數橫幅）</div>
+                  <div style="font-size:0.72rem;color:var(--text-soft);margin-top:2px;">設定「結單日」後，前台頂部會自動顯示倒數計時；並可一鍵匯出品牌叫貨總表</div>
                 </div>
                 <button type="button" onclick="downloadOrderSummaryExcel()" style="background:linear-gradient(135deg,var(--dark-brown),var(--warm-brown));color:var(--white);border:none;border-radius:20px;padding:8px 16px;font-size:0.78rem;font-family:'Noto Serif TC',serif;cursor:pointer;letter-spacing:0.05em;white-space:nowrap;">📥 一鍵下載叫貨總表</button>
               </div>
@@ -332,7 +526,7 @@
                 </select>
               </div>
             </div>
-            <!-- 未叫貨列表（收合式） -->
+            <!-- 未叫貨列表 -->
             <div id="unorderedAlert" style="display:none;" class="bulk-bar">
               <div style="display:flex;align-items:center;justify-content:space-between;">
                 <div class="bulk-bar-title" style="color:var(--red);">⚠️ 尚未叫貨的商品</div>
@@ -351,7 +545,7 @@
             <div id="orderList"></div>
           </div>
         </div>
-        <!-- ───── 已完成訂單分頁 ───── -->
+        <!-- 已完成訂單分頁 -->
         <div class="tab-pane" id="tab-completed">
           <div class="admin-section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
@@ -367,7 +561,8 @@
       </div>
     </div>
   </div>
-</div><!-- FLOAT SAVE BTN (batch modify) --><button class="float-save-btn" id="floatSaveBtn" onclick="saveBatchEditAll()" style="bottom:80px;">  💾 儲存變更</button><!-- RE-LOVED 回收說明 MODAL --><div class="reloved-overlay" id="relovedOverlay" onclick="relovedOutside(event)">  <div class="reloved-panel">    <div class="reloved-handle"></div>    <div class="reloved-modal-header">      <div class="reloved-modal-eyebrow">Janine Chiang Re-loved</div>      <h3>循環計畫・回收申請</h3>      <button class="reloved-close" onclick="closeRelovedGuide()">✕</button>    </div>    <div class="reloved-modal-body">      <p class="reloved-intro">當寶貝長大、衣物還很美好，<br>讓我們一起延續這份溫柔。</p>
+</div><!-- FLOAT SAVE BTN --><button class="float-save-btn" id="floatSaveBtn" onclick="saveBatchEditAll()" style="bottom:80px;">  💾 儲存變更</button><!-- RE-LOVED 回收說明 MODAL --><div class="reloved-overlay" id="relovedOverlay" onclick="relovedOutside(event)">  <div class="reloved-panel">    <div class="reloved-handle"></div>    <div class="reloved-modal-header">      <div class="reloved-modal-eyebrow">Janine Chiang Re-loved</div>      <h3>循環計畫・回收申請</h3>      <button class="reloved-close" onclick="closeRelovedGuide()">✕</button>
+    </div>    <div class="reloved-modal-body">      <p class="reloved-intro">當寶貝長大、衣物還很美好，<br>讓我們一起延續這份溫柔。</p>
       <div class="reloved-section-title"><span>回收流程</span></div>
       <div class="reloved-step">        <div class="reloved-step-num">01</div>        <div class="reloved-step-content">          <div class="reloved-step-title">線上申請</div>          <div class="reloved-step-desc">透過官網 LINE「二手回收申請」，上傳衣物照片。</div>          <div class="reloved-step-note"><strong>回收標準</strong>：9 成新，無嚴重污漬、無破損、扣子配件齊全。</div>        </div>
       </div>
@@ -381,22 +576,36 @@
       </div>
       <div class="reloved-section-title"><span>常見問題</span></div>
       <div class="reloved-faq">        <div class="reloved-faq-q">Q. 哪些衣服可以參加回收？</div>        <div class="reloved-faq-a">凡於<strong>本官網購買</strong>的童裝品項皆可申請回收。<br>（基於衛生考量，貼身衣物內衣褲、襪子<strong>不參與</strong>回收。）</div>      </div>
-      <div class="reloved-modal-footer">        <a class="reloved-apply-btn" href="https://lin.ee/rCNd7ai" target="_blank" rel="noopener noreferrer">透過官方 Line 申請回收</a>        <div class="reloved-footer-note">點擊後將開啟官方 Line，請傳送「我要申請回收」開始流程。</div>      </div>    </div>  </div></div><!-- CART FAB --><button class="cart-fab" id="cartFab" onclick="openCart()">  我的清單 <span class="cart-fab-count" id="cartFabCount">0</span></button><!-- CART MODAL --><div class="cart-overlay" id="cartOverlay" onclick="cartOutside(event)">  <div class="cart-panel">    <div class="cart-handle"></div>    <div class="cart-header">      <h3>我的清單</h3>      <button class="cart-close" onclick="closeCart()">✕</button>
+      <div class="reloved-modal-footer">        <a class="reloved-apply-btn" href="https://line.me/R/oaMessage/@027nskmc/?Hi%EF%BC%81%E6%88%91%E8%A6%81%E7%94%B3%E8%AB%8B%E4%BA%8C%E6%89%8B%E5%9B%9E%E6%94%B6" target="_blank" rel="noopener noreferrer">💬 一鍵帶入訊息至官方 Line 申請回收</a>
+        <div class="reloved-footer-note">點擊後將自動帶入「我要申請二手回收」至官方 Line（@027nskmc），直接按送出即可！</div>
+      </div>    </div>  </div></div>
+
+<!-- SCROLL TO TOP FAB -->
+<button class="scroll-top-fab" id="scrollTopFab" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">↑</button>
+
+<!-- CART FAB --><button class="cart-fab" id="cartFab" onclick="openCart()">  我的清單 <span class="cart-fab-count" id="cartFabCount">0</span></button><!-- CART MODAL --><div class="cart-overlay" id="cartOverlay" onclick="cartOutside(event)">  <div class="cart-panel">    <div class="cart-handle"></div>    <div class="cart-header">      <h3>我的清單</h3>      <button class="cart-close" onclick="closeCart()">✕</button>
     </div>
+    <div id="cartFreeShipBanner" style="padding:0 18px;"></div>
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-footer" id="cartFooter"></div>
   </div></div><!-- LINE SEND MODAL --><!-- 訂單查詢結果（只在 ?c= 連結時顯示） --><div id="oqResult" style="display:none;position:fixed;inset:0;background:rgba(30,18,8,0.88);z-index:400;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">  <div style="background:var(--white);border-radius:var(--radius);max-width:420px;width:100%;padding:20px;position:relative;max-height:90vh;overflow-y:auto;animation:scaleIn 0.25s ease;">    <button onclick="document.getElementById('oqResult').style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text-light);">✕</button>    <div id="oqResultInner"></div>
-  </div></div><div class="line-send-overlay" id="lineSendOverlay">  <div class="line-send-box">    <div class="line-send-title">傳送清單至官方 Line</div>    <div class="line-send-hint">請先複製訊息，再點「前往官方 Line」貼上送出</div>    <div class="line-send-msg" id="lineSendMsg"></div>
-    <button class="line-send-copy-btn" id="lineCopyBtn" onclick="copyLineMsg()">複製訊息</button>
-    <a class="line-send-go-btn" id="lineGoBtn" href="" target="_blank" onclick="event.preventDefault();closeLineSendModal();showRulesBeforeLine()">前往官方 Line</a>
+  </div></div><div class="line-send-overlay" id="lineSendOverlay">  <div class="line-send-box">    <div class="line-send-title">傳送清單至官方 Line</div>    <div class="line-send-hint">點擊下方按鈕將<strong>自動帶入完整清單文字</strong>至官方 Line（@027nskmc），開啟後直接按送出即可！</div>
+    <div class="line-send-msg" id="lineSendMsg"></div>
+    <button class="line-send-copy-btn" id="lineCopyBtn" onclick="copyLineMsg()">📋 備用：手動複製訊息</button>
+    <a class="line-send-go-btn" id="lineGoBtn" href="" target="_blank" onclick="event.preventDefault();closeLineSendModal();showRulesBeforeLine()">💬 一鍵帶入訊息並前往官方 Line</a>
     <div class="line-send-close" onclick="closeLineSendModal()">關閉</div>
   </div></div>
-<!-- 銷售報表彈窗 --><div class="line-send-overlay" id="salesReportOverlay" style="display:none;">  <div class="line-send-box" style="max-width:600px;max-height:85vh;overflow-y:auto;">    <div class="line-send-title">📊 銷售報表</div>        <!-- 時間篩選 -->    <div style="background:var(--cream);padding:12px;border-radius:8px;margin-bottom:16px;">      <div style="font-size:0.85rem;font-weight:500;margin-bottom:8px;">📅 時間篩選</div>      <select id="reportPeriod" onchange="updateSalesReport()" style="width:100%;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">        <option value="all">全部時間</option>        <option value="thisMonth">本月</option>        <option value="lastMonth">上個月</option>        <option value="thisQuarter">本季</option>        <option value="thisYear">本年度</option>        <option value="custom">自訂區間</option>
+<!-- 銷售報表彈窗 --><div class="line-send-overlay" id="salesReportOverlay" style="display:none;">  <div class="line-send-box" style="max-width:600px;max-height:85vh;overflow-y:auto;">    <div class="line-send-title">📊 銷售報表</div>    <div style="background:var(--cream);padding:12px;border-radius:8px;margin-bottom:16px;">      <div style="font-size:0.85rem;font-weight:500;margin-bottom:8px;">📅 時間篩選</div>      <select id="reportPeriod" onchange="updateSalesReport()" style="width:100%;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">        <option value="all">全部時間</option>
+        <option value="thisMonth">本月</option>
+        <option value="lastMonth">上個月</option>
+        <option value="thisQuarter">本季</option>
+        <option value="thisYear">本年度</option>
+        <option value="custom">自訂區間</option>
       </select>
       <div id="customDateRange" style="display:none;margin-top:8px;display:flex;gap:8px;">        <input type="date" id="reportStartDate" onchange="updateSalesReport()" style="flex:1;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">
         <input type="date" id="reportEndDate" onchange="updateSalesReport()" style="flex:1;padding:8px;border:1.5px solid var(--cream-mid);border-radius:6px;font-family:'Noto Serif TC',serif;font-size:0.85rem;">
       </div>
-    </div>        <!-- 基本統計 -->    <div id="salesReportStats"></div>        <!-- 客戶消費排行 -->    <div id="customerRanking"></div>        <!-- 匯出按鈕 -->    <button class="line-send-copy-btn" onclick="exportSalesReport()" style="margin-top:16px;">📥 匯出 Excel</button>        <div class="line-send-close" onclick="closeSalesReport()">關閉</div>  </div></div>
+    </div>    <div id="salesReportStats"></div>    <div id="customerRanking"></div>    <button class="line-send-copy-btn" onclick="exportSalesReport()" style="margin-top:16px;">📥 匯出 Excel</button>    <div class="line-send-close" onclick="closeSalesReport()">關閉</div>  </div></div>
 
 <!-- 訂單商品大圖燈箱 -->
 <div class="lightbox" id="orderImgLightbox" style="z-index:550;" onclick="if(event.target===this)this.classList.remove('active')">
