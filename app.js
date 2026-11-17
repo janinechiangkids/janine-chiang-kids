@@ -33,8 +33,8 @@ function _buildLineOaMessageUrl(msgText) {
 function _upgradeKrImageUrl(url) {
   if (!url || typeof url !== 'string') return url || '';
   if (/^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(url)) {
-    // 韓網 Gnuboard 列表縮圖為 xxx_m.jpg，去掉 _m 即為原始高清大圖 xxx.jpg
-    return url.replace(/(\/data\/item\/[^\/]+?)_m(\.[a-z0-9]+)$/i, '$1$2');
+    // 韓網 Gnuboard 列表縮圖為 xxx_m 或 xxx_m.jpg（常無副檔名），去掉 _m 即為原始高清大圖
+    return url.replace(/(\/data\/item\/[^\/?#]+?)_m(\.[a-z0-9]+)?([?#].*)?$/i, '$1$2$3');
   }
   return url;
 }
@@ -68,9 +68,9 @@ function _imgUrlOnFail(imgEl, originalUrl) {
   const stage = parseInt(imgEl.dataset.failStage || '0', 10);
   const isKr = /^https?:\/\/(www\.)?(hangou|gouhan)\.co\.kr/i.test(originalUrl);
   // 若原圖（無 _m）不存在，自動退回 _m 縮圖並透過 wsrv 超取樣銳化顯示
-  if (stage === 0 && isKr && /\/data\/item\/([^\/]+?)(\.[a-z]+)?$/i.test(originalUrl) && !/_m(\.[a-z]+)?$/i.test(originalUrl)) {
+  if (stage === 0 && isKr && /\/data\/item\/([^\/?#]+?)(\.[a-z0-9]+)?$/i.test(originalUrl) && !/_m(\.[a-z0-9]+)?$/i.test(originalUrl)) {
     imgEl.dataset.failStage = '1';
-    const fallbackM = originalUrl.replace(/(\.[a-z]+)?$/i, '_m$1');
+    const fallbackM = originalUrl.replace(/(\/data\/item\/[^\/?#]+?)(\.[a-z0-9]+)?$/i, '$1_m$2');
     imgEl.src = _normalizeExternalImg(fallbackM, 800);
     return;
   }
