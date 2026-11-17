@@ -1045,6 +1045,8 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
         <button class="add-item-btn" onclick="applyBmToSelected('category')" style="font-size:0.72rem;">套用品項至勾選</button>
         <button class="add-item-btn" onclick="applyBmToSelected('sizes')" style="font-size:0.72rem;">套用尺寸至勾選</button>
         <button class="add-item-btn" onclick="copySizesAndPricesToSelected()" style="font-size:0.72rem;background:var(--blush-light);border-color:var(--warm-brown);color:var(--warm-brown);">📋 複製同款尺寸/價格至勾選</button>
+        <button class="add-item-btn" onclick="aiEnhanceExistingProducts(true)" style="font-size:0.72rem;background:linear-gradient(135deg,#4A3425,#8B6E52);color:#fff;border:none;">✨ AI 高清修復勾選</button>
+        <button class="add-item-btn" onclick="aiEnhanceExistingProducts(false)" style="font-size:0.72rem;background:#FDF8F2;border-color:#8B6E52;color:#5C4332;">✨ AI 修復所有韓網模糊圖</button>
         <button class="batch-btn batch-btn-del" onclick="deleteBmSelected()" style="font-size:0.72rem;padding:4px 12px;margin-left:auto;">🗑 刪除勾選</button>
       </div>
 
@@ -1396,6 +1398,7 @@ function _updateFloatingBatchBar(mode, count) {
       ${selCat ? `<button type="button" onclick="applyBmToSelected('category')" style="background:#A8866A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">套用「${esc(selCat)}」</button>` : ''}
       ${hasSizes ? `<button type="button" onclick="applyBmToSelected('sizes')" style="background:#8B6E52;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">📐 套用已選尺寸</button>` : ''}
       ${count >= 2 ? `<button type="button" onclick="copySizesAndPricesToSelected()" style="background:#E8C9B0;color:#3D2B1F;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;font-weight:600;cursor:pointer;">📋 合併同款尺寸/價格</button>` : ''}
+      <button type="button" onclick="aiEnhanceExistingProducts(true)" style="background:linear-gradient(135deg,#D49A6A,#B87344);color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;font-weight:600;cursor:pointer;">✨ AI 高清修復</button>
       <button type="button" onclick="deleteBmSelected()" style="background:#C0614A;color:#fff;border:none;border-radius:12px;padding:5px 10px;font-size:0.74rem;cursor:pointer;">🗑 刪除</button>
       <button type="button" onclick="_clearAllBmCheckboxes()" style="background:rgba(255,255,255,0.16);color:#fff;border:none;border-radius:12px;padding:5px 9px;font-size:0.72rem;cursor:pointer;">✕ 取消</button>
     `;
@@ -2428,6 +2431,308 @@ function parseKoreanHtml() {
   const jrMsg = mergedJrCount > 0 ? `，已自動合併 ${mergedJrCount} 件 JR 大童價格` : '';
   const oosMsg = skippedSoldOutCount > 0 ? `，已略過 ${skippedSoldOutCount} 件斷貨商品` : '';
   showToast(`🎉 成功解析 ${finalParsed.length} 件高清商品（${pricedCount} 件已算好價格${jrMsg}${oosMsg}）！`, 5500);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ 瀏覽器端 AI 超解析度畫質增強引擎（Real-ESRGAN / UpscalerJS）
+// ═══════════════════════════════════════════════════════════
+let _aiUpscalerInstance = null;
+let _aiUpscaleCancelled = false;
+
+function cancelAiUpscale() {
+  _aiUpscaleCancelled = true;
+  const btn = document.getElementById('aiUpscaleCancelBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '正在停止…'; }
+}
+
+function _showAiUpscaleModal(title, desc, current, total) {
+  const ov = document.getElementById('aiUpscaleOverlay');
+  const tEl = document.getElementById('aiUpscaleTitle');
+  const dEl = document.getElementById('aiUpscaleDesc');
+  const bEl = document.getElementById('aiUpscaleBar');
+  const cEl = document.getElementById('aiUpscaleCounter');
+  const btn = document.getElementById('aiUpscaleCancelBtn');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  if (tEl && title) tEl.textContent = title;
+  if (dEl && desc) dEl.textContent = desc;
+  const pct = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
+  if (bEl) bEl.style.width = pct + '%';
+  if (cEl) cEl.textContent = total > 0 ? `處理進度：${current} / ${total} 張（${pct}%）` : '正在初始化 AI 模型…';
+  if (btn) { btn.disabled = false; btn.textContent = '停止處理'; }
+}
+
+function _hideAiUpscaleModal() {
+  const ov = document.getElementById('aiUpscaleOverlay');
+  if (ov) ov.style.display = 'none';
+}
+
+async function _getAiUpscaler() {
+  if (_aiUpscalerInstance) return _aiUpscalerInstance;
+  if (typeof window.Upscaler === 'function') {
+    try {
+      const modelObj = window.DefaultUpscalerJSModel || undefined;
+      _aiUpscalerInstance = modelObj ? new window.Upscaler({ model: modelObj }) : new window.Upscaler();
+      return _aiUpscalerInstance;
+    } catch (e) {
+      console.warn('[AI Upscaler] Init fallback:', e);
+    }
+  }
+  return null;
+}
+
+function _loadCorsImage(srcUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('圖片載入失敗'));
+    img.src = srcUrl;
+  });
+}
+
+function _getCorsReadableSource(rawUrl) {
+  if (!rawUrl) return '';
+  if (rawUrl.includes('supabase.co/storage')) return rawUrl;
+  const clean = rawUrl.replace(/^https?:\/\//i, '');
+  return 'https://wsrv.nl/?url=' + encodeURIComponent(clean) + '&q=100';
+}
+
+function _applyDetailSharpen(ctx, w, h, amount = 0.28) {
+  try {
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+    const copy = new Uint8ClampedArray(data);
+    const rowBytes = w * 4;
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = y * rowBytes + x * 4;
+        for (let c = 0; c < 3; c++) {
+          const center = copy[idx + c];
+          const neighbors = (
+            copy[idx - 4 + c] +
+            copy[idx + 4 + c] +
+            copy[idx - rowBytes + c] +
+            copy[idx + rowBytes + c]
+          ) * 0.25;
+          const sharpened = center + (center - neighbors) * amount;
+          data[idx + c] = sharpened < 0 ? 0 : (sharpened > 255 ? 255 : sharpened);
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  } catch (e) {}
+}
+
+async function _aiUpscaleAndUploadUrl(rawUrl) {
+  if (!sb) throw new Error('Supabase 尚未初始化');
+
+  const upgraded = _upgradeKrImageUrl(rawUrl);
+  let imgEl = null;
+  try {
+    imgEl = await _loadCorsImage(_getCorsReadableSource(upgraded));
+  } catch (e) {
+    if (upgraded !== rawUrl) {
+      imgEl = await _loadCorsImage(_getCorsReadableSource(rawUrl));
+    } else if (/\/data\/item\/([^\/?#]+?)(\.[a-z0-9]+)?$/i.test(upgraded) && !/_m(\.[a-z0-9]+)?$/i.test(upgraded)) {
+      const mUrl = upgraded.replace(/(\/data\/item\/[^\/?#]+?)(\.[a-z0-9]+)?$/i, '$1_m$2');
+      imgEl = await _loadCorsImage(_getCorsReadableSource(mUrl));
+    } else {
+      throw e;
+    }
+  }
+
+  const origW = imgEl.naturalWidth || imgEl.width || 250;
+  const origH = imgEl.naturalHeight || imgEl.height || 250;
+
+  let sourceCanvas = document.createElement('canvas');
+  sourceCanvas.width = origW;
+  sourceCanvas.height = origH;
+  const sCtx = sourceCanvas.getContext('2d');
+  sCtx.fillStyle = '#FFFFFF';
+  sCtx.fillRect(0, 0, origW, origH);
+  sCtx.drawImage(imgEl, 0, 0, origW, origH);
+
+  const upscaler = await _getAiUpscaler();
+  let aiResultCanvas = null;
+
+  if (upscaler && origW <= 700 && origH <= 700) {
+    try {
+      const pass1DataUrl = await upscaler.upscale(sourceCanvas, { output: 'base64', patchSize: 64, padding: 4 });
+      const pass1Img = await _loadCorsImage(pass1DataUrl);
+
+      if (origW <= 320 && origH <= 320) {
+        const pass2DataUrl = await upscaler.upscale(pass1Img, { output: 'base64', patchSize: 64, padding: 4 });
+        const pass2Img = await _loadCorsImage(pass2DataUrl);
+        aiResultCanvas = document.createElement('canvas');
+        aiResultCanvas.width = pass2Img.naturalWidth || 1000;
+        aiResultCanvas.height = pass2Img.naturalHeight || 1000;
+        aiResultCanvas.getContext('2d').drawImage(pass2Img, 0, 0);
+      } else {
+        aiResultCanvas = document.createElement('canvas');
+        aiResultCanvas.width = pass1Img.naturalWidth || (origW * 2);
+        aiResultCanvas.height = pass1Img.naturalHeight || (origH * 2);
+        aiResultCanvas.getContext('2d').drawImage(pass1Img, 0, 0);
+      }
+    } catch (aiErr) {
+      console.warn('[AI Upscale] Neural pass fallback:', aiErr);
+    }
+  }
+
+  const targetW = aiResultCanvas ? aiResultCanvas.width : Math.max(1000, origW * 3);
+  const targetH = aiResultCanvas ? aiResultCanvas.height : Math.max(1000, origH * 3);
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = targetW;
+  finalCanvas.height = targetH;
+  const fCtx = finalCanvas.getContext('2d');
+  fCtx.imageSmoothingEnabled = true;
+  fCtx.imageSmoothingQuality = 'high';
+  fCtx.fillStyle = '#FFFFFF';
+  fCtx.fillRect(0, 0, targetW, targetH);
+  fCtx.drawImage(aiResultCanvas || sourceCanvas, 0, 0, targetW, targetH);
+
+  _applyDetailSharpen(fCtx, targetW, targetH, 0.25);
+
+  const blob = await _canvasToBlob(finalCanvas, 0.92);
+  const filename = _uniqueName();
+  const { error } = await sb.storage.from(SUPABASE_BUCKET).upload(filename, blob, {
+    contentType: 'image/jpeg',
+    cacheControl: '31536000',
+    upsert: false
+  });
+  if (error) throw error;
+  const { data: pub } = sb.storage.from(SUPABASE_BUCKET).getPublicUrl(filename);
+  return pub.publicUrl;
+}
+
+async function aiEnhanceEditData() {
+  if (!editData.length) { showToast('目前沒有待編輯的商品圖片'); return; }
+  const targets = editData.map((d, idx) => ({ d, idx })).filter(x => x.d.url && !x.d.url.includes('supabase.co/storage'));
+  if (!targets.length) {
+    showToast('✓ 所有商品圖片都已經是雲端高清圖囉！');
+    return;
+  }
+  _aiUpscaleCancelled = false;
+  _showAiUpscaleModal(
+    '✨ AI 畫質增強進行中…',
+    '正在透過神經網路重建衣服紋理與清晰細節，並自動存入 Supabase 雲端…',
+    0,
+    targets.length
+  );
+
+  let successCount = 0;
+  for (let i = 0; i < targets.length; i++) {
+    if (_aiUpscaleCancelled) break;
+    const { d, idx } = targets[i];
+    _showAiUpscaleModal(
+      '✨ AI 畫質增強進行中…',
+      `正在重建第 ${i + 1} 張商品圖（${d.brand || '商品'}）…`,
+      i,
+      targets.length
+    );
+    try {
+      const newPublicUrl = await _aiUpscaleAndUploadUrl(d.url);
+      d.url = newPublicUrl;
+      const imgEl = document.getElementById('eimg' + idx);
+      if (imgEl) {
+        imgEl.dataset.fullurl = newPublicUrl;
+        imgEl.src = newPublicUrl;
+      }
+      successCount++;
+    } catch (err) {
+      console.error('[AI Enhance EditItem Error]', err);
+    }
+    _showAiUpscaleModal(
+      '✨ AI 畫質增強進行中…',
+      `已完成 ${i + 1} / ${targets.length} 張…`,
+      i + 1,
+      targets.length
+    );
+  }
+
+  _hideAiUpscaleModal();
+  if (_aiUpscaleCancelled) {
+    showToast(`已停止處理，完成 ${successCount} 張高清修復`);
+  } else {
+    showToast(`🎉 AI 高清修復完成！共成功升級 ${successCount} 張商品圖片並存入雲端`, 4500);
+  }
+}
+
+async function aiEnhanceExistingProducts(onlySelected = true) {
+  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }
+  let targetProds = [];
+  if (onlySelected) {
+    const checked = [...document.querySelectorAll('.bm-card-cb:checked')];
+    if (!checked.length) {
+      showToast('請先勾選要進行 AI 畫質增強的商品卡片');
+      return;
+    }
+    const ids = new Set(checked.map(cb => batchEditItems[Number(cb.dataset.idx)]?.id).filter(Boolean));
+    targetProds = products.filter(p => ids.has(p.id));
+  } else {
+    targetProds = products.filter(p => p.url && !p.url.includes('supabase.co/storage'));
+    if (!targetProds.length) {
+      showToast('✓ 目前全站所有商品都已經是雲端高畫質圖片囉！');
+      return;
+    }
+    if (!confirm(`偵測到 ${targetProds.length} 件外部網站圖片，要使用 AI 批次重建高清畫質並轉存至你的 Supabase 雲端嗎？\n（建議分批執行，每張約需 1~2 秒）`)) {
+      return;
+    }
+  }
+
+  _aiUpscaleCancelled = false;
+  _showAiUpscaleModal(
+    '✨ AI 畫質增強進行中…',
+    '正在透過神經網路重建高清原圖，完成後會自動更新前台商品圖片…',
+    0,
+    targetProds.length
+  );
+
+  let successCount = 0;
+  for (let i = 0; i < targetProds.length; i++) {
+    if (_aiUpscaleCancelled) break;
+    const p = targetProds[i];
+    _showAiUpscaleModal(
+      '✨ AI 畫質增強進行中…',
+      `正在處理：${p.brand || '商品'} ${p.category || ''}（${i + 1}/${targetProds.length}）`,
+      i,
+      targetProds.length
+    );
+    try {
+      const oldUrl = p.url;
+      const newPublicUrl = await _aiUpscaleAndUploadUrl(oldUrl);
+      const sameUrlProds = products.filter(x => x.url === oldUrl);
+      const sameIds = sameUrlProds.map(x => x.id);
+      const { error } = await sb.from(SUPABASE_TABLE).update({ url: newPublicUrl }).in('id', sameIds);
+      if (!error) {
+        sameUrlProds.forEach(item => { item.url = newPublicUrl; });
+        batchEditItems.forEach(item => { if (sameIds.includes(item.id)) item.url = newPublicUrl; });
+        successCount++;
+      }
+    } catch (err) {
+      console.error('[AI Enhance Existing Error]', err);
+    }
+    _showAiUpscaleModal(
+      '✨ AI 畫質增強進行中…',
+      `已完成 ${i + 1} / ${targetProds.length} 件…`,
+      i + 1,
+      targetProds.length
+    );
+  }
+
+  _hideAiUpscaleModal();
+  _saveProductsCache(products);
+  applyFilters();
+  renderManage();
+  if (onlySelected) _clearAllBmCheckboxes();
+
+  if (_aiUpscaleCancelled) {
+    showToast(`已停止處理，共完成 ${successCount} 款商品的高清修復`);
+  } else {
+    showToast(`🎉 AI 高清修復完成！共升級 ${successCount} 款商品並永久存入雲端`, 4500);
+  }
 }
 
 /* ── 監聽頁面捲動顯示「回到頂部」按鈕 ── */

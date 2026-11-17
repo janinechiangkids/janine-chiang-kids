@@ -1,5 +1,8 @@
 <!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="referrer" content="no-referrer">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Janine Chiang Kids｜精品童裝</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500;600&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Janine Chiang Kids｜精品童裝</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Noto+Serif+TC:wght@300;400;500;600&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0-beta.16/dist/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.19/dist/browser/umd/upscaler.min.js"></script><link rel="stylesheet" href="style.css">
 <style>
   /* ── 本期收單倒數 ＋ 儲值5000送500 優惠公告橫幅 ── */
   .promo-countdown-bar {
@@ -355,6 +358,9 @@
               <button class="bulk-apply-btn full" onclick="applyBulkSizes()">✓ 套用至所有商品</button>
             </div>
             <div class="edit-cards" id="editCards"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <button type="button" onclick="aiEnhanceEditData()" style="flex:1;min-width:200px;background:linear-gradient(135deg,#4A3425,#8B6E52);color:#FFFDF9;border:none;border-radius:22px;padding:11px 16px;font-size:0.84rem;font-family:'Noto Serif TC',serif;letter-spacing:0.06em;cursor:pointer;box-shadow:0 3px 10px rgba(74,52,37,0.2);">✨ AI 一鍵高清修復全部圖片（轉存雲端）</button>
+            </div>
             <button class="save-all-btn" onclick="saveAll()">🌟 一鍵發佈商品</button>
           </div>
         </div>
@@ -613,6 +619,20 @@
     <button class="lightbox-close" onclick="document.getElementById('orderImgLightbox').classList.remove('active')">✕</button>
     <img id="orderImgLightboxImg" src="" alt="商品大圖" style="width:100%;max-height:72vh;object-fit:contain;border-radius:8px;display:block;background:var(--cream-dark);">
     <div id="orderImgLightboxCaption" style="text-align:center;font-size:0.85rem;color:var(--text-main);margin-top:10px;line-height:1.6;"></div>
+  </div>
+</div>
+
+<!-- AI 超解析度畫質增強進度視窗 -->
+<div class="line-send-overlay" id="aiUpscaleOverlay" style="display:none;z-index:600;">
+  <div class="line-send-box" style="max-width:440px;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:6px;">✨</div>
+    <div class="line-send-title" id="aiUpscaleTitle">AI 超解析度畫質增強中…</div>
+    <div class="line-send-hint" id="aiUpscaleDesc" style="margin-bottom:14px;">正在載入神經網路模型（Real-ESRGAN），將模糊縮圖重建為高畫質原圖並存入雲端…</div>
+    <div style="background:var(--cream-dark);border-radius:99px;height:10px;overflow:hidden;margin-bottom:10px;border:1px solid var(--cream-mid);">
+      <div id="aiUpscaleBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--warm-brown),#C0614A);transition:width 0.3s ease;"></div>
+    </div>
+    <div id="aiUpscaleCounter" style="font-size:0.78rem;color:var(--warm-brown);font-weight:600;margin-bottom:12px;">準備中 (0 / 0)</div>
+    <button type="button" id="aiUpscaleCancelBtn" onclick="cancelAiUpscale()" style="background:var(--cream);color:var(--text-soft);border:1px solid var(--cream-mid);border-radius:18px;padding:6px 18px;font-size:0.78rem;cursor:pointer;">停止處理</button>
   </div>
 </div>
 
