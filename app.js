@@ -1174,7 +1174,7 @@ function toggleSelectBrand(brand) {
   else brandIds.forEach(id => batchSelected.add(id));
   _batchBrandFilter = (_batchBrandFilter === brand) ? null : brand;
   renderManage();
-}function renderBatchModifyPanel() {  const count = batchEditItems.length;  const allSelectedSizes = [...new Set(batchEditItems.flatMap(d => d.sizes||[]))];  return `<div class="batch-modify-panel">    <div class="bulk-bar" style="margin-bottom:8px;">      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+}function renderBatchModifyPanel() {  const count = batchEditItems.length;  const allSelectedSizes = [...new Set(batchEditItems.flatMap(d => (d.sizes||[]).map(s => LEGACY_HEIGHT_SIZES.includes(s) ? s + 'cm' : s)))];  return `<div class="batch-modify-panel">    <div class="bulk-bar" style="margin-bottom:8px;">      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div class="bulk-bar-title" style="margin-bottom:0;">👗 品項</div>
         <button class="bulk-apply-btn" onclick="applyBmToSelected('category')">套用至勾選</button>
       </div>
@@ -1509,16 +1509,23 @@ function addCustomBmSize() {
   showToast(`✓ 已加入尺寸「${parts.join(' / ')}」，請勾選商品後按「套用至勾選」`);
 }
 
+const LEGACY_HEIGHT_SIZES = ['90','95','100','105','110','115','120','125','130','140','150'];
+function _groupMatchesSize(g, s) {
+  if (g.sizes.includes(s)) return true;
+  if (g.label === '身高(cm)' && LEGACY_HEIGHT_SIZES.includes(s)) return true;
+  return false;
+}
 function _renderBmPriceInputs(idx, d) {
   if (!d.sizes || !d.sizes.length) return `<span style="font-size:0.72rem;color:var(--text-light);">請先在上方選擇尺寸</span>`;
   const sp = d.sizePrices || {};
-  const activeGroups = SIZE_GROUPS.filter(g => g.sizes.some(s => d.sizes.includes(s)));
-  const knownSet = new Set(SIZE_GROUPS.flatMap(g => g.sizes));
+  const activeGroups = SIZE_GROUPS.filter(g => d.sizes.some(s => _groupMatchesSize(g, s)));
+  const knownSet = new Set([...SIZE_GROUPS.flatMap(g => g.sizes), ...LEGACY_HEIGHT_SIZES]);
   const customSizes = d.sizes.filter(s => !knownSet.has(s));
 
   let html = `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">`;
   html += activeGroups.map(g => {
-    const groupPrice = g.sizes.map(s => sp[s]).find(Boolean) || '';
+    const matchingSizes = d.sizes.filter(s => _groupMatchesSize(g, s));
+    const groupPrice = matchingSizes.map(s => sp[s]).find(Boolean) || '';
     return `<div style="display:flex;align-items:center;gap:4px;background:var(--cream-dark);border-radius:8px;padding:3px 7px;">
       <span style="font-size:0.7rem;font-weight:500;color:var(--text-main);">${g.label}</span>
       <input type="number" placeholder="NT$" value="${esc(groupPrice)}"
@@ -1563,7 +1570,7 @@ function bmSetGroupPrice(idx, groupLabel, val) {
   if (!d.sizePrices) d.sizePrices = {};
   const g = SIZE_GROUPS.find(g => g.label === groupLabel);
   if (!g) return;
-  g.sizes.forEach(s => { if ((d.sizes||[]).includes(s)) d.sizePrices[s] = val; });
+  (d.sizes||[]).forEach(s => { if (_groupMatchesSize(g, s)) d.sizePrices[s] = val; });
   d.price = val;
 }function _refreshBmProductRows() {  batchEditItems.forEach((d, idx) => {    const priceWrap = document.getElementById(`bm_prices_${idx}`);
     if (priceWrap) priceWrap.innerHTML = _renderBmPriceInputs(idx, d);
