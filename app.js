@@ -1094,6 +1094,25 @@ function _rerenderSinglePcard(id) {  const p = products.find(x => x.id === id); 
 
             <div id="bm_prices_${idx}">              ${_renderBmPriceInputs(idx, d)}
             </div>
+            <div style="margin-top:2px;">
+              <button type="button" id="bm_col_btn_${idx}" onclick="toggleBmCardColor(${idx})"
+                style="width:100%;text-align:left;background:var(--cream);border:1px dashed var(--blush);border-radius:6px;padding:3px 6px;font-size:0.64rem;color:var(--soft-brown);cursor:pointer;font-family:'Noto Serif TC',serif;display:flex;align-items:center;justify-content:space-between;">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🎨 ${d.color ? esc(d.color) : '顏色（選填）'}</span>
+                <span id="bm_col_arr_${idx}" style="font-size:0.58rem;flex-shrink:0;">▶</span>
+              </button>
+              <div id="bm_col_wrap_${idx}" style="display:none;margin-top:4px;background:var(--white);border:1px solid var(--cream-mid);border-radius:6px;padding:5px;">
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  ${COLOR_LIST.map(c => {
+                    const arr = (d.color||'').split(/[\/、,]/).map(s=>s.trim()).filter(Boolean);
+                    const on = arr.includes(c);
+                    return `<span class="option-chip ${on?'on':''}" style="font-size:0.62rem;padding:2px 5px;" onclick="toggleBmCardColorChip(${idx},'${esc(c)}',this)">${esc(c)}</span>`;
+                  }).join('')}
+                </div>
+                <input type="text" class="field-input" id="bm_col_inp_${idx}" value="${esc(d.color||'')}" placeholder="多色用 / 分隔"
+                  style="font-size:0.66rem;padding:3px 6px;"
+                  oninput="setBmCardColorManual(${idx},this.value)">
+              </div>
+            </div>
             <div style="margin-top:2px;padding-top:5px;border-top:1px dashed var(--cream-mid);display:flex;flex-direction:column;gap:4px;">
               <label style="display:flex;align-items:center;gap:4px;font-size:0.68rem;color:#C0614A;font-weight:500;cursor:pointer;user-select:none;">
                 <input type="checkbox" ${d.isGroupBuy ? 'checked' : ''}
@@ -1268,6 +1287,56 @@ function toggleBmRowByCheckbox(rowIdx, checked) {
   const slice = cbs.slice(rowIdx * 6, (rowIdx + 1) * 6);
   slice.forEach(cb => { cb.checked = checked; });
   updateBmCardSelectedCount();
+}
+function toggleBmCardColor(idx) {
+  const wrap = document.getElementById('bm_col_wrap_' + idx);
+  const arr = document.getElementById('bm_col_arr_' + idx);
+  if (!wrap) return;
+  const isOpen = wrap.style.display !== 'none';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  if (arr) arr.textContent = isOpen ? '▶' : '▼';
+}
+function _updateBmCardColorUi(idx) {
+  const d = batchEditItems[idx];
+  if (!d) return;
+  const btn = document.getElementById('bm_col_btn_' + idx);
+  if (btn) {
+    const span = btn.querySelector('span');
+    if (span) span.textContent = '🎨 ' + (d.color ? d.color : '顏色（選填）');
+  }
+  const metaEl = document.getElementById('bm_meta_' + idx);
+  if (metaEl) metaEl.textContent = (d.color || '未選顏色') + (d.sizes?.length ? ' · ' + d.sizes.join('/') : '');
+}
+function toggleBmCardColorChip(idx, val, el) {
+  const d = batchEditItems[idx];
+  if (!d) return;
+  _trackUsage('col', val);
+  const arr = (d.color || '').split(/[\/、,]/).map(s => s.trim()).filter(Boolean);
+  const pos = arr.indexOf(val);
+  if (pos >= 0) {
+    arr.splice(pos, 1);
+    el.classList.remove('on');
+  } else {
+    arr.push(val);
+    el.classList.add('on');
+  }
+  d.color = arr.join('/');
+  const inp = document.getElementById('bm_col_inp_' + idx);
+  if (inp) inp.value = d.color;
+  _updateBmCardColorUi(idx);
+}
+function setBmCardColorManual(idx, val) {
+  const d = batchEditItems[idx];
+  if (!d) return;
+  d.color = (val || '').trim();
+  const arr = d.color.split(/[\/、,]/).map(s => s.trim()).filter(Boolean);
+  const wrap = document.getElementById('bm_col_wrap_' + idx);
+  if (wrap) {
+    wrap.querySelectorAll('.option-chip').forEach(ch => {
+      ch.classList.toggle('on', arr.includes(ch.textContent));
+    });
+  }
+  _updateBmCardColorUi(idx);
 }
 function bmToggleGroupBuy(idx, checked) {
   if (!batchEditItems[idx]) return;
