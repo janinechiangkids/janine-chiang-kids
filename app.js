@@ -519,6 +519,16 @@ function closeTopupModal() {
           ${categoryPicker('new', i, d.category)}
         </div>
         <div class="edit-field">
+          <button type="button" onclick="toggleNewColorPicker(${i})" id="newColToggle_${i}"
+            style="width:100%;text-align:left;background:var(--cream);border:1px dashed var(--blush);border-radius:10px;padding:6px 10px;font-size:0.74rem;color:var(--soft-brown);cursor:pointer;font-family:'Noto Serif TC',serif;display:flex;align-items:center;justify-content:space-between;">
+            <span>🎨 ${d.color ? '已選顏色：' + esc(d.color) : '＋ 新增顏色選項（選填）'}</span>
+            <span id="newColArrow_${i}" style="font-size:0.65rem;">${d.color ? '▼' : '▶'}</span>
+          </button>
+          <div id="newColWrap_${i}" style="display:${d.color ? 'block' : 'none'};margin-top:6px;">
+            ${colorPicker('new', i, d.color)}
+          </div>
+        </div>
+        <div class="edit-field">
           ${sizePicker('new', i, d.sizes, d.sizePrices)}
         </div>
         <button class="remove-btn" onclick="removeCard(${i})">✕ 移除</button>
@@ -530,7 +540,15 @@ function closeTopupModal() {
         img.src = imgUrl(d.url, 600);
       }
     });
-  });}function toggleEditCard(i) {}function closeEditCard(i) {}function updateCardSummary(i) {}function onImgLoad(i) {  const img  = document.getElementById('eimg' + i);  const load = document.getElementById('imgload' + i);  if (img)  img.style.display = 'block';  if (load) load.style.display = 'none';}function onImgError(i) {  const img = document.getElementById('eimg' + i);
+  });}function toggleEditCard(i) {}
+function toggleNewColorPicker(i) {
+  const wrap = document.getElementById('newColWrap_' + i);
+  const arrow = document.getElementById('newColArrow_' + i);
+  if (!wrap) return;
+  const isOpen = wrap.style.display !== 'none';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+}function closeEditCard(i) {}function updateCardSummary(i) {}function onImgLoad(i) {  const img  = document.getElementById('eimg' + i);  const load = document.getElementById('imgload' + i);  if (img)  img.style.display = 'block';  if (load) load.style.display = 'none';}function onImgError(i) {  const img = document.getElementById('eimg' + i);
   if (img && img.dataset.fullurl && img.dataset.failStage !== '99') {
     _imgUrlOnFail(img, img.dataset.fullurl);
     return;
@@ -1571,6 +1589,23 @@ function bmSetGroupPrice(idx, groupLabel, val) {
         </select>
       </div>
       <div class="edit-field">
+        <button type="button" onclick="const w=document.getElementById('ecol_wrap_${p.id}');const a=document.getElementById('ecol_arr_${p.id}');const o=w.style.display!=='none';w.style.display=o?'none':'block';a.textContent=o?'▶':'▼';"
+          style="width:100%;text-align:left;background:var(--cream);border:1px dashed var(--blush);border-radius:10px;padding:7px 11px;font-size:0.76rem;color:var(--soft-brown);cursor:pointer;font-family:'Noto Serif TC',serif;display:flex;align-items:center;justify-content:space-between;">
+          <span>🎨 顏色選項（選填${p.color ? '：' + esc(p.color) : ''}）</span>
+          <span id="ecol_arr_${p.id}" style="font-size:0.65rem;">${p.color ? '▼' : '▶'}</span>
+        </button>
+        <div id="ecol_wrap_${p.id}" style="display:${p.color ? 'block' : 'none'};margin-top:8px;">
+          <div class="option-chips" style="margin-bottom:6px;">
+            ${COLOR_LIST.map(c => {
+              const arr = (p.color||'').split(/[\/、,]/).map(s=>s.trim()).filter(Boolean);
+              const on = arr.includes(c);
+              return `<div class="option-chip ${on?'on':''}" onclick="toggleSingleEditColor('${p.id}','${esc(c)}',this)">${esc(c)}</div>`;
+            }).join('')}
+          </div>
+          <input class="field-input" type="text" id="ecol_${p.id}" value="${esc(p.color||'')}" placeholder="多個顏色請用 / 分隔（例：米白/卡其/深藍）">
+        </div>
+      </div>
+      <div class="edit-field">
         <label>📐 尺寸 ＋ 💰 價格</label>
         ${sizePicker('edit_' + p.id, 0, editingSizes, p._editSizePrices || p.sizePrices || {})}
       </div>
@@ -1596,7 +1631,21 @@ function bmSetGroupPrice(idx, groupLabel, val) {
       </div>
     </div>
   </div>`;}
-function startEditProd(id) {  const p = products.find(x => x.id === id);  if (!p) return;  editingProdId = id;  editingSizes  = [...(p.sizes||[])];  p._editSizePrices = {...(p.sizePrices||{})};  renderManage();  requestAnimationFrame(() => { const el = document.querySelector('.ep-editing'); if (el) el.scrollIntoView({ behavior:'smooth', block:'center' }); });}function cancelEditProd() { editingProdId = null; editingSizes = []; renderManage(); }async function saveEditProd(id) {  const p = products.find(x => x.id === id);  if (!p) return;  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }  const brand      = document.getElementById('ebi_'+id).value.trim();  const category   = document.getElementById('ecat_'+id).value.trim();  const color      = p.color || '';  const sizes      = [...editingSizes];  const sizePrices = p._editSizePrices || p.sizePrices || {};  const prices     = sizes.map(s => sizePrices[s]).filter(Boolean);  const price      = prices.length ? prices[0] : (p.price || '');
+function toggleSingleEditColor(pid, val, el) {
+  const inp = document.getElementById('ecol_' + pid);
+  if (!inp) return;
+  const arr = inp.value.split(/[\/、,]/).map(s => s.trim()).filter(Boolean);
+  const idx = arr.indexOf(val);
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+    el.classList.remove('on');
+  } else {
+    arr.push(val);
+    el.classList.add('on');
+  }
+  inp.value = arr.join('/');
+}
+function startEditProd(id) {  const p = products.find(x => x.id === id);  if (!p) return;  editingProdId = id;  editingSizes  = [...(p.sizes||[])];  p._editSizePrices = {...(p.sizePrices||{})};  renderManage();  requestAnimationFrame(() => { const el = document.querySelector('.ep-editing'); if (el) el.scrollIntoView({ behavior:'smooth', block:'center' }); });}function cancelEditProd() { editingProdId = null; editingSizes = []; renderManage(); }async function saveEditProd(id) {  const p = products.find(x => x.id === id);  if (!p) return;  if (!sb) { showToast('⚠️ Supabase 尚未初始化'); return; }  const brand      = document.getElementById('ebi_'+id).value.trim();  const category   = document.getElementById('ecat_'+id).value.trim();  const colorEl    = document.getElementById('ecol_'+id);  const color      = colorEl ? colorEl.value.trim() : (p.color || '');  const sizes      = [...editingSizes];  const sizePrices = p._editSizePrices || p.sizePrices || {};  const prices     = sizes.map(s => sizePrices[s]).filter(Boolean);  const price      = prices.length ? prices[0] : (p.price || '');
   const isGroupBuy = !!document.getElementById('egb_' + id)?.checked;
   const groupPrice = (document.getElementById('egb_price_' + id)?.value || '').trim();
   if (isGroupBuy && !groupPrice) {
